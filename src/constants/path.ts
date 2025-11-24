@@ -1,5 +1,8 @@
 const path = {
-  home: '/',
+  home: '/home',
+  menu: '/home/menu',
+  about: 'home/about',
+  blog: 'home/blog',
   user: '/user',
   profile: '/user/profile',
   changePassword: '/user/password',

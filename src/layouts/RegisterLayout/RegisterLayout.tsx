@@ -1,7 +1,17 @@
 import React from 'react'
+import RegisterHeader from '../../components/RegisterHeader'
+import Footer from '../../components/Footer'
 
-export default function RegisterLayout() {
+interface RegisterLayoutProps {
+  children: React.ReactNode
+}
+
+export default function RegisterLayout({ children }: RegisterLayoutProps) {
   return (
-    <div>RegisterLayout</div>
+    <div>
+      <RegisterHeader />
+      {children}
+      <Footer />
+    </div>
   )
 }
