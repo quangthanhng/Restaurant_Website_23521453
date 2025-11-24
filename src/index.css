@@ -1,5 +1,12 @@
 @import 'tailwindcss';
 
+@theme {
+  --color-savoria-gold: rgb(230, 194, 161);
+  --font-family-serif: Georgia, Cambria, 'Times New Roman', Times, serif;
+  --letter-spacing-logo: -0.3px;
+  --line-height-logo: 46.8px;
+}
+
 * {
   margin: 0;
   padding: 0;

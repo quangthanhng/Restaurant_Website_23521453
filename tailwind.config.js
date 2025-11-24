@@ -14,7 +14,17 @@ export default {
           100: '#1A1A1A',
           70: '#4D4D4D',
           16: '#D6D6D6'
-        }
+        },
+        'savoria-gold': 'rgb(230, 194, 161)'
+      },
+      fontFamily: {
+        serif: ['Georgia', 'Cambria', 'Times New Roman', 'Times', 'serif']
+      },
+      letterSpacing: {
+        logo: '-0.3px'
+      },
+      lineHeight: {
+        logo: '46.8px'
       }
     }
   },
