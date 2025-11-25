@@ -1,78 +1,107 @@
-import { useRoutes } from "react-router-dom"
-import path from "./constants/path"
-import Login from "./pages/Login"
-import Register from "./pages/Register"
-import Homepage from "./pages/homepage"
-import Admin from "./pages/admin"
-import MainLayout from "./layouts/MainLayout"
-import RegisterLayout from "./layouts/RegisterLayout"
-import Menu from "./pages/Menu"
-import About from "./pages/About"
-import Blog from "./pages/Blog"
-import Booking from "./pages/Booking"
-import ForgotPassword from "./pages/ForgotPassword"
-
+import { useRoutes } from 'react-router-dom'
+import path from './constants/path'
+import Login from './pages/Login'
+import Register from './pages/Register'
+import Homepage from './pages/homepage'
+import Admin from './pages/admin'
+import MainLayout from './layouts/MainLayout'
+import RegisterLayout from './layouts/RegisterLayout'
+import Menu from './pages/Menu'
+import About from './pages/About'
+import Blog from './pages/Blog'
+import Booking from './pages/Booking'
+import ForgotPassword from './pages/ForgotPassword'
+import NotFound from './pages/NotFound'
+import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
 
 export default function useRouteElement() {
-  const routeElements = useRoutes([{
-    path: path.home,
-    element: (
-      <MainLayout>
-        <Homepage />
-      </MainLayout>)
-
-  },
-  {
-    path: path.login,
-    element: (
-      <RegisterLayout>
-        <Login />
-      </RegisterLayout>
-    )
-  },
-  {
-    path: path.register,
-    element: (
-      <RegisterLayout>
-        <Register />
-      </RegisterLayout>
-    )
-  }, {
-    path: path.admin,
-    element: <Admin />
-  }, {
-    path: path.menu,
-    element: (
-      <MainLayout>
-        <Menu />
-      </MainLayout>)
-  }, {
-    path: path.about,
-    element: (
-      <MainLayout>
-        <About />
-      </MainLayout>)
-  }, {
-    path: path.blog,
-    element: (
-      <MainLayout>
-        <Blog />
-      </MainLayout>)
-  },
-  {
-    path: path.booking,
-    element: (
-      <MainLayout>
-        <Booking />
-      </MainLayout>)
-  },
-  {
-    path: path.forgot_password,
-    element: (
-      <MainLayout>
-        <ForgotPassword />
-      </MainLayout>)
-  }
+  const routeElements = useRoutes([
+    {
+      path: path.home,
+      element: (
+        <MainLayout>
+          <Homepage />
+        </MainLayout>
+      )
+    },
+    // Rejected Routes - Chỉ cho user chưa đăng nhập
+    {
+      path: '',
+      element: <RejectedRoute />,
+      children: [
+        {
+          path: path.login,
+          element: (
+            <RegisterLayout>
+              <Login />
+            </RegisterLayout>
+          )
+        },
+        {
+          path: path.register,
+          element: (
+            <RegisterLayout>
+              <Register />
+            </RegisterLayout>
+          )
+        }
+      ]
+    },
+    // Admin Routes - Chỉ cho admin
+    {
+      path: '',
+      element: <AdminRoute />,
+      children: [
+        {
+          path: path.admin,
+          element: <Admin />
+        }
+      ]
+    },
+    {
+      path: path.menu,
+      element: (
+        <MainLayout>
+          <Menu />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.about,
+      element: (
+        <MainLayout>
+          <About />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.blog,
+      element: (
+        <MainLayout>
+          <Blog />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.booking,
+      element: (
+        <MainLayout>
+          <Booking />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.forgot_password,
+      element: (
+        <MainLayout>
+          <ForgotPassword />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.notFound,
+      element: <NotFound />
+    }
   ])
   return routeElements
 }

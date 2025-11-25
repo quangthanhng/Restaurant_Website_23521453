@@ -14,7 +14,8 @@ const path = {
   forgot_password: '/forgot-password',
   productDetail: ':nameId',
   cart: '/cart',
-  admin: '/admin'
+  admin: '/admin',
+  notFound: '*'
 } as const
 
 export default path

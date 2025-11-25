@@ -32,14 +32,14 @@ class Http {
     this.instance.interceptors.response.use(
       (response) => {
         const { url } = response.config
-        if (url === '/auth/login' || url === '/auth/register') {
+        if (url === '/users/login' || url === '/users/register') {
           const data = response.data
           if (data.data) {
             this.accessToken = data.data.accessToken
             setAccessTokenToLS(data.data.accessToken)
             setRefreshTokenToLS(data.data.refreshToken)
           }
-        } else if (url === '/auth/logout') {
+        } else if (url === '/users/logout') {
           this.accessToken = ''
           clearLS()
         }
