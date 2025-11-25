@@ -8,22 +8,22 @@ export default function Footer() {
       <div className='flex h-[650px] items-center justify-center px-[30px]'>
         <div className='w-full max-w-7xl grid grid-cols-1 gap-12 md:grid-cols-2 lg:grid-cols-3'>
           {/* Column 1 - Quick Links */}
-          <div>
-            <h3 className='mb-8 text-lg font-medium text-neutral-100'>Quick Links</h3>
-            <div className='flex flex-col gap-4'>
+          <div className='w-full'>
+            <h3 className='mb-8 text-lg font-medium text-savoria-gold'>Quick Links</h3>
+            <div className='flex w-full flex-col gap-4'>
               <Link
                 to={path.home}
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Home
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -31,17 +31,17 @@ export default function Footer() {
 
               <Link
                 to={path.menu}
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Menu
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -49,17 +49,17 @@ export default function Footer() {
 
               <Link
                 to={path.about}
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   About
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -67,17 +67,17 @@ export default function Footer() {
 
               <Link
                 to='/reservation'
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Reservation
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -86,22 +86,22 @@ export default function Footer() {
           </div>
 
           {/* Column 2 - Utility Pages */}
-          <div>
-            <h3 className='mb-8 text-lg font-medium text-neutral-100'>Utility Pages</h3>
-            <div className='flex flex-col gap-4'>
+          <div className='w-full'>
+            <h3 className='mb-8 text-lg font-medium text-savoria-gold'>Utility Pages</h3>
+            <div className='flex w-full flex-col gap-4'>
               <Link
                 to={path.blog}
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Blogs
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -109,17 +109,17 @@ export default function Footer() {
 
               <Link
                 to='/terms'
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Terms & Conditions
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -127,17 +127,17 @@ export default function Footer() {
 
               <Link
                 to='/privacy'
-                className='group flex items-center justify-between border border-neutral-800 px-4 py-3 transition-colors hover:border-neutral-700 hover:bg-neutral-900'
+                className='group flex w-full items-center justify-between border border-neutral-800 py-3 pl-4 pr-1.5 transition-colors hover:border-savoria-gold hover:bg-neutral-900'
               >
-                <span className='text-base text-neutral-300 transition-colors group-hover:text-neutral-100'>
+                <span className='block text-base text-neutral-400 transition-colors group-hover:text-savoria-gold'>
                   Privacy Policy
                 </span>
                 <svg
-                  className='h-4 w-4 -rotate-45 text-neutral-500 transition-all duration-300 group-hover:rotate-0 group-hover:text-neutral-100'
+                  className='block h-5 w-5 shrink-0 -rotate-45 text-savoria-gold transition-all duration-300 group-hover:rotate-0'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
-                  strokeWidth='2'
+                  strokeWidth='2.5'
                 >
                   <path strokeLinecap='round' strokeLinejoin='round' d='M17 8l4 4m0 0l-4 4m4-4H3' />
                 </svg>
@@ -147,25 +147,25 @@ export default function Footer() {
 
           {/* Column 3 - Newsletter */}
           <div>
-            <h3 className='mb-4 text-lg font-medium text-neutral-100'>Newsletter</h3>
+            <h3 className='mb-4 text-lg font-medium text-savoria-gold'>Newsletter</h3>
             <p className='mb-6 text-sm leading-relaxed text-neutral-400'>
               Sign up today and let us serve you unforgettable flavors and moments, right to your inbox!
             </p>
 
             {/* Email Input */}
-            <div className='mb-8 flex items-center border border-neutral-800 bg-neutral-900/50 transition-colors focus-within:border-neutral-700'>
+            <div className='mb-8 flex items-center border border-neutral-800 bg-neutral-900/50 transition-colors focus-within:border-savoria-gold'>
               <input
                 type='email'
                 placeholder='jane@framer.com'
-                className='flex-1 bg-transparent px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-600 focus:outline-none'
+                className='flex-1 bg-transparent px-4 py-3 text-sm text-white placeholder:text-neutral-600 focus:outline-none'
               />
               <button
                 type='submit'
-                className='flex h-12 w-12 items-center justify-center bg-neutral-800 transition-colors hover:bg-neutral-700'
+                className='flex h-12 w-12 items-center justify-center bg-neutral-800 transition-colors hover:bg-savoria-gold'
                 aria-label='Subscribe'
               >
                 <svg
-                  className='h-5 w-5 text-neutral-100'
+                  className='h-5 w-5 text-white'
                   fill='none'
                   stroke='currentColor'
                   viewBox='0 0 24 24'
@@ -182,7 +182,7 @@ export default function Footer() {
                 href='https://instagram.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-400 transition-all hover:border-neutral-600 hover:bg-neutral-900 hover:text-neutral-100'
+                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-500 transition-all hover:border-savoria-gold hover:bg-neutral-900 hover:text-savoria-gold'
                 aria-label='Instagram'
               >
                 <svg className='h-5 w-5' fill='currentColor' viewBox='0 0 24 24'>
@@ -194,7 +194,7 @@ export default function Footer() {
                 href='https://linkedin.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-400 transition-all hover:border-neutral-600 hover:bg-neutral-900 hover:text-neutral-100'
+                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-500 transition-all hover:border-savoria-gold hover:bg-neutral-900 hover:text-savoria-gold'
                 aria-label='LinkedIn'
               >
                 <svg className='h-5 w-5' fill='currentColor' viewBox='0 0 24 24'>
@@ -206,7 +206,7 @@ export default function Footer() {
                 href='https://pinterest.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-400 transition-all hover:border-neutral-600 hover:bg-neutral-900 hover:text-neutral-100'
+                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-500 transition-all hover:border-savoria-gold hover:bg-neutral-900 hover:text-savoria-gold'
                 aria-label='Pinterest'
               >
                 <svg className='h-5 w-5' fill='currentColor' viewBox='0 0 24 24'>
@@ -218,7 +218,7 @@ export default function Footer() {
                 href='https://facebook.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-400 transition-all hover:border-neutral-600 hover:bg-neutral-900 hover:text-neutral-100'
+                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-500 transition-all hover:border-savoria-gold hover:bg-neutral-900 hover:text-savoria-gold'
                 aria-label='Facebook'
               >
                 <svg className='h-5 w-5' fill='currentColor' viewBox='0 0 24 24'>
@@ -230,7 +230,7 @@ export default function Footer() {
                 href='https://twitter.com'
                 target='_blank'
                 rel='noopener noreferrer'
-                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-400 transition-all hover:border-neutral-600 hover:bg-neutral-900 hover:text-neutral-100'
+                className='flex h-10 w-10 items-center justify-center rounded-full border border-neutral-800 text-neutral-500 transition-all hover:border-savoria-gold hover:bg-neutral-900 hover:text-savoria-gold'
                 aria-label='X (Twitter)'
               >
                 <svg className='h-5 w-5' fill='currentColor' viewBox='0 0 24 24'>
@@ -247,12 +247,12 @@ export default function Footer() {
         <div className='flex flex-col items-center justify-between gap-4 p-[30px] md:flex-row'>
           <p className='text-sm text-neutral-500'>Copyrights are reserved @ TS Restaurant</p>
           <p className='text-sm text-neutral-500'>
-            Designed by Jitu Raut{' '}
+            Designed by TS Restaurant{' '}
             <a
               href='https://fremix.design'
               target='_blank'
               rel='noopener noreferrer'
-              className='text-neutral-400 transition-colors hover:text-neutral-100'
+              className='text-neutral-500 transition-colors hover:text-savoria-gold'
             >
               @fremix.design
             </a>

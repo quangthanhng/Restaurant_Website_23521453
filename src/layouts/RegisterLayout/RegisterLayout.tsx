@@ -8,9 +8,9 @@ interface RegisterLayoutProps {
 
 export default function RegisterLayout({ children }: RegisterLayoutProps) {
   return (
-    <div>
+    <div className='flex min-h-screen flex-col'>
       <RegisterHeader />
-      {children}
+      <main className='flex-1'>{children}</main>
       <Footer />
     </div>
   )

@@ -60,7 +60,7 @@ export default function Header() {
         <div className='flex items-center gap-4' style={{ marginRight: '100px' }}>
           {/* Book A Table Button - Desktop Only */}
           <Link
-            to='/booking'
+            to={path.booking}
             className='group relative isolate hidden items-center overflow-hidden rounded-lg bg-savoria-gold text-sm font-medium transition-colors duration-300 lg:flex'
             style={{ padding: '10px' }}
           >
