@@ -4,15 +4,15 @@ import http from '../utils/http'
 
 const authApi = {
   login: (body: LoginFormData) => {
-    return http.post<AuthResponse>('/auth/login', body)
+    return http.post<AuthResponse>('/users/login', body)
   },
 
   register: (body: Omit<RegisterFormData, 'confirmPassword'>) => {
-    return http.post<AuthResponse>('/auth/register', body)
+    return http.post<AuthResponse>('/users/register', body)
   },
 
   logout: () => {
-    return http.post('/auth/logout')
+    return http.post('/users/logout')
   }
 }
 

@@ -11,6 +11,7 @@ const path = {
   login: '/login',
   register: '/register',
   logout: '/logout',
+  forgot_password: '/forgot-password',
   productDetail: ':nameId',
   cart: '/cart',
   admin: '/admin'

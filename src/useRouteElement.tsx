@@ -10,6 +10,7 @@ import Menu from "./pages/Menu"
 import About from "./pages/About"
 import Blog from "./pages/Blog"
 import Booking from "./pages/Booking"
+import ForgotPassword from "./pages/ForgotPassword"
 
 
 export default function useRouteElement() {
@@ -64,9 +65,14 @@ export default function useRouteElement() {
       <MainLayout>
         <Booking />
       </MainLayout>)
+  },
+  {
+    path: path.forgot_password,
+    element: (
+      <MainLayout>
+        <ForgotPassword />
+      </MainLayout>)
   }
-
-
   ])
   return routeElements
 }

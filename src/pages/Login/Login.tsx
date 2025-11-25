@@ -116,8 +116,8 @@ export default function Login() {
                       id='email'
                       placeholder='example@email.com'
                       className={`w-full rounded-xl border bg-neutral-800/50 py-3.5 pl-12 pr-4 text-white placeholder:text-neutral-500 transition-all duration-300 focus:outline-none focus:ring-2 ${errors.email
-                          ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-neutral-700/50 focus:border-savoria-gold focus:ring-savoria-gold/20 hover:border-neutral-600'
+                        ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-neutral-700/50 focus:border-savoria-gold focus:ring-savoria-gold/20 hover:border-neutral-600'
                         }`}
                       {...register('email', rules.email)}
                     />
@@ -148,8 +148,8 @@ export default function Login() {
                       id='password'
                       placeholder='••••••••'
                       className={`w-full rounded-xl border bg-neutral-800/50 py-3.5 pl-12 pr-12 text-white placeholder:text-neutral-500 transition-all duration-300 focus:outline-none focus:ring-2 ${errors.password
-                          ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-neutral-700/50 focus:border-savoria-gold focus:ring-savoria-gold/20 hover:border-neutral-600'
+                        ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20'
+                        : 'border-neutral-700/50 focus:border-savoria-gold focus:ring-savoria-gold/20 hover:border-neutral-600'
                         }`}
                       {...register('password', rules.password)}
                     />
@@ -189,7 +189,7 @@ export default function Login() {
                     />
                     <span className='text-sm text-neutral-400'>Ghi nhớ đăng nhập</span>
                   </label>
-                  <Link to='/forgot-password' className='text-sm text-savoria-gold transition-colors hover:text-amber-300'>
+                  <Link to={path.forgot_password} className='text-sm text-savoria-gold transition-colors hover:text-amber-300'>
                     Quên mật khẩu?
                   </Link>
                 </div>
