@@ -4,23 +4,58 @@ import Login from "./pages/Login"
 import Register from "./pages/Register"
 import Homepage from "./pages/homepage"
 import Admin from "./pages/admin"
+import MainLayout from "./layouts/MainLayout"
+import RegisterLayout from "./layouts/RegisterLayout"
+import Menu from "./pages/Menu"
+import About from "./pages/About"
+import Blog from "./pages/Blog"
 
 
 export default function useRouteElement() {
   const routeElements = useRoutes([{
     path: path.home,
-    element: <Homepage />
+    element: (
+      <MainLayout>
+        <Homepage />
+      </MainLayout>)
+
   },
   {
     path: path.login,
-    element: <Login />
+    element: (
+      <RegisterLayout>
+        <Login />
+      </RegisterLayout>
+    )
   },
   {
     path: path.register,
-    element: <Register />
+    element: (
+      <RegisterLayout>
+        <Register />
+      </RegisterLayout>
+    )
   }, {
     path: path.admin,
     element: <Admin />
+  }, {
+    path: path.menu,
+    element: (
+      <MainLayout>
+        <Menu />
+      </MainLayout>)
+  }, {
+    path: path.about,
+    element: (
+      <MainLayout>
+        <About />
+      </MainLayout>)
+  }, {
+    path: path.blog,
+    element: (
+      <MainLayout>
+        <Blog />
+      </MainLayout>)
   }
 
 

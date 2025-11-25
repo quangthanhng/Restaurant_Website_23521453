@@ -1,5 +1,17 @@
-export default function MainLayout() {
+import React from 'react'
+import Footer from '../../components/Footer'
+import Header from '../../components/Header'
+
+interface MainLayoutProps {
+  children: React.ReactNode
+}
+
+export default function MainLayout({ children }: MainLayoutProps) {
   return (
-    <div>MainLayout</div>
+    <div>
+      <Header />
+      {children}
+      <Footer />
+    </div>
   )
 }

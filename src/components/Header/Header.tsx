@@ -6,7 +6,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-900/70 backdrop-blur-md'>
+    <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-950/90 backdrop-blur-md'>
       <div className='relative flex h-[74px] w-full items-center'>
         {/* Left section - Logo positioned at left with 100px margin, flexible */}
         <div className='flex items-center' style={{ marginLeft: '100px' }}>
@@ -61,7 +61,8 @@ export default function Header() {
           {/* Book A Table Button - Desktop Only */}
           <Link
             to='/booking'
-            className='group relative isolate hidden h-[50px] items-center justify-center gap-2.5 overflow-hidden rounded-lg bg-savoria-gold px-6 text-sm font-medium transition-colors duration-300 lg:flex'
+            className='group relative isolate hidden items-center overflow-hidden rounded-lg bg-savoria-gold text-sm font-medium transition-colors duration-300 lg:flex'
+            style={{ padding: '10px' }}
           >
             {/* Ripple effect background - starts hidden, expands on hover */}
             <span className='absolute right-[18px] top-1/2 -z-10 h-9 w-9 -translate-y-1/2 scale-0 rounded-full bg-neutral-900 transition-transform duration-700 ease-in-out group-hover:scale-[25]'></span>
@@ -69,9 +70,9 @@ export default function Header() {
             <span className='relative z-10 whitespace-nowrap text-neutral-900 transition-colors duration-500 group-hover:text-savoria-gold'>
               Book A Table
             </span>
-            <span className='relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 transition-all duration-500 group-hover:bg-savoria-gold'>
+            <span className='relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-neutral-900 transition-all duration-500 group-hover:bg-savoria-gold' style={{ marginLeft: '15px' }}>
               <svg
-                className='h-4 w-4 -rotate-45 text-savoria-gold transition-colors duration-500 group-hover:text-neutral-900'
+                className='h-4 w-4 -rotate-45 text-savoria-gold transition-all duration-500 group-hover:rotate-0 group-hover:text-neutral-900'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'
@@ -143,7 +144,7 @@ export default function Header() {
             Blog
           </Link>
           <Link
-            to='/booking'
+            to={path.booking}
             onClick={() => setIsMenuOpen(false)}
             className='mt-4 flex items-center justify-center gap-2 rounded-full bg-amber-600 px-8 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-amber-500'
           >
