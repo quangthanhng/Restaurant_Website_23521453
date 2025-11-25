@@ -9,6 +9,7 @@ import RegisterLayout from "./layouts/RegisterLayout"
 import Menu from "./pages/Menu"
 import About from "./pages/About"
 import Blog from "./pages/Blog"
+import Booking from "./pages/Booking"
 
 
 export default function useRouteElement() {
@@ -55,6 +56,13 @@ export default function useRouteElement() {
     element: (
       <MainLayout>
         <Blog />
+      </MainLayout>)
+  },
+  {
+    path: path.booking,
+    element: (
+      <MainLayout>
+        <Booking />
       </MainLayout>)
   }
 

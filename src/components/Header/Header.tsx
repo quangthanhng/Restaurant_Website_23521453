@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import path from '../../constants/path'
 import { useState } from 'react'
+import UserDropdown from '../UserDropdown'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -86,6 +87,11 @@ export default function Header() {
               </svg>
             </span>
           </Link>
+
+          {/* User Dropdown - Desktop Only */}
+          <div className='hidden lg:block'>
+            <UserDropdown />
+          </div>
 
           {/* Mobile Menu Button */}
           <button
