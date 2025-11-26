@@ -31,8 +31,11 @@ export interface Pagination {
 // Response khi lấy danh sách dishes
 export interface DishListResponse {
   message: string
-  data: Dish[]
-  pagination?: Pagination
+  data: {
+    dishes: Dish[]
+    totalPages: number
+    currentPage: number
+  }
 }
 
 // Response khi lấy chi tiết 1 dish

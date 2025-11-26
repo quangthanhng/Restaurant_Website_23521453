@@ -1,5 +1,6 @@
+import { useMemo } from 'react'
 import { useForm } from 'react-hook-form'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Dish } from '../../../../types/dish.type'
 import dishApi from '../../../../apis/dish.api'
 
@@ -24,6 +25,21 @@ interface ProductFormProps {
 export default function ProductForm({ product, onClose }: ProductFormProps) {
   const queryClient = useQueryClient()
   const isEditing = !!product
+
+  // Fetch tất cả dishes để lấy danh sách categories
+  const { data: allDishesData } = useQuery({
+    queryKey: ['admin-dishes-all'],
+    queryFn: () => dishApi.getDishes({ limit: 100 }),
+    select: (response) => response.data,
+    staleTime: 5 * 60 * 1000
+  })
+
+  // Lấy danh sách categories unique từ tất cả dishes
+  const categories = useMemo(() => {
+    const allDishes = allDishesData?.data?.dishes || []
+    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.category))]
+    return uniqueCategories.filter(Boolean).sort()
+  }, [allDishesData])
 
   const {
     register,
@@ -165,11 +181,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   }`}
               >
                 <option value=''>Chọn danh mục</option>
-                <option value='Món chính'>Món chính</option>
-                <option value='Món khai vị'>Món khai vị</option>
-                <option value='Món tráng miệng'>Món tráng miệng</option>
-                <option value='Đồ uống'>Đồ uống</option>
-                <option value='Món ăn nhẹ'>Món ăn nhẹ</option>
+                {categories.map((category) => (
+                  <option key={category} value={category}>
+                    {category}
+                  </option>
+                ))}
               </select>
               {errors.category && <p className='mt-1 text-sm text-red-400'>{errors.category.message}</p>}
             </div>

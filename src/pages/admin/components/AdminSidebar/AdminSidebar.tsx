@@ -95,75 +95,166 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
     navigate('/')
   }
 
-  // Mobile overlay will be rendered inline inside return
-
   // Desktop sidebar
   return (
-    <aside className='hidden lg:flex fixed left-0 top-0 z-40 h-screen w-64 bg-neutral-950 text-white border-r border-neutral-800'>
-      <div className='flex h-full flex-col'>
-        {/* Logo */}
-        <div className='flex items-center gap-3 px-6 py-5 border-b border-neutral-800'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-savoria-gold/20'>
-            <svg className='h-6 w-6 text-savoria-gold' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
-            </svg>
-          </div>
-          <span className='text-lg font-semibold text-savoria-gold'>TS Restaurant</span>
-        </div>
+    <>
+      {/* Mobile Overlay */}
+      {isOpen && (
+        <div
+          className='lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm'
+          onClick={onClose}
+        />
+      )}
 
-        {/* Menu Items */}
-        <nav className='flex-1 space-y-1 px-3 py-4'>
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
-            return (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${isActive
-                  ? 'bg-savoria-gold/20 text-savoria-gold'
-                  : 'text-neutral-400 hover:bg-neutral-800 hover:text-savoria-gold'
-                  }`}
-              >
-                {item.icon}
-                {item.label}
-              </Link>
-            )
-          })}
-        </nav>
-
-        {/* User Info */}
-        <div className='border-t border-neutral-800 p-4'>
-          <div className='mb-3 rounded-lg bg-neutral-800/50 p-3'>
-            <p className='text-xs text-neutral-500'>Đang đăng nhập với</p>
-            <div className='mt-2 flex items-center gap-3'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-full bg-savoria-gold/20'>
-                {profile?.avatar ? (
-                  <img src={profile.avatar} alt='Avatar' className='h-full w-full rounded-full object-cover' />
-                ) : (
-                  <svg className='h-5 w-5 text-savoria-gold' fill='currentColor' viewBox='0 0 24 24'>
-                    <path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
-                  </svg>
-                )}
+      {/* Mobile Sidebar */}
+      <aside
+        className={`lg:hidden fixed left-0 top-0 z-50 h-screen w-64 bg-neutral-950 text-white border-r border-neutral-800 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
+      >
+        <div className='flex h-full flex-col'>
+          {/* Logo with close button */}
+          <div className='flex items-center justify-between gap-3 px-6 py-5 border-b border-neutral-800'>
+            <div className='flex items-center gap-3'>
+              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-savoria-gold/20'>
+                <svg className='h-6 w-6 text-savoria-gold' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
+                </svg>
               </div>
-              <div>
-                <p className='font-medium text-amber-50'>{profile?.username || 'Admin'}</p>
-                <p className='text-xs text-neutral-500'>Quản trị viên</p>
+              <span className='text-lg font-semibold text-savoria-gold'>TS Restaurant</span>
+            </div>
+            <button
+              onClick={onClose}
+              className='p-2 rounded-lg text-neutral-400 hover:bg-neutral-800 hover:text-white transition-colors'
+            >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
+              </svg>
+            </button>
+          </div>
+
+          {/* Menu Items */}
+          <nav className='flex-1 space-y-1 px-3 py-4 overflow-y-auto'>
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  onClick={onClose}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${isActive
+                    ? 'bg-savoria-gold/20 text-savoria-gold'
+                    : 'text-neutral-400 hover:bg-neutral-800 hover:text-savoria-gold'
+                    }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* User Info */}
+          <div className='border-t border-neutral-800 p-4'>
+            <div className='mb-3 rounded-lg bg-neutral-800/50 p-3'>
+              <p className='text-xs text-neutral-500'>Đang đăng nhập với</p>
+              <div className='mt-2 flex items-center gap-3'>
+                <div className='flex h-10 w-10 items-center justify-center rounded-full bg-savoria-gold/20'>
+                  {profile?.avatar ? (
+                    <img src={profile.avatar} alt='Avatar' className='h-full w-full rounded-full object-cover' />
+                  ) : (
+                    <svg className='h-5 w-5 text-savoria-gold' fill='currentColor' viewBox='0 0 24 24'>
+                      <path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p className='font-medium text-amber-50'>{profile?.username || 'Admin'}</p>
+                  <p className='text-xs text-neutral-500'>Quản trị viên</p>
+                </div>
               </div>
             </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className='flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-neutral-400 transition-all hover:bg-neutral-800 hover:text-red-400'
+            >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1' />
+              </svg>
+              Đăng xuất
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Desktop Sidebar */}
+      <aside className='hidden lg:flex fixed left-0 top-0 z-40 h-screen w-64 bg-neutral-950 text-white border-r border-neutral-800'>
+        <div className='flex h-full flex-col'>
+          {/* Logo */}
+          <div className='flex items-center gap-3 px-6 py-5 border-b border-neutral-800'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-savoria-gold/20'>
+              <svg className='h-6 w-6 text-savoria-gold' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' />
+              </svg>
+            </div>
+            <span className='text-lg font-semibold text-savoria-gold'>TS Restaurant</span>
           </div>
 
-          {/* Logout Button */}
-          <button
-            onClick={handleLogout}
-            className='flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-neutral-400 transition-all hover:bg-neutral-800 hover:text-red-400'
-          >
-            <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1' />
-            </svg>
-            Đăng xuất
-          </button>
+          {/* Menu Items */}
+          <nav className='flex-1 space-y-1 px-3 py-4'>
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/')
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${isActive
+                    ? 'bg-savoria-gold/20 text-savoria-gold'
+                    : 'text-neutral-400 hover:bg-neutral-800 hover:text-savoria-gold'
+                    }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </Link>
+              )
+            })}
+          </nav>
+
+          {/* User Info */}
+          <div className='border-t border-neutral-800 p-4'>
+            <div className='mb-3 rounded-lg bg-neutral-800/50 p-3'>
+              <p className='text-xs text-neutral-500'>Đang đăng nhập với</p>
+              <div className='mt-2 flex items-center gap-3'>
+                <div className='flex h-10 w-10 items-center justify-center rounded-full bg-savoria-gold/20'>
+                  {profile?.avatar ? (
+                    <img src={profile.avatar} alt='Avatar' className='h-full w-full rounded-full object-cover' />
+                  ) : (
+                    <svg className='h-5 w-5 text-savoria-gold' fill='currentColor' viewBox='0 0 24 24'>
+                      <path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
+                    </svg>
+                  )}
+                </div>
+                <div>
+                  <p className='font-medium text-amber-50'>{profile?.username || 'Admin'}</p>
+                  <p className='text-xs text-neutral-500'>Quản trị viên</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Logout Button */}
+            <button
+              onClick={handleLogout}
+              className='flex w-full items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-neutral-400 transition-all hover:bg-neutral-800 hover:text-red-400'
+            >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1' />
+              </svg>
+              Đăng xuất
+            </button>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   )
 }

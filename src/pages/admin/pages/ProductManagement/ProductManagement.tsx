@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import ProductForm from './ProductForm'
@@ -34,7 +34,22 @@ export default function ProductManagement() {
     setSearchParams(params, { replace: true })
   }, [queryParams, setSearchParams])
 
-  // Fetch dishes từ API
+  // Fetch tất cả dishes để lấy danh sách categories
+  const { data: allDishesData } = useQuery({
+    queryKey: ['admin-dishes-all'],
+    queryFn: () => dishApi.getDishes({ limit: 100 }), // Lấy nhiều để có đủ categories
+    select: (response) => response.data,
+    staleTime: 5 * 60 * 1000 // Cache 5 phút
+  })
+
+  // Lấy danh sách categories unique từ tất cả dishes
+  const categories = useMemo(() => {
+    const allDishes = allDishesData?.data?.dishes || []
+    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.category))]
+    return uniqueCategories.filter(Boolean).sort()
+  }, [allDishesData])
+
+  // Fetch dishes từ API (có phân trang và filter)
   const {
     data: dishesData,
     isLoading,
@@ -46,18 +61,20 @@ export default function ProductManagement() {
     select: (response) => response.data
   })
 
-  // Lấy dishes từ response
-  const dishes = dishesData?.data || []
-  const currentPage = queryParams.page || 1
+  // Lấy dishes từ response - API trả về { data: { dishes: [...], totalPages, currentPage } }
+  const dishes = Array.isArray(dishesData?.data?.dishes) ? dishesData.data.dishes : []
+  const totalPages = dishesData?.data?.totalPages || 1
+  const currentPage = dishesData?.data?.currentPage || queryParams.page || 1
   const currentLimit = queryParams.limit || 10
 
-  // Kiểm tra xem trang hiện tại có đủ items không (có thể còn trang tiếp)
-  const hasMorePages = dishes.length >= currentLimit
+  // Kiểm tra xem có còn trang tiếp theo không
+  const hasMorePages = currentPage < totalPages
 
   // Pagination info
   const pagination = {
     page: currentPage,
-    limit: currentLimit
+    limit: currentLimit,
+    totalPages: totalPages
   }
 
   // Delete mutation
@@ -100,8 +117,10 @@ export default function ProductManagement() {
     setEditingProduct(null)
   }
 
-  // Filter theo search term (client-side)
-  const filteredDishes = dishes.filter((dish) => dish.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Filter theo search term (client-side) - đảm bảo dishes là mảng
+  const filteredDishes = Array.isArray(dishes)
+    ? dishes.filter((dish) => dish.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    : []
 
   // Handle filter change
   const handleCategoryChange = (category: string) => {
@@ -122,32 +141,38 @@ export default function ProductManagement() {
     setQueryParams((prev) => ({ ...prev, limit, page: 1 }))
   }
 
-  // Generate page numbers - hiển thị động không giới hạn số trang
-  // Pattern: 1 2 3 ... (currentPage-1) currentPage (currentPage+1) ... nếu còn trang
+  // Generate page numbers - sử dụng totalPages từ API
   const getPageNumbers = (): (number | string)[] => {
     const pages: (number | string)[] = []
     const cp = pagination.page // current page
+    const tp = pagination.totalPages // total pages
 
-    if (cp <= 5) {
-      // Đang ở đầu: hiển thị 1 2 3 4 5 6 (và thêm > nếu có more)
-      for (let i = 1; i <= Math.max(cp + 2, 5); i++) {
+    if (tp <= 7) {
+      // Nếu tổng số trang <= 7, hiển thị tất cả
+      for (let i = 1; i <= tp; i++) {
         pages.push(i)
       }
-      if (hasMorePages) {
-        pages.push('...')
+    } else if (cp <= 4) {
+      // Đang ở đầu: hiển thị 1 2 3 4 5 ... totalPages
+      for (let i = 1; i <= 5; i++) {
+        pages.push(i)
+      }
+      pages.push('...')
+      pages.push(tp)
+    } else if (cp >= tp - 3) {
+      // Đang ở cuối: 1 ... (tp-4) (tp-3) (tp-2) (tp-1) tp
+      pages.push(1)
+      pages.push('...')
+      for (let i = tp - 4; i <= tp; i++) {
+        pages.push(i)
       }
     } else {
-      // Đang ở giữa hoặc cuối: 1 2 3 ... (cp-1) cp (cp+1) ...
-      pages.push(1, 2, 3)
+      // Đang ở giữa: 1 ... (cp-1) cp (cp+1) ... tp
+      pages.push(1)
       pages.push('...')
-      pages.push(cp - 1, cp)
-      if (hasMorePages) {
-        pages.push(cp + 1)
-        pages.push('...')
-      } else if (dishes.length > 0) {
-        // Đây là trang cuối, không có more
-        // có thể thêm page tiếp nếu muốn
-      }
+      pages.push(cp - 1, cp, cp + 1)
+      pages.push('...')
+      pages.push(tp)
     }
 
     return pages
@@ -209,10 +234,11 @@ export default function ProductManagement() {
           className='rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-1 focus:ring-savoria-gold'
         >
           <option value=''>Tất cả danh mục</option>
-          <option value='main'>Món chính</option>
-          <option value='appetizer'>Món khai vị</option>
-          <option value='dessert'>Món tráng miệng</option>
-          <option value='drink'>Đồ uống</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
         </select>
         <select
           value={queryParams.status}
@@ -409,6 +435,8 @@ export default function ProductManagement() {
                   <span className='font-semibold text-amber-50'>{dishes.length}</span>
                   {' sản phẩm - Trang '}
                   <span className='font-semibold text-amber-50'>{pagination.page}</span>
+                  {' / '}
+                  <span className='font-semibold text-amber-50'>{pagination.totalPages}</span>
                 </>
               )}
             </p>
@@ -480,7 +508,7 @@ export default function ProductManagement() {
                 )}
               </div>
 
-              {/* Next button - luôn enable nếu trang hiện tại có đủ items */}
+              {/* Next button */}
               <button
                 onClick={() => handlePageChange(pagination.page + 1)}
                 disabled={!hasMorePages}
@@ -491,13 +519,26 @@ export default function ProductManagement() {
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
                 </svg>
               </button>
+
+              {/* Last page button */}
+              <button
+                onClick={() => handlePageChange(pagination.totalPages)}
+                disabled={pagination.page >= pagination.totalPages}
+                className='flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-700 text-neutral-400 transition-all hover:bg-neutral-800 hover:border-savoria-gold hover:text-savoria-gold disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-neutral-700 disabled:hover:text-neutral-400'
+                title='Trang cuối'
+              >
+                <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 5l7 7-7 7M5 5l7 7-7 7' />
+                </svg>
+              </button>
             </div>
 
             {/* Page info and jump to page */}
             <div className='flex items-center gap-3 border-l border-neutral-700 pl-4'>
               <span className='text-sm text-neutral-400'>
                 Trang <span className='font-semibold text-amber-50'>{pagination.page}</span>
-                {hasMorePages && ' (còn tiếp)'}
+                {' / '}
+                <span className='font-semibold text-amber-50'>{pagination.totalPages}</span>
               </span>
 
               {/* Jump to page input */}
@@ -507,11 +548,12 @@ export default function ProductManagement() {
                 <input
                   type='number'
                   min={1}
+                  max={pagination.totalPages}
                   placeholder='...'
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       const value = parseInt((e.target as HTMLInputElement).value)
-                      if (value >= 1) {
+                      if (value >= 1 && value <= pagination.totalPages) {
                         handlePageChange(value)
                           ; (e.target as HTMLInputElement).value = ''
                       }
