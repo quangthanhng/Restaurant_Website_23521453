@@ -1,4 +1,5 @@
 import { useMemo, useState, useRef } from 'react'
+import axios, { type AxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Dish } from '../../../../types/dish.type'
@@ -25,7 +26,7 @@ interface ProductFormProps {
 
 export default function ProductForm({ product, onClose }: ProductFormProps) {
   const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const toast = useToast()
   const isEditing = !!product
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -89,14 +90,16 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       return dishApi.createDish(data)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-dishes'] })
+      // Invalidate all queries starting with ['admin-dishes'] (including paginated)
+      queryClient.invalidateQueries({ queryKey: ['admin-dishes'], exact: false })
       toast.success(isEditing ? 'Cập nhật món ăn thành công!' : 'Thêm món ăn thành công!')
       onClose()
     },
-    onError: (error: any) => {
-      if (error && typeof error === 'object' && 'response' in error) {
-        const axiosError = error as { response?: { data?: { message?: string; errors?: unknown } } }
-        const message = axiosError.response?.data?.message || 'Có lỗi xảy ra'
+    onError: (error: unknown) => {
+      // Narrow unknown to AxiosError for nicer messages
+      if (axios.isAxiosError(error)) {
+        const axiosErr = error as AxiosError<{ message?: string }>
+        const message = axiosErr.response?.data?.message ?? 'Có lỗi xảy ra'
         toast.error('Lỗi: ' + message)
       } else if (error instanceof Error) {
         toast.error('Lỗi: ' + error.message)
@@ -114,9 +117,9 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4'>
       <div className='w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl'>
         {/* Header */}
-        <div className='flex items-center justify-between border-b border-neutral-800 px-6 py-4 flex-shrink-0'>
+        <div className='flex items-center justify-between border-b border-neutral-800 px-6 py-4 shrink-0'>
           <h2 className='text-xl font-semibold text-savoria-gold'>
-            {isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm món ăn mới'}
+            {isEditing ? 'Chỉnh sửa món ăn' : 'Thêm món ăn mới'}
           </h2>
           <button
             onClick={onClose}
@@ -134,16 +137,16 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             {/* Name */}
             <div className='col-span-2'>
               <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Tên sản phẩm <span className='text-red-400'>*</span>
+                Tên Món Ăn <span className='text-red-400'>*</span>
               </label>
               <input
                 type='text'
-                {...register('name', { required: 'Vui lòng nhập tên sản phẩm' })}
+                {...register('name', { required: 'Vui lòng nhập tên món ăn' })}
                 className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.name
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                   : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
                   }`}
-                placeholder='Nhập tên sản phẩm'
+                placeholder='Nhập tên món ăn'
               />
               {errors.name && <p className='mt-1 text-sm text-red-400'>{errors.name.message}</p>}
             </div>
@@ -218,7 +221,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
               <div className='flex gap-4'>
                 {/* Thumbnail Preview */}
-                <div className='flex-shrink-0'>
+                <div className='shrink-0'>
                   {imagePreview ? (
                     <div className='relative group'>
                       <img
@@ -263,7 +266,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       if (file) {
                         // Kiểm tra kích thước file (max 5MB)
                         if (file.size > 5 * 1024 * 1024) {
-                          alert('Kích thước ảnh không được vượt quá 5MB')
+                          toast.error('Kích thước ảnh không được vượt quá 5MB')
                           return
                         }
 
@@ -276,7 +279,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                           setIsUploading(false)
                         }
                         reader.onerror = () => {
-                          alert('Không thể đọc file ảnh')
+                          toast.error('Không thể đọc file ảnh')
                           setIsUploading(false)
                         }
                         reader.readAsDataURL(file)
@@ -347,7 +350,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 {...register('description')}
                 rows={3}
                 className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 placeholder:text-neutral-500 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
-                placeholder='Nhập mô tả sản phẩm'
+                placeholder='Nhập mô tả món ăn'
               />
             </div>
 

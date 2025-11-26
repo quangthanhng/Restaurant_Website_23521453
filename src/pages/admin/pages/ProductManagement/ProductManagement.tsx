@@ -86,11 +86,11 @@ export default function ProductManagement() {
       console.log('Delete success:', response)
       // Force refetch immediately after delete
       await queryClient.refetchQueries({ queryKey: ['admin-dishes'] })
-      toast.success('Xóa sản phẩm thành công!')
+      toast.success('Xóa món ăn thành công!')
     },
     onError: (error: Error) => {
       console.error('Delete error:', error)
-      toast.error('Lỗi khi xóa sản phẩm: ' + error.message)
+      toast.error('Lỗi khi xóa món ăn: ' + error.message)
     }
   })
 
@@ -145,7 +145,7 @@ export default function ProductManagement() {
   }
 
   const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
+    if (window.confirm('Bạn có chắc chắn muốn xóa món ăn này?')) {
       deleteMutation.mutate(id)
     }
   }
@@ -260,7 +260,7 @@ export default function ProductManagement() {
           </svg>
           <input
             type='text'
-            placeholder='Tìm kiếm sản phẩm...'
+            placeholder='Tìm kiếm món ăn...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className='w-full rounded-lg border border-neutral-700 bg-neutral-800 py-2.5 pl-10 pr-4 text-sm text-amber-50 placeholder:text-neutral-500 focus:border-savoria-gold focus:outline-none focus:ring-1 focus:ring-savoria-gold'
@@ -293,7 +293,7 @@ export default function ProductManagement() {
       {isError && (
         <div className='mb-6 rounded-lg border border-red-800 bg-red-900/50 p-4 text-red-300'>
           <p className='font-medium'>Có lỗi xảy ra!</p>
-          <p className='text-sm'>{(error as Error)?.message || 'Không thể tải danh sách sản phẩm'}</p>
+          <p className='text-sm'>{(error as Error)?.message || 'Không thể tải danh sách món ăn'}</p>
         </div>
       )}
 
@@ -303,7 +303,7 @@ export default function ProductManagement() {
           <thead className='bg-neutral-900'>
             <tr>
               <th className='px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-savoria-gold'>
-                Sản phẩm
+                Món ăn
               </th>
               <th className='px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-savoria-gold'>
                 Danh mục
@@ -366,7 +366,7 @@ export default function ProductManagement() {
                       d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 20a8 8 0 100-16 8 8 0 000 16z'
                     />
                   </svg>
-                  <p className='mt-2'>Không tìm thấy sản phẩm nào</p>
+                  <p className='mt-2'>Không tìm thấy món ăn nào</p>
                 </td>
               </tr>
             ) : (
@@ -463,14 +463,14 @@ export default function ProductManagement() {
           <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
             <p className='text-sm text-neutral-400'>
               {dishes.length === 0 && pagination.page === 1 ? (
-                'Chưa có sản phẩm nào'
+                'Chưa có món ăn nào'
               ) : dishes.length === 0 ? (
-                'Không có sản phẩm ở trang này'
+                'Không có món ăn ở trang này'
               ) : (
                 <>
                   Đang hiển thị{' '}
                   <span className='font-semibold text-amber-50'>{dishes.length}</span>
-                  {' sản phẩm - Trang '}
+                  {' Món ăn - Trang '}
                   <span className='font-semibold text-amber-50'>{pagination.page}</span>
                   {' / '}
                   <span className='font-semibold text-amber-50'>{pagination.totalPages}</span>
