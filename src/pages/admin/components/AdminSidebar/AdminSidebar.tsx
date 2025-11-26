@@ -84,7 +84,7 @@ const menuItems: MenuItem[] = [
   }
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const location = useLocation()
   const navigate = useNavigate()
   const { profile, reset } = useContext(AppContext)
@@ -95,8 +95,11 @@ export default function AdminSidebar() {
     navigate('/')
   }
 
+  // Mobile overlay will be rendered inline inside return
+
+  // Desktop sidebar
   return (
-    <aside className='fixed left-0 top-0 z-40 h-screen w-64 bg-neutral-950 text-white border-r border-neutral-800'>
+    <aside className='hidden lg:flex fixed left-0 top-0 z-40 h-screen w-64 bg-neutral-950 text-white border-r border-neutral-800'>
       <div className='flex h-full flex-col'>
         {/* Logo */}
         <div className='flex items-center gap-3 px-6 py-5 border-b border-neutral-800'>

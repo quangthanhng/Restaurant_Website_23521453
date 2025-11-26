@@ -12,7 +12,7 @@ export default function NotFound() {
         </span>
 
         {/* Broken Wine Glass SVG */}
-        <div className='relative h-[120px] w-[80px] md:h-[200px] md:w-[130px] lg:h-[280px] lg:w-[180px]'>
+        <div className='relative h-[120px] w-20 md:h-[200px] md:w-[130px] lg:h-[280px] lg:w-[180px]'>
           <svg
             viewBox='0 0 100 150'
             fill='none'
