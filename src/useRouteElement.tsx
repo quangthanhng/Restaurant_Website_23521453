@@ -14,6 +14,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
 import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
 import ProductManagement from './pages/admin/pages/ProductManagement'
+import TableManagement from './pages/admin/pages/TableManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -64,6 +65,10 @@ export default function useRouteElement() {
             {
               path: path.adminProducts,
               element: <ProductManagement />
+            },
+            {
+              path: path.adminTables,
+              element: <TableManagement />
             }
           ]
         }
