@@ -4,9 +4,11 @@ import { useSearchParams } from 'react-router-dom'
 import ProductForm from './ProductForm'
 import dishApi from '../../../../apis/dish.api'
 import type { Dish, DishQueryParams } from '../../../../types/dish.type'
+import { useToast } from '../../../../components/Toast'
 
 export default function ProductManagement() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [searchParams, setSearchParams] = useSearchParams()
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Dish | null>(null)
@@ -84,19 +86,55 @@ export default function ProductManagement() {
       console.log('Delete success:', response)
       // Force refetch immediately after delete
       await queryClient.refetchQueries({ queryKey: ['admin-dishes'] })
-      alert('Xóa sản phẩm thành công!')
+      toast.success('Xóa sản phẩm thành công!')
     },
     onError: (error: Error) => {
       console.error('Delete error:', error)
-      alert('Lỗi khi xóa sản phẩm: ' + error.message)
+      toast.error('Lỗi khi xóa sản phẩm: ' + error.message)
     }
   })
 
-  // Toggle status mutation
+  // Toggle status mutation với Optimistic Update
   const toggleStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: 'active' | 'inactive' }) =>
       dishApi.changeStatus(id, status),
-    onSuccess: () => {
+    // Optimistic update: cập nhật UI ngay lập tức
+    onMutate: async ({ id, status }) => {
+      // Cancel các queries đang chạy để tránh overwrite
+      await queryClient.cancelQueries({ queryKey: ['admin-dishes'] })
+
+      // Lưu lại data cũ để rollback nếu lỗi
+      const previousData = queryClient.getQueryData(['admin-dishes', queryParams])
+
+      // Cập nhật cache ngay lập tức
+      queryClient.setQueryData(['admin-dishes', queryParams], (old: unknown) => {
+        if (!old || typeof old !== 'object') return old
+        const oldData = old as { data: { data: { dishes: Dish[]; totalPages: number; currentPage: number } } }
+
+        return {
+          ...oldData,
+          data: {
+            ...oldData.data,
+            data: {
+              ...oldData.data?.data,
+              dishes: oldData.data?.data?.dishes?.map((dish: Dish) =>
+                dish._id === id ? { ...dish, status } : dish
+              )
+            }
+          }
+        }
+      })
+
+      return { previousData }
+    },
+    // Rollback nếu có lỗi
+    onError: (_error, _variables, context) => {
+      if (context?.previousData) {
+        queryClient.setQueryData(['admin-dishes', queryParams], context.previousData)
+      }
+    },
+    // Đồng bộ lại với server sau khi thành công
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-dishes'] })
     }
   })
@@ -200,7 +238,7 @@ export default function ProductManagement() {
           <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 4v16m8-8H4' />
           </svg>
-          Thêm sản phẩm
+          Thêm món ăn
         </button>
       </div>
 
@@ -375,12 +413,11 @@ export default function ProductManagement() {
                           status: dish.status === 'active' ? 'inactive' : 'active'
                         })
                       }
-                      disabled={toggleStatusMutation.isPending}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${dish.status === 'active' ? 'bg-savoria-gold' : 'bg-neutral-700'
-                        } ${toggleStatusMutation.isPending ? 'opacity-50' : ''}`}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-savoria-gold focus:ring-offset-2 focus:ring-offset-neutral-950 ${dish.status === 'active' ? 'bg-savoria-gold' : 'bg-neutral-700'
+                        }`}
                     >
                       <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-neutral-950 transition-transform ${dish.status === 'active' ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform duration-200 ease-in-out ${dish.status === 'active' ? 'translate-x-6' : 'translate-x-1'
                           }`}
                       />
                     </button>
