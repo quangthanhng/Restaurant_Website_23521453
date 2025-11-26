@@ -1,9 +1,9 @@
-import { useRoutes } from 'react-router-dom'
+import { Navigate, useRoutes } from 'react-router-dom'
 import path from './constants/path'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Homepage from './pages/homepage'
-import Admin from './pages/admin'
+import AdminLayout from './pages/admin/AdminLayout'
 import MainLayout from './layouts/MainLayout'
 import RegisterLayout from './layouts/RegisterLayout'
 import Menu from './pages/Menu'
@@ -13,6 +13,7 @@ import Booking from './pages/Booking'
 import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
 import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
+import ProductManagement from './pages/admin/pages/ProductManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -54,7 +55,17 @@ export default function useRouteElement() {
       children: [
         {
           path: path.admin,
-          element: <Admin />
+          element: <AdminLayout />,
+          children: [
+            {
+              index: true,
+              element: <Navigate to={path.adminProducts} replace />
+            },
+            {
+              path: path.adminProducts,
+              element: <ProductManagement />
+            }
+          ]
         }
       ]
     },

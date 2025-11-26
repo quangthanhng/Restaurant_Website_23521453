@@ -14,7 +14,16 @@ const path = {
   forgot_password: '/forgot-password',
   productDetail: ':nameId',
   cart: '/cart',
+  // Admin routes
   admin: '/admin',
+  adminProducts: '/admin/products',
+  adminCategories: '/admin/categories',
+  adminTables: '/admin/tables',
+  adminOrders: '/admin/orders',
+  adminUsers: '/admin/users',
+  adminCoupons: '/admin/coupons',
+  adminBlogs: '/admin/blogs',
+  adminContacts: '/admin/contacts',
   notFound: '*'
 } as const
 
