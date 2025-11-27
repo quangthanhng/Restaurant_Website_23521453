@@ -136,7 +136,7 @@ export default function TableManagement() {
       </div>
 
       {/* Statistics Cards */}
-      <div className='mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4'>
+      <div className='mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-4'>
         <div className='rounded-xl border border-neutral-800 bg-neutral-950 p-4'>
           <div className='flex items-center gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-savoria-gold/20'>
@@ -270,7 +270,7 @@ export default function TableManagement() {
 
       {/* Tables Grid */}
       {!isLoading && (
-        <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
+        <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {filteredTables.length === 0 ? (
             <div className='col-span-full rounded-xl border border-neutral-800 bg-neutral-950 p-8 text-center'>
               <svg
