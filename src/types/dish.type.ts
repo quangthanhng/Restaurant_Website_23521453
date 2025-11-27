@@ -6,16 +6,21 @@ export interface Dish {
   price: number
   discount: number
   image: string
-  category: string
+  categoryId: CategoryID
   status: 'active' | 'inactive'
   finalPrice: number
   rating: number
-  position: number
   bestSeller: boolean
   ingredients: string[]
   prepareTime: number
   createdAt: string
   updatedAt: string
+  deleted: boolean
+}
+
+export interface CategoryID {
+  _id: string
+  name: string
 }
 
 // Pagination type - hỗ trợ nhiều format từ API

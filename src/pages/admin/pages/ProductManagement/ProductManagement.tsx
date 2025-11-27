@@ -47,7 +47,7 @@ export default function ProductManagement() {
   // Lấy danh sách categories unique từ tất cả dishes
   const categories = useMemo(() => {
     const allDishes = allDishesData?.data?.dishes || []
-    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.category))]
+    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.categoryId.name))]
     return uniqueCategories.filter(Boolean).sort()
   }, [allDishesData])
 
@@ -155,9 +155,9 @@ export default function ProductManagement() {
     setEditingProduct(null)
   }
 
-  // Filter theo search term (client-side) - đảm bảo dishes là mảng
+  // Filter: chỉ hiển thị món chưa bị xóa và theo search term
   const filteredDishes = Array.isArray(dishes)
-    ? dishes.filter((dish) => dish.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? dishes.filter((dish) => !dish.deleted && dish.name.toLowerCase().includes(searchTerm.toLowerCase()))
     : []
 
   // Handle filter change
@@ -390,7 +390,7 @@ export default function ProductManagement() {
                   {/* Category */}
                   <td className='whitespace-nowrap px-6 py-4'>
                     <span className='inline-flex max-w-[150px] truncate rounded-full bg-savoria-gold/20 px-3 py-1 text-xs font-medium text-savoria-gold'>
-                      {dish.category}
+                      {dish.categoryId.name}
                     </span>
                   </td>
 

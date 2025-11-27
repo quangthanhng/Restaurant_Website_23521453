@@ -15,6 +15,7 @@ import NotFound from './pages/NotFound'
 import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
 import ProductManagement from './pages/admin/pages/ProductManagement'
 import TableManagement from './pages/admin/pages/TableManagement'
+import CategoryManagement from './pages/admin/pages/CategoryManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -69,6 +70,10 @@ export default function useRouteElement() {
             {
               path: path.adminTables,
               element: <TableManagement />
+            },
+            {
+              path: path.adminCategories,
+              element: <CategoryManagement />
             }
           ]
         }

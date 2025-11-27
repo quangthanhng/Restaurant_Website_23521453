@@ -1,20 +1,23 @@
-import { useMemo, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import axios, { type AxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import type { Dish } from '../../../../types/dish.type'
 import dishApi from '../../../../apis/dish.api'
 import { useToast } from '../../../../components/Toast'
+import categoryApi from '../../../../apis/category.api'
+import type { Category } from '../../../../types/category.type'
 
 interface ProductFormData {
   name: string
   price: number
   discount?: number
-  category: string
+  category: string // categoryId (string)
   image: string
   description: string
   status: 'active' | 'inactive'
   bestSeller: boolean
+  rating?: number
   ingredients?: string
   prepareTime?: string
 }
@@ -34,20 +37,14 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   const [imagePreview, setImagePreview] = useState<string>(product?.image || '')
   const [isUploading, setIsUploading] = useState(false)
 
-  // Fetch tất cả dishes để lấy danh sách categories
-  const { data: allDishesData } = useQuery({
-    queryKey: ['admin-dishes-all'],
-    queryFn: () => dishApi.getDishes({ limit: 100 }),
-    select: (response) => response.data,
+  // Lấy danh mục từ API
+  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryApi.getCategories(),
+    select: (res) => res.data.metadata,
     staleTime: 5 * 60 * 1000
   })
-
-  // Lấy danh sách categories unique từ tất cả dishes
-  const categories = useMemo(() => {
-    const allDishes = allDishesData?.data?.dishes || []
-    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.category))]
-    return uniqueCategories.filter(Boolean).sort()
-  }, [allDishesData])
+  const categories: Category[] = categoriesData || []
 
   const {
     register,
@@ -60,13 +57,14 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
         name: product.name,
         price: product.price,
         discount: product.discount || 0,
-        category: product.category,
+        category: product.categoryId?._id || '',
         image: product.image,
         description: product.description,
         status: product.status,
         bestSeller: product.bestSeller,
+        rating: product.rating,
         ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(', ') : (product.ingredients || ''),
-        prepareTime: String(product.prepareTime || '')
+        prepareTime: product.prepareTime !== undefined && product.prepareTime !== null ? String(product.prepareTime) : ''
       }
       : {
         name: '',
@@ -77,6 +75,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
         description: '',
         status: 'active',
         bestSeller: false,
+        rating: 4.5,
         ingredients: '',
         prepareTime: ''
       }
@@ -110,7 +109,13 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   })
 
   const onSubmit = handleSubmit((data: ProductFormData) => {
-    mutation.mutate(data)
+    // Chuyển prepareTime về string nếu có, và ingredients là string
+    const submitData = {
+      ...data,
+      prepareTime: data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '',
+      ingredients: data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : ''
+    }
+    mutation.mutate(submitData)
   })
 
   return (
@@ -172,6 +177,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               {errors.price && <p className='mt-1 text-sm text-red-400'>{errors.price.message}</p>}
             </div>
 
+
             {/* Discount */}
             <div>
               <label className='mb-2 block text-sm font-medium text-neutral-300'>
@@ -191,7 +197,66 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 placeholder='0'
               />
               {errors.discount && <p className='mt-1 text-sm text-red-400'>{errors.discount.message}</p>}
-            </div>            {/* Category */}
+            </div>
+
+            {/* Rating */}
+            <div>
+              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+                Đánh giá (1-5)
+              </label>
+              <input
+                type='number'
+                step='0.1'
+                min={1}
+                max={5}
+                {...register('rating', {
+                  min: { value: 1, message: 'Đánh giá tối thiểu là 1' },
+                  max: { value: 5, message: 'Đánh giá tối đa là 5' },
+                  valueAsNumber: true
+                })}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.rating
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                  }`}
+                placeholder='4.5'
+              />
+              {errors.rating && <p className='mt-1 text-sm text-red-400'>{errors.rating.message}</p>}
+            </div>
+
+            {/* Ingredients */}
+            <div className='col-span-2'>
+              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+                Nguyên liệu (phân tách bằng dấu phẩy)
+              </label>
+              <input
+                type='text'
+                {...register('ingredients')}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.ingredients
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                  }`}
+                placeholder='Bánh phở, Thịt bò, Hành, Nước dùng'
+              />
+            </div>
+
+            {/* Prepare Time */}
+            <div>
+              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+                Thời gian chuẩn bị (phút)
+              </label>
+              <input
+                type='number'
+                min={1}
+                {...register('prepareTime', { valueAsNumber: true })}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.prepareTime
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                  }`}
+                placeholder='12'
+              />
+            </div>
+
+            {/* Category */}
             <div>
               <label className='mb-2 block text-sm font-medium text-neutral-300'>
                 Danh mục <span className='text-red-400'>*</span>
@@ -202,11 +267,12 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                   : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
                   }`}
+                disabled={isLoadingCategories}
               >
                 <option value=''>Chọn danh mục</option>
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category}
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.name}
                   </option>
                 ))}
               </select>
@@ -218,7 +284,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               <label className='mb-2 block text-sm font-medium text-neutral-300'>
                 Hình ảnh <span className='text-red-400'>*</span>
               </label>
-
               <div className='flex gap-4'>
                 {/* Thumbnail Preview */}
                 <div className='shrink-0'>
@@ -253,7 +318,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                     </div>
                   )}
                 </div>
-
                 {/* Upload Controls */}
                 <div className='flex flex-1 flex-col gap-2'>
                   {/* File Input */}
@@ -269,7 +333,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                           toast.error('Kích thước ảnh không được vượt quá 5MB')
                           return
                         }
-
                         setIsUploading(true)
                         const reader = new FileReader()
                         reader.onloadend = () => {
@@ -287,7 +350,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                     }}
                     className='hidden'
                   />
-
                   <button
                     type='button'
                     onClick={() => fileInputRef.current?.click()}
@@ -311,9 +373,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       </>
                     )}
                   </button>
-
                   <p className='text-xs text-neutral-500'>PNG, JPG, WEBP. Tối đa 5MB</p>
-
                   {/* Hoặc nhập URL */}
                   <div className='relative'>
                     <div className='absolute inset-0 flex items-center'>
@@ -323,7 +383,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       <span className='bg-neutral-900 px-2 text-xs text-neutral-500'>hoặc nhập URL</span>
                     </div>
                   </div>
-
                   <input
                     type='text'
                     {...register('image', { required: 'Vui lòng chọn ảnh hoặc nhập URL' })}
@@ -339,7 +398,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   />
                 </div>
               </div>
-
               {errors.image && <p className='mt-2 text-sm text-red-400'>{errors.image.message}</p>}
             </div>
 
@@ -367,7 +425,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   <option value='inactive'>Tạm ẩn</option>
                 </select>
               </div>
-
               {/* Best Seller */}
               <label className='flex cursor-pointer items-center gap-3'>
                 <input
@@ -379,7 +436,6 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               </label>
             </div>
           </div>
-
           {/* Actions */}
           <div className='mt-6 flex items-center justify-end gap-3 border-t border-neutral-800 pt-6'>
             <button
