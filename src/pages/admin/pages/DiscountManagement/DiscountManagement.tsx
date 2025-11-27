@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as discountApi from '../../../../apis/discount.api'
 import type { Discount } from '../../../../types/discount.type'
 import { useToast } from '../../../../components/Toast'
+import AdminActionButtons from '../../../../components/AdminActionButtons'
 import dayjs from 'dayjs'
 import DiscountForm from './DiscountForm'
 
@@ -101,8 +102,13 @@ export default function DiscountManagement() {
                   </span>
                 </td>
                 <td className='px-4 py-3'>
-                  <button className='mr-2 text-xs text-savoria-gold hover:underline' onClick={() => handleEdit(discount)}>Sửa</button>
-                  <button className='text-xs text-red-400 hover:underline' onClick={() => handleDelete(discount._id)}>Xóa</button>
+                  <AdminActionButtons
+                    onEdit={() => handleEdit(discount)}
+                    onDelete={() => handleDelete(discount._id)}
+                    editLabel='Sửa'
+                    deleteLabel='Xóa'
+                    showAdd={false}
+                  />
                 </td>
               </tr>
             ))}
@@ -128,8 +134,13 @@ export default function DiscountManagement() {
                 </div>
               </div>
               <div className='flex flex-col gap-2'>
-                <button className='text-xs text-savoria-gold hover:underline' onClick={() => handleEdit(discount)}>Sửa</button>
-                <button className='text-xs text-red-400 hover:underline' onClick={() => handleDelete(discount._id)}>Xóa</button>
+                <AdminActionButtons
+                  onEdit={() => handleEdit(discount)}
+                  onDelete={() => handleDelete(discount._id)}
+                  editLabel='Sửa'
+                  deleteLabel='Xóa'
+                  showAdd={false}
+                />
               </div>
             </div>
           </div>

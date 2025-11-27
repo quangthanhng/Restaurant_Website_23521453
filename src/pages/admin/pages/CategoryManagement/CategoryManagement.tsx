@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import categoryApi from '../../../../apis/category.api';
 import CategoryForm from './CategoryForm';
+import AdminActionButtons from '../../../../components/AdminActionButtons';
 // import Modal, Button, Input, etc. từ thư viện UI bạn đang dùng (AntD, MUI, hoặc tự custom)
 
 export interface Category {
@@ -108,15 +109,13 @@ const CategoryManagement: React.FC = () => {
     <div className="p-2 sm:p-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
         <h2 className="text-xl sm:text-3xl font-serif font-bold text-savoria-gold tracking-logo drop-shadow-lg">Quản lý danh mục</h2>
-        <button
-          className="group flex items-center gap-2 rounded-xl bg-savoria-gold px-4 py-2 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-neutral-900 shadow-lg transition-all hover:bg-neutral-900 hover:text-savoria-gold border border-savoria-gold hover:border-savoria-gold"
-          onClick={() => handleOpenModal()}
-        >
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          <span className="hidden xs:inline">Thêm danh mục</span>
-        </button>
+        <AdminActionButtons
+          showEdit={false}
+          showDelete={false}
+          showAdd={true}
+          onAdd={() => handleOpenModal()}
+          addLabel={<span className="flex items-center gap-2"><svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg><span className="hidden xs:inline">Thêm danh mục</span></span>}
+        />
       </div>
       {/* Table for desktop/tablet */}
       <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl hidden sm:block">
@@ -144,14 +143,13 @@ const CategoryManagement: React.FC = () => {
                 </td>
                 <td className="py-2 px-2 sm:px-4 text-neutral-400 text-xs sm:text-base">{new Date(cat.createdAt).toLocaleString()}</td>
                 <td className="py-2 px-2 sm:px-4 flex gap-1 sm:gap-2">
-                  <button
-                    className="rounded-lg border border-savoria-gold bg-neutral-900 px-2 py-1 sm:px-3 sm:py-1 text-savoria-gold font-semibold shadow transition-all hover:bg-savoria-gold hover:text-neutral-900 text-xs sm:text-base"
-                    onClick={() => handleOpenModal(cat)}
-                  >Sửa</button>
-                  <button
-                    className="rounded-lg border border-red-500 bg-neutral-900 px-2 py-1 sm:px-3 sm:py-1 text-red-400 font-semibold shadow transition-all hover:bg-red-500 hover:text-white text-xs sm:text-base"
-                    onClick={() => handleDelete(cat._id)}
-                  >Xóa</button>
+                  <AdminActionButtons
+                    onEdit={() => handleOpenModal(cat)}
+                    onDelete={() => handleDelete(cat._id)}
+                    editLabel='Sửa'
+                    deleteLabel='Xóa'
+                    showAdd={false}
+                  />
                 </td>
               </tr>
             ))}
