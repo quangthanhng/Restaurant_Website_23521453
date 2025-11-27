@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import categoryApi from '../../../../apis/category.api';
+import { useToast } from '../../../../components/Toast';
 import CategoryForm from './CategoryForm';
 import AdminActionButtons from '../../../../components/AdminActionButtons';
 // import Modal, Button, Input, etc. từ thư viện UI bạn đang dùng (AntD, MUI, hoặc tự custom)
@@ -17,6 +18,7 @@ export interface Category {
 
 const CategoryManagement: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
+  const toast = useToast();
   // const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<Category | null>(null);
@@ -27,21 +29,20 @@ const CategoryManagement: React.FC = () => {
     images: undefined as File | undefined,
   });
 
-  const fetchCategories = async () => {
-    // setLoading(true);
+  const fetchCategories = useCallback(async () => {
     try {
       const res = await categoryApi.getCategories();
       setCategories(res.data.metadata || []);
     } catch {
-      // handle error
-    } finally {
-      // setLoading(false);
+      toast.error('Lỗi khi tải danh mục!');
     }
-  };
+  }, [toast]);
 
   useEffect(() => {
-    fetchCategories();
-  }, []);
+    (async () => {
+      await fetchCategories();
+    })();
+  }, [fetchCategories]);
 
   const handleOpenModal = (category?: Category) => {
     if (category) {
@@ -85,13 +86,15 @@ const CategoryManagement: React.FC = () => {
     try {
       if (editCategory) {
         await categoryApi.updateCategory(editCategory._id, formData);
+        toast.success('Cập nhật danh mục thành công!');
       } else {
         await categoryApi.createCategory(formData);
+        toast.success('Thêm danh mục thành công!');
       }
       fetchCategories();
       handleCloseModal();
     } catch {
-      // handle error
+      toast.error('Lỗi khi lưu danh mục!');
     }
   };
 
@@ -99,9 +102,10 @@ const CategoryManagement: React.FC = () => {
     if (!window.confirm('Bạn có chắc chắn muốn xóa danh mục này?')) return;
     try {
       await categoryApi.deleteCategory(id);
+      toast.success('Xóa danh mục thành công!');
       fetchCategories();
     } catch {
-      // handle error
+      toast.error('Lỗi khi xóa danh mục!');
     }
   };
 
