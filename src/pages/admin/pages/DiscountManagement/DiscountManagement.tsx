@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import * as discountApi from '../../../../apis/discount.api'
 import type { Discount } from '../../../../types/discount.type'
 import { useToast } from '../../../../components/Toast'
-import AdminActionButtons from '../../../../components/AdminActionButtons'
+import AdminActionButtons from '../../components/AdminActionButtons'
 import dayjs from 'dayjs'
 import DiscountForm from './DiscountForm'
 

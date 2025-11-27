@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import categoryApi from '../../../../apis/category.api';
 import { useToast } from '../../../../components/Toast';
 import CategoryForm from './CategoryForm';
-import AdminActionButtons from '../../../../components/AdminActionButtons';
+import AdminActionButtons from '../../components/AdminActionButtons';
 // import Modal, Button, Input, etc. từ thư viện UI bạn đang dùng (AntD, MUI, hoặc tự custom)
 
 export interface Category {
