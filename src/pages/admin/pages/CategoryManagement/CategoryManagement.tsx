@@ -105,50 +105,51 @@ const CategoryManagement: React.FC = () => {
   };
 
   return (
-    <div className="p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-serif font-bold text-savoria-gold tracking-logo drop-shadow-lg">Quản lý danh mục</h2>
+    <div className="p-2 sm:p-4">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
+        <h2 className="text-xl sm:text-3xl font-serif font-bold text-savoria-gold tracking-logo drop-shadow-lg">Quản lý danh mục</h2>
         <button
-          className="group flex items-center gap-2 rounded-xl bg-savoria-gold px-5 py-2 text-base font-semibold text-neutral-900 shadow-lg transition-all hover:bg-neutral-900 hover:text-savoria-gold border border-savoria-gold hover:border-savoria-gold"
+          className="group flex items-center gap-2 rounded-xl bg-savoria-gold px-4 py-2 sm:px-5 sm:py-2 text-sm sm:text-base font-semibold text-neutral-900 shadow-lg transition-all hover:bg-neutral-900 hover:text-savoria-gold border border-savoria-gold hover:border-savoria-gold"
           onClick={() => handleOpenModal()}
         >
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
           </svg>
-          Thêm danh mục
+          <span className="hidden xs:inline">Thêm danh mục</span>
         </button>
       </div>
-      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl">
-        <table className="min-w-full text-neutral-300">
+      {/* Table for desktop/tablet */}
+      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl hidden sm:block">
+        <table className="min-w-[600px] w-full text-neutral-300 text-sm sm:text-base">
           <thead>
-            <tr className="bg-neutral-900 text-savoria-gold text-lg">
-              <th className="py-3 px-4 font-semibold">Ảnh</th>
-              <th className="py-3 px-4 font-semibold">Tên</th>
-              <th className="py-3 px-4 font-semibold">Mô tả</th>
-              <th className="py-3 px-4 font-semibold">Trạng thái</th>
-              <th className="py-3 px-4 font-semibold">Ngày tạo</th>
-              <th className="py-3 px-4 font-semibold">Hành động</th>
+            <tr className="bg-neutral-900 text-savoria-gold text-sm sm:text-lg">
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Ảnh</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Tên</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Mô tả</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Trạng thái</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Ngày tạo</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Hành động</th>
             </tr>
           </thead>
           <tbody>
             {categories.map((cat) => (
               <tr key={cat._id} className="border-b border-neutral-800 hover:bg-neutral-900 transition-colors">
-                <td className="py-2 px-4">
-                  <img src={cat.images} alt={cat.name} className="w-16 h-16 object-cover rounded-lg border border-neutral-800 shadow" />
+                <td className="py-2 px-2 sm:px-4">
+                  <img src={cat.images} alt={cat.name} className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg border border-neutral-800 shadow" />
                 </td>
-                <td className="py-2 px-4 font-semibold text-lg text-savoria-gold">{cat.name}</td>
-                <td className="py-2 px-4 text-neutral-400 max-w-xs truncate">{cat.description}</td>
-                <td className="py-2 px-4">
-                  <span className={`px-3 py-1 rounded-full text-sm font-bold ${cat.status === 'active' ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-neutral-700/40 text-neutral-400 border border-neutral-700'}`}>{cat.status === 'active' ? 'Hoạt động' : 'Ẩn'}</span>
+                <td className="py-2 px-2 sm:px-4 font-semibold text-savoria-gold text-base sm:text-lg">{cat.name}</td>
+                <td className="py-2 px-2 sm:px-4 text-neutral-400 max-w-[120px] sm:max-w-xs truncate">{cat.description}</td>
+                <td className="py-2 px-2 sm:px-4">
+                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${cat.status === 'active' ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-neutral-700/40 text-neutral-400 border border-neutral-700'}`}>{cat.status === 'active' ? 'Hoạt động' : 'Ẩn'}</span>
                 </td>
-                <td className="py-2 px-4 text-neutral-400">{new Date(cat.createdAt).toLocaleString()}</td>
-                <td className="py-2 px-4 flex gap-2">
+                <td className="py-2 px-2 sm:px-4 text-neutral-400 text-xs sm:text-base">{new Date(cat.createdAt).toLocaleString()}</td>
+                <td className="py-2 px-2 sm:px-4 flex gap-1 sm:gap-2">
                   <button
-                    className="rounded-lg border border-savoria-gold bg-neutral-900 px-3 py-1 text-savoria-gold font-semibold shadow transition-all hover:bg-savoria-gold hover:text-neutral-900"
+                    className="rounded-lg border border-savoria-gold bg-neutral-900 px-2 py-1 sm:px-3 sm:py-1 text-savoria-gold font-semibold shadow transition-all hover:bg-savoria-gold hover:text-neutral-900 text-xs sm:text-base"
                     onClick={() => handleOpenModal(cat)}
                   >Sửa</button>
                   <button
-                    className="rounded-lg border border-red-500 bg-neutral-900 px-3 py-1 text-red-400 font-semibold shadow transition-all hover:bg-red-500 hover:text-white"
+                    className="rounded-lg border border-red-500 bg-neutral-900 px-2 py-1 sm:px-3 sm:py-1 text-red-400 font-semibold shadow transition-all hover:bg-red-500 hover:text-white text-xs sm:text-base"
                     onClick={() => handleDelete(cat._id)}
                   >Xóa</button>
                 </td>
@@ -159,6 +160,38 @@ const CategoryManagement: React.FC = () => {
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Card list for mobile */}
+      <div className="block sm:hidden space-y-4">
+        {categories.length === 0 && (
+          <div className="text-center py-8 text-neutral-400">Không có danh mục nào</div>
+        )}
+        {categories.map((cat) => (
+          <div key={cat._id} className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950 shadow p-3 gap-2">
+            <div className="flex gap-3 items-center">
+              <img src={cat.images} alt={cat.name} className="w-16 h-16 object-cover rounded-lg border border-neutral-800 shadow" />
+              <div className="flex-1">
+                <div className="font-bold text-savoria-gold text-base">{cat.name}</div>
+                <div className="text-xs text-neutral-400 mt-1">{cat.description}</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <span className={`px-2 py-1 rounded-full text-xs font-bold ${cat.status === 'active' ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-neutral-700/40 text-neutral-400 border border-neutral-700'}`}>{cat.status === 'active' ? 'Hoạt động' : 'Ẩn'}</span>
+              <span className="text-xs text-neutral-400">{new Date(cat.createdAt).toLocaleString()}</span>
+            </div>
+            <div className="flex gap-2 mt-2">
+              <button
+                className="flex-1 rounded-lg border border-savoria-gold bg-neutral-900 px-2 py-1 text-savoria-gold font-semibold shadow transition-all hover:bg-savoria-gold hover:text-neutral-900 text-xs"
+                onClick={() => handleOpenModal(cat)}
+              >Sửa</button>
+              <button
+                className="flex-1 rounded-lg border border-red-500 bg-neutral-900 px-2 py-1 text-red-400 font-semibold shadow transition-all hover:bg-red-500 hover:text-white text-xs"
+                onClick={() => handleDelete(cat._id)}
+              >Xóa</button>
+            </div>
+          </div>
+        ))}
       </div>
       {/* Modal Thêm/Sửa */}
       {modalOpen && (
