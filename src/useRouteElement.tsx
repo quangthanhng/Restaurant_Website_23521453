@@ -16,6 +16,7 @@ import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
 import ProductManagement from './pages/admin/pages/ProductManagement'
 import TableManagement from './pages/admin/pages/TableManagement'
 import CategoryManagement from './pages/admin/pages/CategoryManagement'
+import DiscountManagement from './pages/admin/pages/DiscountManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -74,6 +75,10 @@ export default function useRouteElement() {
             {
               path: path.adminCategories,
               element: <CategoryManagement />
+            },
+            {
+              path: path.adminCoupons,
+              element: <DiscountManagement />
             }
           ]
         }
