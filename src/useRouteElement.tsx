@@ -18,6 +18,7 @@ import TableManagement from './pages/admin/pages/TableManagement'
 import CategoryManagement from './pages/admin/pages/CategoryManagement'
 import DiscountManagement from './pages/admin/pages/DiscountManagement'
 import BlogManagement from './pages/admin/pages/BlogManagement'
+import ContactManagement from './pages/admin/pages/ContactManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -84,6 +85,10 @@ export default function useRouteElement() {
             {
               path: path.adminBlogs,
               element: <BlogManagement />
+            },
+            {
+              path: path.adminContacts,
+              element: <ContactManagement />
             }
           ]
         }
