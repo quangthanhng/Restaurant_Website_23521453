@@ -1,8 +1,10 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import ProductForm from './ProductForm'
 import dishApi from '../../../../apis/dish.api'
+import categoryApi from '../../../../apis/category.api'
+import type { Category } from '../../../../types/category.type'
 import type { Dish, DishQueryParams } from '../../../../types/dish.type'
 import { useToast } from '../../../../components/Toast'
 
@@ -36,20 +38,14 @@ export default function ProductManagement() {
     setSearchParams(params, { replace: true })
   }, [queryParams, setSearchParams])
 
-  // Fetch tất cả dishes để lấy danh sách categories
-  const { data: allDishesData } = useQuery({
-    queryKey: ['admin-dishes-all'],
-    queryFn: () => dishApi.getDishes({ limit: 100 }), // Lấy nhiều để có đủ categories
-    select: (response) => response.data,
-    staleTime: 5 * 60 * 1000 // Cache 5 phút
-  })
 
-  // Lấy danh sách categories unique từ tất cả dishes
-  const categories = useMemo(() => {
-    const allDishes = allDishesData?.data?.dishes || []
-    const uniqueCategories = [...new Set(allDishes.map((dish: Dish) => dish.categoryId.name))]
-    return uniqueCategories.filter(Boolean).sort()
-  }, [allDishesData])
+  // Fetch tất cả categories từ API (giống ProductForm)
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryApi.getCategories(),
+    select: (response) => response.data.metadata || []
+  })
+  const categories: Category[] = categoriesData || []
 
   // Fetch dishes từ API (có phân trang và filter)
   const {
@@ -155,9 +151,13 @@ export default function ProductManagement() {
     setEditingProduct(null)
   }
 
-  // Filter: chỉ hiển thị món chưa bị xóa và theo search term
+  // Filter: chỉ hiển thị món chưa bị xóa, theo search term và đúng danh mục nếu có chọn
   const filteredDishes = Array.isArray(dishes)
-    ? dishes.filter((dish) => !dish.deleted && dish.name.toLowerCase().includes(searchTerm.toLowerCase()))
+    ? dishes.filter((dish) => {
+      const matchSearch = dish.name.toLowerCase().includes(searchTerm.toLowerCase())
+      const matchCategory = !queryParams.category || (dish.categoryId && dish.categoryId._id === queryParams.category)
+      return !dish.deleted && matchSearch && matchCategory
+    })
     : []
 
   // Handle filter change
@@ -175,9 +175,6 @@ export default function ProductManagement() {
   }
 
   // Handle limit change
-  const handleLimitChange = (limit: number) => {
-    setQueryParams((prev) => ({ ...prev, limit, page: 1 }))
-  }
 
   // Generate page numbers - sử dụng totalPages từ API
   const getPageNumbers = (): (number | string)[] => {
@@ -270,11 +267,12 @@ export default function ProductManagement() {
           value={queryParams.category}
           onChange={(e) => handleCategoryChange(e.target.value)}
           className='rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-1 focus:ring-savoria-gold'
+          disabled={isCategoriesLoading}
         >
           <option value=''>Tất cả danh mục</option>
           {categories.map((category) => (
-            <option key={category} value={category}>
-              {category}
+            <option key={category._id} value={category._id}>
+              {category.name}
             </option>
           ))}
         </select>
@@ -449,22 +447,7 @@ export default function ProductManagement() {
             )}
           </p>
 
-          {/* Items per page selector */}
-          <div className='flex items-center gap-2'>
-            <span className='text-sm text-neutral-400'>Số lượng:</span>
-            <select
-              value={queryParams.limit}
-              onChange={(e) => handleLimitChange(Number(e.target.value))}
-              className='rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-1.5 text-sm font-medium text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
-            >
-              <option value={5}>5</option>
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-            <span className='text-sm text-neutral-400'>/ trang</span>
-          </div>
+          {/* Items per page selector removed as requested */}
         </div>
 
         {/* Bottom row - Pagination controls */}

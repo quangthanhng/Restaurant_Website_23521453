@@ -98,28 +98,31 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      let imageValue = data.image
-      if (selectedFile) {
-        imageValue = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader()
-          reader.onloadend = () => resolve(reader.result as string)
-          reader.onerror = () => reject('Không thể đọc file ảnh')
-          reader.readAsDataURL(selectedFile)
-        })
-      }
       // Tìm object category từ mảng categories dựa vào id đã chọn
       const selectedCategory = categories.find(cat => cat._id === data.category)
-      const submitData = {
-        ...data,
-        image: imageValue,
-        categoryId: selectedCategory ? { _id: selectedCategory._id, name: selectedCategory.name } : undefined,
-        prepareTime: data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '',
-        ingredients: data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : ''
+      const formData = new FormData()
+      formData.append('name', data.name)
+      formData.append('description', data.description)
+      formData.append('price', String(data.price))
+      formData.append('discount', String(data.discount))
+      formData.append('status', data.status)
+      formData.append('rating', data.rating !== undefined ? String(data.rating) : '4.5')
+      formData.append('bestSeller', String(data.bestSeller))
+      formData.append('prepareTime', data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '')
+      formData.append('ingredients', data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : '')
+      if (selectedCategory) {
+        formData.append('categoryId', selectedCategory._id)
+      }
+      if (selectedFile) {
+        formData.append('image', selectedFile)
+      } else if (data.image) {
+        // Nếu không có file nhưng có url (trường hợp nhập url), vẫn gửi url
+        formData.append('image', data.image)
       }
       if (isEditing && product) {
-        return dishApi.updateDish(product._id, submitData)
+        return dishApi.updateDish(product._id, formData)
       }
-      return dishApi.createDish(submitData)
+      return dishApi.createDish(formData)
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-dishes'], exact: false })

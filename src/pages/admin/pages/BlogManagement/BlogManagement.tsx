@@ -68,7 +68,15 @@ function BlogManagement() {
           showDelete={false}
           showAdd={true}
           onAdd={() => handleOpenModal()}
-          addLabel={<span className="flex items-center gap-2"><svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" /></svg><span className="hidden xs:inline">Thêm blog</span></span>}
+          addLabel={
+            <span className="flex items-center gap-1">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              <span className="hidden sm:inline text-xs sm:text-sm">Thêm blog</span>
+            </span>
+          }
+          className="w-auto!"
         />
       </div>
       {/* Table for desktop/tablet */}

@@ -27,12 +27,22 @@ const dishApi = {
   },
 
   // Tạo món ăn mới
-  createDish: (data: DishFormData) => {
+  createDish: (data: DishFormData | FormData) => {
+    if (data instanceof FormData) {
+      return http.post<DishListResponse>('/dishes/create', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
     return http.post<DishListResponse>('/dishes/create', data)
   },
 
   // Cập nhật món ăn
-  updateDish: (id: string, data: DishFormData) => {
+  updateDish: (id: string, data: DishFormData | FormData) => {
+    if (data instanceof FormData) {
+      return http.patch<DishListResponse>(`/dishes/edit/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+    }
     return http.patch<DishListResponse>(`/dishes/edit/${id}`, data)
   },
 
