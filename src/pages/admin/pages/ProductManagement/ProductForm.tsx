@@ -10,16 +10,16 @@ import type { Category } from '../../../../types/category.type'
 
 interface ProductFormData {
   name: string
-  price: number
-  discount?: number
-  category: string // categoryId (string)
-  image: string
   description: string
+  price: number
+  discount: number
+  image: string
+  category: string // id của danh mục
   status: 'active' | 'inactive'
-  bestSeller: boolean
   rating?: number
-  ingredients?: string
+  bestSeller: boolean
   prepareTime?: string
+  ingredients?: string
 }
 
 interface ProductFormProps {
@@ -31,71 +31,102 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   const queryClient = useQueryClient()
   const toast = useToast()
   const isEditing = !!product
+  const [imagePreview, setImagePreview] = useState<string>(product?.image || '')
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [uploadMode, setUploadMode] = useState<'file' | 'url'>('file')
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // State cho image preview
-  const [imagePreview, setImagePreview] = useState<string>(product?.image || '')
-  const [isUploading, setIsUploading] = useState(false)
-
-  // Lấy danh mục từ API
-  const { data: categoriesData, isLoading: isLoadingCategories } = useQuery({
+  // Fetch danh mục
+  const { data: categoriesData, isLoading: isCategoriesLoading } = useQuery({
     queryKey: ['categories'],
     queryFn: () => categoryApi.getCategories(),
-    select: (res) => res.data.metadata,
-    staleTime: 5 * 60 * 1000
+    select: (response) => response.data.metadata || []
   })
   const categories: Category[] = categoriesData || []
+
+  // Helper để lấy category từ product (id string)
+  const getCategory = () => {
+    if (!product) return ''
+    if (product.categoryId && typeof product.categoryId === 'object') {
+      return product.categoryId._id
+    }
+    if (product.categoryId && typeof product.categoryId === 'string') {
+      return product.categoryId
+    }
+    return ''
+  }
 
   const {
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors }
   } = useForm<ProductFormData>({
     defaultValues: product
       ? {
         name: product.name,
+        description: product.description,
         price: product.price,
         discount: product.discount || 0,
-        category: product.categoryId?._id || '',
         image: product.image,
-        description: product.description,
+        category: getCategory(),
         status: product.status,
-        bestSeller: product.bestSeller,
         rating: product.rating,
-        ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(', ') : (product.ingredients || ''),
-        prepareTime: product.prepareTime !== undefined && product.prepareTime !== null ? String(product.prepareTime) : ''
+        bestSeller: product.bestSeller,
+        prepareTime: product.prepareTime !== undefined && product.prepareTime !== null ? String(product.prepareTime) : '',
+        ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(', ') : ''
       }
       : {
         name: '',
+        description: '',
         price: 0,
         discount: 0,
-        category: '',
         image: '',
-        description: '',
+        category: '',
         status: 'active',
-        bestSeller: false,
         rating: 4.5,
-        ingredients: '',
-        prepareTime: ''
+        bestSeller: false,
+        prepareTime: '',
+        ingredients: ''
       }
   })
 
+  // Tự động tính finalPrice khi price hoặc discount thay đổi
+  const price = watch('price')
+  const discount = watch('discount')
+
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
-      if (isEditing && product) {
-        return dishApi.updateDish(product._id, data)
+      let imageValue = data.image
+      if (selectedFile) {
+        imageValue = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onloadend = () => resolve(reader.result as string)
+          reader.onerror = () => reject('Không thể đọc file ảnh')
+          reader.readAsDataURL(selectedFile)
+        })
       }
-      return dishApi.createDish(data)
+      // Tìm object category từ mảng categories dựa vào id đã chọn
+      const selectedCategory = categories.find(cat => cat._id === data.category)
+      const submitData = {
+        ...data,
+        image: imageValue,
+        categoryId: selectedCategory ? { _id: selectedCategory._id, name: selectedCategory.name } : undefined,
+        prepareTime: data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '',
+        ingredients: data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : ''
+      }
+      if (isEditing && product) {
+        return dishApi.updateDish(product._id, submitData)
+      }
+      return dishApi.createDish(submitData)
     },
     onSuccess: () => {
-      // Invalidate all queries starting with ['admin-dishes'] (including paginated)
       queryClient.invalidateQueries({ queryKey: ['admin-dishes'], exact: false })
       toast.success(isEditing ? 'Cập nhật món ăn thành công!' : 'Thêm món ăn thành công!')
       onClose()
     },
     onError: (error: unknown) => {
-      // Narrow unknown to AxiosError for nicer messages
       if (axios.isAxiosError(error)) {
         const axiosErr = error as AxiosError<{ message?: string }>
         const message = axiosErr.response?.data?.message ?? 'Có lỗi xảy ra'
@@ -109,13 +140,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   })
 
   const onSubmit = handleSubmit((data: ProductFormData) => {
-    // Chuyển prepareTime về string nếu có, và ingredients là string
-    const submitData = {
-      ...data,
-      prepareTime: data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '',
-      ingredients: data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : ''
-    }
-    mutation.mutate(submitData)
+    mutation.mutate(data)
   })
 
   return (
@@ -180,9 +205,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
             {/* Discount */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Giảm giá (%)
-              </label>
+              <label className='mb-2 block text-sm font-medium text-neutral-300'>Giảm giá (%)</label>
               <input
                 type='number'
                 {...register('discount', {
@@ -197,6 +220,17 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 placeholder='0'
               />
               {errors.discount && <p className='mt-1 text-sm text-red-400'>{errors.discount.message}</p>}
+            </div>
+            {/* Final Price Preview */}
+            <div className='col-span-2 rounded-lg border border-neutral-700 bg-neutral-800/50 p-4'>
+              <p className='text-sm text-neutral-400'>
+                Giá sau giảm:{' '}
+                <span className='text-lg font-semibold text-savoria-gold'>
+                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
+                    (price || 0) - ((price || 0) * (discount || 0)) / 100
+                  )}
+                </span>
+              </p>
             </div>
 
             {/* Rating */}
@@ -267,12 +301,12 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
                   : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
                   }`}
-                disabled={isLoadingCategories}
+                disabled={isCategoriesLoading}
               >
-                <option value=''>Chọn danh mục</option>
-                {categories.map((cat) => (
-                  <option key={cat._id} value={cat._id}>
-                    {cat.name}
+                <option value=''>{isCategoriesLoading ? 'Đang tải...' : 'Chọn danh mục'}</option>
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
                   </option>
                 ))}
               </select>
@@ -284,6 +318,29 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               <label className='mb-2 block text-sm font-medium text-neutral-300'>
                 Hình ảnh <span className='text-red-400'>*</span>
               </label>
+              {/* Toggle upload mode */}
+              <div className='mb-3 flex gap-2'>
+                <button
+                  type='button'
+                  onClick={() => setUploadMode('file')}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'file'
+                    ? 'bg-savoria-gold text-neutral-900'
+                    : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
+                    }`}
+                >
+                  📁 Upload từ máy
+                </button>
+                <button
+                  type='button'
+                  onClick={() => setUploadMode('url')}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'url'
+                    ? 'bg-savoria-gold text-neutral-900'
+                    : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
+                    }`}
+                >
+                  🔗 Nhập URL
+                </button>
+              </div>
               <div className='flex gap-4'>
                 {/* Thumbnail Preview */}
                 <div className='shrink-0'>
@@ -294,7 +351,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                         alt='Preview'
                         className='h-28 w-28 rounded-lg border border-neutral-700 object-cover'
                         onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112?text=Lỗi+ảnh'
+                          ; (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112?text=Lỗi+ảnh'
                         }}
                       />
                       <button
@@ -302,6 +359,10 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                         onClick={() => {
                           setImagePreview('')
                           setValue('image', '')
+                          setSelectedFile(null)
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = ''
+                          }
                         }}
                         className='absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600'
                       >
@@ -313,89 +374,96 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   ) : (
                     <div className='flex h-28 w-28 items-center justify-center rounded-lg border-2 border-dashed border-neutral-700 bg-neutral-800'>
                       <svg className='h-8 w-8 text-neutral-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z' />
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth='2'
+                          d='M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z'
+                        />
                       </svg>
                     </div>
                   )}
                 </div>
                 {/* Upload Controls */}
                 <div className='flex flex-1 flex-col gap-2'>
-                  {/* File Input */}
-                  <input
-                    type='file'
-                    ref={fileInputRef}
-                    accept='image/*'
-                    onChange={(e) => {
-                      const file = e.target.files?.[0]
-                      if (file) {
-                        // Kiểm tra kích thước file (max 5MB)
-                        if (file.size > 5 * 1024 * 1024) {
-                          toast.error('Kích thước ảnh không được vượt quá 5MB')
-                          return
-                        }
-                        setIsUploading(true)
-                        const reader = new FileReader()
-                        reader.onloadend = () => {
-                          const base64String = reader.result as string
-                          setImagePreview(base64String)
-                          setValue('image', base64String)
-                          setIsUploading(false)
-                        }
-                        reader.onerror = () => {
-                          toast.error('Không thể đọc file ảnh')
-                          setIsUploading(false)
-                        }
-                        reader.readAsDataURL(file)
-                      }
-                    }}
-                    className='hidden'
-                  />
-                  <button
-                    type='button'
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={isUploading}
-                    className='flex items-center justify-center gap-2 rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 hover:text-amber-50 disabled:opacity-50'
-                  >
-                    {isUploading ? (
-                      <>
-                        <svg className='h-4 w-4 animate-spin' fill='none' viewBox='0 0 24 24'>
-                          <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
-                          <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z'></path>
-                        </svg>
-                        Đang xử lý...
-                      </>
-                    ) : (
-                      <>
-                        <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                          <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12' />
-                        </svg>
-                        Chọn ảnh từ thiết bị
-                      </>
-                    )}
-                  </button>
-                  <p className='text-xs text-neutral-500'>PNG, JPG, WEBP. Tối đa 5MB</p>
-                  {/* Hoặc nhập URL */}
-                  <div className='relative'>
-                    <div className='absolute inset-0 flex items-center'>
-                      <div className='w-full border-t border-neutral-700'></div>
-                    </div>
-                    <div className='relative flex justify-center'>
-                      <span className='bg-neutral-900 px-2 text-xs text-neutral-500'>hoặc nhập URL</span>
-                    </div>
-                  </div>
-                  <input
-                    type='text'
-                    {...register('image', { required: 'Vui lòng chọn ảnh hoặc nhập URL' })}
-                    onChange={(e) => {
-                      const url = e.target.value
-                      setImagePreview(url)
-                    }}
-                    className={`w-full rounded-lg border px-4 py-2 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.image
-                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                      : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
-                      }`}
-                    placeholder='https://example.com/image.jpg'
-                  />
+                  {uploadMode === 'file' ? (
+                    <>
+                      <p className='text-xs text-neutral-500 mb-1'>
+                        Chọn ảnh từ máy tính (PNG, JPG, JPEG, GIF, WEBP - Tối đa 10MB)
+                      </p>
+                      <input
+                        type='file'
+                        ref={fileInputRef}
+                        accept='image/png,image/jpeg,image/jpg,image/gif,image/webp'
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) {
+                            if (file.size > 10 * 1024 * 1024) {
+                              toast.error('Kích thước ảnh phải nhỏ hơn 10MB')
+                              return
+                            }
+                            const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp']
+                            if (!allowedTypes.includes(file.type)) {
+                              toast.error('Chỉ chấp nhận file ảnh (PNG, JPG, JPEG, GIF, WEBP)')
+                              return
+                            }
+                            setSelectedFile(file)
+                            const previewUrl = URL.createObjectURL(file)
+                            setImagePreview(previewUrl)
+                            setValue('image', file.name)
+                            toast.success('Đã chọn ảnh: ' + file.name)
+                          }
+                        }}
+                        className='hidden'
+                      />
+                      <button
+                        type='button'
+                        onClick={() => fileInputRef.current?.click()}
+                        className='w-full rounded-lg border-2 border-dashed px-4 py-4 text-sm transition-colors border-neutral-600 bg-neutral-800 text-neutral-300 hover:border-savoria-gold hover:bg-neutral-700'
+                      >
+                        {selectedFile ? (
+                          <span className='flex items-center justify-center gap-2 text-green-400'>
+                            <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M5 13l4 4L19 7' />
+                            </svg>
+                            Đã chọn: {selectedFile.name}
+                          </span>
+                        ) : (
+                          <span className='flex items-center justify-center gap-2'>
+                            <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                              <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                strokeWidth='2'
+                                d='M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12'
+                              />
+                            </svg>
+                            Chọn ảnh từ máy tính
+                          </span>
+                        )}
+                      </button>
+                      <input type='hidden' {...register('image', { required: 'Vui lòng chọn ảnh' })} />
+                    </>
+                  ) : (
+                    <>
+                      <p className='text-xs text-neutral-500 mb-1'>Nhập URL ảnh (Cloudinary, Imgur, ...)</p>
+                      <input
+                        type='text'
+                        value={imagePreview}
+                        onChange={(e) => {
+                          const url = e.target.value
+                          setImagePreview(url)
+                          setValue('image', url)
+                        }}
+                        className={`w-full rounded-lg border px-4 py-2 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.image
+                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+                          : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                          }`}
+                        placeholder='https://example.com/image.jpg'
+                      />
+                      <input type='hidden' {...register('image', { required: 'Vui lòng nhập URL ảnh' })} />
+                    </>
+                  )}
                 </div>
               </div>
               {errors.image && <p className='mt-2 text-sm text-red-400'>{errors.image.message}</p>}

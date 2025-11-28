@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import blogApi from '../../../../apis/blog.api';
 import { useToast } from '../../../../components/Toast';
-import AdminActionButtons from '../../components/AdminActionButtons';
+import AdminActionButtons from '../../components/AdminActionButtons/AdminActionButtons';
 import BlogForm from './BlogForm';
 
 interface Blog {

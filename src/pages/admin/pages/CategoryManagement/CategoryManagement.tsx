@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from 'react';
 import categoryApi from '../../../../apis/category.api';
 import { useToast } from '../../../../components/Toast';
 import CategoryForm from './CategoryForm';
-import AdminActionButtons from '../../components/AdminActionButtons';
+import AdminActionButtons from '../../components/AdminActionButtons/AdminActionButtons';
 // import Modal, Button, Input, etc. từ thư viện UI bạn đang dùng (AntD, MUI, hoặc tự custom)
 
 export interface Category {
@@ -129,7 +129,7 @@ const CategoryManagement: React.FC = () => {
               <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Ảnh</th>
               <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Tên</th>
               <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Mô tả</th>
-              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Trạng thái</th>
+              <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold text-center">Trạng thái</th>
               <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Ngày tạo</th>
               <th className="py-2 px-2 sm:py-3 sm:px-4 font-semibold">Hành động</th>
             </tr>
@@ -142,8 +142,8 @@ const CategoryManagement: React.FC = () => {
                 </td>
                 <td className="py-2 px-2 sm:px-4 font-semibold text-savoria-gold text-base sm:text-lg">{cat.name}</td>
                 <td className="py-2 px-2 sm:px-4 text-neutral-400 max-w-[120px] sm:max-w-xs truncate">{cat.description}</td>
-                <td className="py-2 px-2 sm:px-4">
-                  <span className={`px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${cat.status === 'active' ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-neutral-700/40 text-neutral-400 border border-neutral-700'}`}>{cat.status === 'active' ? 'Hoạt động' : 'Ẩn'}</span>
+                <td className="py-2 px-2 sm:px-4 text-center">
+                  <span className={`inline-flex justify-center items-center min-w-[90px] px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm font-bold ${cat.status === 'active' ? 'bg-green-600/20 text-green-400 border border-green-600/40' : 'bg-neutral-700/40 text-neutral-400 border border-neutral-700'}`}>{cat.status === 'active' ? 'Hoạt động' : 'Ẩn'}</span>
                 </td>
                 <td className="py-2 px-2 sm:px-4 text-neutral-400 text-xs sm:text-base">{new Date(cat.createdAt).toLocaleString()}</td>
                 <td className="py-2 px-2 sm:px-4 flex gap-1 sm:gap-2">
