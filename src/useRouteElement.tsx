@@ -19,6 +19,7 @@ import CategoryManagement from './pages/admin/pages/CategoryManagement'
 import DiscountManagement from './pages/admin/pages/DiscountManagement'
 import BlogManagement from './pages/admin/pages/BlogManagement'
 import ContactManagement from './pages/admin/pages/ContactManagement'
+import OrderManagement from './pages/admin/pages/OrderManagement'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -77,6 +78,10 @@ export default function useRouteElement() {
             {
               path: path.adminCategories,
               element: <CategoryManagement />
+            },
+            {
+              path: path.adminOrders,
+              element: <OrderManagement />
             },
             {
               path: path.adminCoupons,

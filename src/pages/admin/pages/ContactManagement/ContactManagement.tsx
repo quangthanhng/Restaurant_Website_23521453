@@ -147,7 +147,7 @@ export default function ContactManagement() {
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-neutral-400">Nội dung</span>
-                <span className="text-neutral-300 break-words text-[15px]">{contact.message}</span>
+                <span className="text-neutral-300 break-word text-[15px]">{contact.message}</span>
               </div>
               <div className="flex flex-col gap-0.5">
                 <span className="text-xs text-neutral-400">Trạng thái</span>
