@@ -66,7 +66,8 @@ export default function ContactManagement() {
   return (
     <div className="p-2 sm:p-4">
       <h2 className="text-xl sm:text-3xl font-bold text-savoria-gold mb-6">Quản lý liên hệ</h2>
-      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl">
+      {/* Table view for desktop */}
+      <div className="overflow-x-auto rounded-xl border border-neutral-800 bg-neutral-950 shadow-xl hidden sm:block">
         <table ref={tableRef} className="min-w-[700px] w-full text-neutral-300 text-sm sm:text-base">
           <thead>
             <tr className="bg-neutral-900 text-savoria-gold text-sm sm:text-lg">
@@ -122,6 +123,67 @@ export default function ContactManagement() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Card view for mobile */}
+      <div className="flex flex-col gap-4 sm:hidden px-2 overflow-y-auto" style={{ maxHeight: 'calc(100vh - 32px)' }}>
+        {isLoading ? (
+          <div className="text-center py-8 text-neutral-400">Đang tải...</div>
+        ) : contacts.length === 0 ? (
+          <div className="text-center py-8 text-neutral-400">Không có liên hệ nào</div>
+        ) : (
+          contacts.map((contact) => (
+            <div
+              key={contact._id}
+              className="rounded-2xl border border-neutral-800 bg-neutral-950 shadow-md p-4 flex flex-col gap-3 max-w-[420px] mx-auto w-full min-h-[120px]"
+            >
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-neutral-400">Tên</span>
+                <span className="font-semibold text-amber-50 text-[17px] leading-tight">{contact.name}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-neutral-400">Email</span>
+                <span className="text-blue-400 break-all text-[15px]">{contact.email}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-neutral-400">Nội dung</span>
+                <span className="text-neutral-300 break-words text-[15px]">{contact.message}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-neutral-400">Trạng thái</span>
+                <button
+                  className={`inline-flex justify-center items-center min-w-[90px] px-2 py-1 rounded-full text-xs font-bold border transition-colors ${contact.status === 'Pending' ? 'bg-yellow-600/20 text-yellow-400 border-yellow-600/40' : contact.status === 'Resolved' ? 'bg-green-600/20 text-green-400 border-green-600/40' : 'bg-red-600/20 text-red-400 border-red-600/40'}`}
+                  onClick={e => {
+                    if (dropdownInfo && dropdownInfo.id === contact._id) {
+                      setDropdownInfo(null)
+                    } else {
+                      const rect = (e.target as HTMLElement).getBoundingClientRect()
+                      setDropdownInfo({ id: contact._id, rect })
+                      setStatusValue(contact.status)
+                    }
+                  }}
+                  type="button"
+                >
+                  {contact.status}
+                  <svg className="ml-1 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                </button>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs text-neutral-400">Ngày gửi</span>
+                <span className="text-neutral-400 text-xs">{new Date(contact.createdAt).toLocaleString()}</span>
+              </div>
+              <div className="flex flex-col gap-2 mt-3">
+                <AdminActionButtons
+                  onEdit={() => setViewingComment(contact._id)}
+                  onDelete={() => handleDelete(contact._id)}
+                  editLabel="Xem bình luận"
+                  deleteLabel="Xóa"
+                  showAdd={false}
+                />
+              </div>
+            </div>
+          ))
+        )}
       </div>
       {/* Portal dropdown trạng thái */}
       {dropdownInfo && (() => {

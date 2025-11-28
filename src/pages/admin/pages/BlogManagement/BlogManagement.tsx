@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import blogApi from '../../../../apis/blog.api';
 import { useToast } from '../../../../components/Toast';
 import AdminActionButtons from '../../components/AdminActionButtons/AdminActionButtons';
-import BlogForm from './BlogForm';
+import BlogEditorModal from './BlogEditorModal';
 
 interface Blog {
   _id: string;
@@ -101,7 +101,7 @@ function BlogManagement() {
                       <img src={blog.image} alt={blog.title} className="w-14 h-14 object-cover rounded-xl border border-neutral-800 shadow bg-neutral-900" />
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-neutral-400 max-w-[320px] truncate align-middle text-left">{blog.content}</td>
+                  <td className="py-3 px-4 text-neutral-400 max-w-[320px] truncate align-middle text-left" dangerouslySetInnerHTML={{ __html: blog.content }} />
                   <td className="py-3 px-4 text-neutral-400 text-xs sm:text-base align-middle text-center whitespace-nowrap">{new Date(blog.createdAt).toLocaleString()}</td>
                   <td className="py-3 px-4 align-middle text-center">
                     <div className="flex justify-center gap-2">
@@ -131,7 +131,7 @@ function BlogManagement() {
             <div key={blog._id} className="flex flex-col rounded-xl border border-neutral-800 bg-neutral-950 shadow p-3 gap-2">
               <img src={blog.image} alt={blog.title} className="w-16 h-16 object-cover rounded-lg border border-neutral-800 shadow self-center" />
               <div className="font-bold text-savoria-gold text-base mt-2">{blog.title}</div>
-              <div className="text-xs text-neutral-400 mt-1">{blog.content}</div>
+              <div className="text-xs text-neutral-400 mt-1" dangerouslySetInnerHTML={{ __html: blog.content }} />
               <div className="text-xs text-neutral-400 mt-1">{new Date(blog.createdAt).toLocaleString()}</div>
               <div className="flex gap-2 mt-2">
                 <AdminActionButtons
@@ -148,12 +148,34 @@ function BlogManagement() {
       </div>
       {/* Modal Thêm/Sửa Blog */}
       {modalOpen && (
-        <BlogForm
-          blog={editingBlog}
+        <BlogEditorModal
+          open={modalOpen}
           onClose={handleCloseModal}
-          onSuccess={() => {
-            fetchBlogs();
-            handleCloseModal();
+          initialTitle={editingBlog?.title || ''}
+          initialContent={editingBlog?.content || ''}
+          initialImage={editingBlog?.image}
+          loading={loading}
+          onSubmit={async ({ title, content, image }) => {
+            setLoading(true)
+            try {
+              const formData = new FormData()
+              formData.append('title', title)
+              formData.append('content', content)
+              if (image) formData.append('image', image)
+              if (editingBlog) {
+                await blogApi.editBlog(editingBlog._id, formData)
+                toast.success('Cập nhật blog thành công!')
+              } else {
+                await blogApi.createBlog(formData)
+                toast.success('Tạo blog mới thành công!')
+              }
+              fetchBlogs()
+              handleCloseModal()
+            } catch {
+              toast.error('Lỗi khi lưu blog!')
+            } finally {
+              setLoading(false)
+            }
           }}
         />
       )}

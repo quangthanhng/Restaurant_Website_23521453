@@ -328,7 +328,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                     : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
                     }`}
                 >
-                  📁 Upload từ máy
+                  Upload từ máy
                 </button>
                 <button
                   type='button'
@@ -338,7 +338,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                     : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
                     }`}
                 >
-                  🔗 Nhập URL
+                  Nhập URL
                 </button>
               </div>
               <div className='flex gap-4'>

@@ -32,12 +32,14 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
   className = ''
 }) => {
   return (
-    <div className={`flex items-center gap-2 ${className}`}>
+    <div
+      className={`flex gap-2 items-center ${className} flex-col xs:flex-row w-full xs:w-auto`}
+    >
       {showEdit && (
         <button
           type="button"
           onClick={onEdit}
-          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200"
+          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
         >
           {editLabel}
         </button>
@@ -47,7 +49,7 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
           type="button"
           onClick={onDelete}
           disabled={disabledDelete}
-          className="rounded-lg border border-red-500 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50"
+          className="rounded-lg border border-red-500 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 w-full xs:w-auto"
         >
           {deleteLabel}
         </button>
@@ -56,7 +58,7 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200"
+          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
         >
           {addLabel}
         </button>

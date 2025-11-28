@@ -14,11 +14,13 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.10",
+    "@tinymce/tinymce-react": "^6.3.0",
     "axios": "^1.13.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-hook-form": "^7.66.1",
-    "react-router-dom": "^7.9.6"
+    "react-router-dom": "^7.9.6",
+    "tinymce": "^8.2.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
