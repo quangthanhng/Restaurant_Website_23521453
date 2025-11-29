@@ -8,7 +8,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
-    <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-950/90 backdrop-blur-md'>
+    <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md shadow-lg border-b border-neutral-900 transition-colors duration-300'>
       <div className='relative flex h-[74px] w-full items-center'>
         {/* Left section - Logo positioned at left with 100px margin, flexible */}
         <div className='flex items-center' style={{ marginLeft: '100px' }}>
