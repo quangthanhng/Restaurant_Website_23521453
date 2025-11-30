@@ -5,6 +5,7 @@ const path = {
   blog: '/blog',
   user: '/user',
   booking: '/booking',
+  payment: '/payment',
   profile: '/user/profile',
   changePassword: '/user/password',
   historyPurchase: '/user/purchase',

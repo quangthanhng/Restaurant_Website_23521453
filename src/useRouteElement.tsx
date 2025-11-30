@@ -10,6 +10,7 @@ import Menu from './pages/Menu'
 import About from './pages/About'
 import Blog from './pages/Blog'
 import Booking from './pages/Booking'
+import Payment from './pages/Payment'
 import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
 import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
@@ -128,6 +129,14 @@ export default function useRouteElement() {
       element: (
         <MainLayout>
           <Booking />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.payment,
+      element: (
+        <MainLayout>
+          <Payment />
         </MainLayout>
       )
     },
