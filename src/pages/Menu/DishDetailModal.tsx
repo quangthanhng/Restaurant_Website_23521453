@@ -1,4 +1,5 @@
 import { useCart } from '../../contexts/CartContext'
+import { useToast } from '../../components/Toast'
 import type { Dish } from '../../types/dish.type'
 
 interface DishDetailModalProps {
@@ -8,6 +9,7 @@ interface DishDetailModalProps {
 
 export default function DishDetailModal({ dish, onClose }: DishDetailModalProps) {
     const { addToCart } = useCart()
+    const { success } = useToast()
 
     if (!dish) return null
 
@@ -20,8 +22,8 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
 
     const handleAddToCart = () => {
         addToCart(dish)
-        // Show success message or toast
-        alert(`Đã thêm "${dish.name}" vào giỏ hàng!`)
+        success(`Đã thêm "${dish.name}" vào giỏ hàng!`)
+        onClose()
     }
 
     return (

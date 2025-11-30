@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCart } from '../../contexts/CartContext'
+import { useToast } from '../../components/Toast'
 import tableApi from '../../apis/table.api'
 import { getDiscounts } from '../../apis/discount.api'
 import type { Table } from '../../types/table.type'
@@ -11,6 +12,7 @@ import path from '../../constants/path'
 export default function Booking() {
   const navigate = useNavigate()
   const { cartItems, updateQuantity, removeFromCart, getTotalPrice } = useCart()
+  const { success, error } = useToast()
 
   // Form state
   const [selectedTableId, setSelectedTableId] = useState<string>('')
@@ -64,17 +66,19 @@ export default function Booking() {
   const handleConfirm = () => {
     // Validation
     if (!selectedTableId) {
-      alert('Vui lòng chọn bàn')
+      error('Vui lòng chọn bàn')
       return
     }
     if (cartItems.length === 0) {
-      alert('Giỏ hàng trống. Vui lòng thêm món ăn từ menu')
+      error('Giỏ hàng trống. Vui lòng thêm món ăn từ menu')
       return
     }
     if (!fullName || !email || !phone) {
-      alert('Vui lòng điền đầy đủ thông tin')
+      error('Vui lòng điền đầy đủ thông tin')
       return
     }
+
+    success('Đặt bàn thành công! Chuyển đến trang thanh toán...')
 
     // Navigate to payment with booking data
     navigate(path.payment, {
@@ -143,38 +147,59 @@ export default function Booking() {
                   Hiện tại không có bàn trống
                 </div>
               ) : (
-                <div className='grid grid-cols-1 gap-4 md:grid-cols-2'>
-                  {availableTables.map((table) => (
-                    <button
-                      key={table._id}
-                      onClick={() => setSelectedTableId(table._id)}
-                      className={`rounded-xl border-2 p-4 text-left transition-all ${selectedTableId === table._id
-                        ? 'border-savoria-gold bg-savoria-gold/10'
-                        : 'border-neutral-700 hover:border-savoria-gold/50'
-                        }`}
-                    >
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <h3 className='font-semibold text-white'>Bàn {table.tableNumber}</h3>
-                          <p className='text-sm text-neutral-400'>{table.position}</p>
-                          <p className='text-sm text-neutral-400'>{table.maximumCapacity} người</p>
-                        </div>
-                        <div className={`flex h-6 w-6 items-center justify-center rounded-full border-2 ${selectedTableId === table._id
-                          ? 'border-savoria-gold bg-savoria-gold'
-                          : 'border-neutral-600'
-                          }`}>
-                          {selectedTableId === table._id && (
-                            <svg className='h-4 w-4 text-neutral-900' fill='currentColor' viewBox='0 0 20 20'>
-                              <path fillRule='evenodd' d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z' clipRule='evenodd' />
-                            </svg>
-                          )}
-                        </div>
-                      </div>
-                      <span className='mt-2 inline-block rounded-full bg-green-500/20 px-3 py-1 text-xs font-medium text-green-400'>
-                        Trống
-                      </span>
-                    </button>
-                  ))}
+                <div className='overflow-hidden rounded-xl border border-neutral-800 bg-neutral-900'>
+                  <div className='max-h-[400px] overflow-y-auto'>
+                    <table className='w-full text-left text-sm text-neutral-400'>
+                      <thead className='sticky top-0 bg-neutral-800 text-xs uppercase text-neutral-200'>
+                        <tr>
+                          <th scope='col' className='px-6 py-4'>Chọn</th>
+                          <th scope='col' className='px-6 py-4'>Số bàn</th>
+                          <th scope='col' className='px-6 py-4'>Tên bàn</th>
+                          <th scope='col' className='px-6 py-4'>Vị trí</th>
+                          <th scope='col' className='px-6 py-4'>Số ghế</th>
+                          <th scope='col' className='px-6 py-4'>Trạng thái</th>
+                        </tr>
+                      </thead>
+                      <tbody className='divide-y divide-neutral-800'>
+                        {availableTables.map((table) => (
+                          <tr
+                            key={table._id}
+                            className={`cursor-pointer transition-colors hover:bg-neutral-800/50 ${selectedTableId === table._id ? 'bg-savoria-gold/10' : ''
+                              }`}
+                            onClick={() => setSelectedTableId(table._id)}
+                          >
+                            <td className='px-6 py-4'>
+                              <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${selectedTableId === table._id
+                                ? 'border-savoria-gold bg-savoria-gold'
+                                : 'border-neutral-600'
+                                }`}>
+                                {selectedTableId === table._id && (
+                                  <div className='h-2 w-2 rounded-full bg-neutral-900' />
+                                )}
+                              </div>
+                            </td>
+                            <td className='px-6 py-4 font-medium text-white'>
+                              {table.tableNumber}
+                            </td>
+                            <td className='px-6 py-4 font-medium text-white'>
+                              Bàn {table.tableNumber}
+                            </td>
+                            <td className='px-6 py-4'>
+                              {table.position}
+                            </td>
+                            <td className='px-6 py-4'>
+                              {table.maximumCapacity} người
+                            </td>
+                            <td className='px-6 py-4'>
+                              <span className='inline-flex items-center rounded-full bg-green-500/10 px-2.5 py-0.5 text-xs font-medium text-green-500'>
+                                Trống
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
             </div>

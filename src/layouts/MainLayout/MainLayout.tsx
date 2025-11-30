@@ -2,6 +2,7 @@ import React from 'react'
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
 
+
 interface MainLayoutProps {
   children: React.ReactNode
 }

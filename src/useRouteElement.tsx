@@ -13,7 +13,7 @@ import Booking from './pages/Booking'
 import Payment from './pages/Payment'
 import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
-import { AdminRoute, RejectedRoute } from './components/ProtectedRoute'
+import { AdminRoute, RejectedRoute, ProtectedRoute } from './components/ProtectedRoute'
 import ProductManagement from './pages/admin/pages/ProductManagement'
 import TableManagement from './pages/admin/pages/TableManagement'
 import CategoryManagement from './pages/admin/pages/CategoryManagement'
@@ -124,21 +124,36 @@ export default function useRouteElement() {
         </MainLayout>
       )
     },
+    // Protected Routes - Yêu cầu đăng nhập
     {
-      path: path.booking,
-      element: (
-        <MainLayout>
-          <Booking />
-        </MainLayout>
-      )
-    },
-    {
-      path: path.payment,
-      element: (
-        <MainLayout>
-          <Payment />
-        </MainLayout>
-      )
+      path: '',
+      element: <ProtectedRoute />,
+      children: [
+        {
+          path: path.booking,
+          element: (
+            <MainLayout>
+              <Booking />
+            </MainLayout>
+          )
+        },
+        {
+          path: path.payment,
+          element: (
+            <MainLayout>
+              <Payment />
+            </MainLayout>
+          )
+        },
+        {
+          path: path.profile,
+          element: (
+            <MainLayout>
+              <div>Profile Page (Coming Soon)</div>
+            </MainLayout>
+          )
+        }
+      ]
     },
     {
       path: path.forgot_password,
