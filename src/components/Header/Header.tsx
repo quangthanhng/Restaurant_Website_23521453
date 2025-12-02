@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom'
+import { useContext } from 'react'
 import path from '../../constants/path'
 import { useState } from 'react'
 import UserDropdown from '../UserDropdown'
 import ButtonPrimary from '../ButtonPrimary'
+import { AppContext } from '../../contexts/app.context'
+import { useCart } from '../../contexts/CartContext'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { isAuthenticated } = useContext(AppContext)
+  const { getTotalItems } = useCart()
+  const totalItems = getTotalItems()
 
   return (
     <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md shadow-lg border-b border-neutral-900 transition-colors duration-300'>
@@ -58,8 +64,36 @@ export default function Header() {
         {/* Another spacer for right side */}
         <div className='flex-1'></div>
 
-        {/* Right section - Book A Table Button with 100px margin from right edge */}
+        {/* Right section - Cart, Book A Table Button, and User Dropdown with 100px margin from right edge */}
         <div className='flex items-center gap-4' style={{ marginRight: '100px' }}>
+          {/* Cart Icon - Only show when authenticated - Desktop Only */}
+          {isAuthenticated && (
+            <Link
+              to={path.cart}
+              className='relative hidden lg:flex h-10 w-10 items-center justify-center rounded-full bg-neutral-800 text-neutral-300 transition-all hover:bg-savoria-gold hover:text-neutral-900'
+            >
+              <svg
+                className='h-5 w-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+                strokeWidth='2'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                />
+              </svg>
+              {/* Badge showing total items */}
+              {totalItems > 0 && (
+                <span className='absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white'>
+                  {totalItems > 99 ? '99+' : totalItems}
+                </span>
+              )}
+            </Link>
+          )}
+
           {/* Book A Table Button - Desktop Only */}
           <ButtonPrimary to={path.booking} className='hidden lg:flex'>
             Book A Table
@@ -94,7 +128,7 @@ export default function Header() {
 
       {/* Mobile Menu */}
       <div
-        className={`absolute left-0 top-full w-full overflow-hidden border-b border-neutral-800 bg-neutral-900/98 backdrop-blur-md transition-all duration-300 lg:hidden ${isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+        className={`absolute left-0 top-full w-full overflow-hidden border-b border-neutral-800 bg-neutral-900/98 backdrop-blur-md transition-all duration-300 lg:hidden ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
           }`}
       >
         <nav className='flex flex-col gap-1 px-4 py-6'>
@@ -126,6 +160,36 @@ export default function Header() {
           >
             Blog
           </Link>
+
+          {/* Cart Link - Mobile - Only show when authenticated */}
+          {isAuthenticated && (
+            <Link
+              to={path.cart}
+              onClick={() => setIsMenuOpen(false)}
+              className='flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
+            >
+              <svg
+                className='h-5 w-5'
+                fill='none'
+                stroke='currentColor'
+                viewBox='0 0 24 24'
+                strokeWidth='2'
+              >
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                />
+              </svg>
+              Giỏ hàng
+              {totalItems > 0 && (
+                <span className='ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white'>
+                  {totalItems > 99 ? '99+' : totalItems}
+                </span>
+              )}
+            </Link>
+          )}
+
           <Link
             to={path.booking}
             onClick={() => setIsMenuOpen(false)}

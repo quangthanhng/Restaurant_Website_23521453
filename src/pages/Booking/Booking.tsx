@@ -101,7 +101,7 @@ export default function Booking() {
   return (
     <div className='min-h-screen w-full bg-neutral-950 pt-[74px]'>
       {/* Hero Section */}
-      <section className='relative h-[300px] w-full overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950'>
+      <section className='relative h-[300px] w-full overflow-hidden bg-linear-to-b from-neutral-900 to-neutral-950'>
         <div className='absolute inset-0 opacity-[0.03]'>
           <svg className='h-full w-full' xmlns='http://www.w3.org/2000/svg'>
             <defs>

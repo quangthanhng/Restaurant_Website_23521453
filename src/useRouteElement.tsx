@@ -11,6 +11,7 @@ import About from './pages/About'
 import Blog from './pages/Blog'
 import Booking from './pages/Booking'
 import Payment from './pages/Payment'
+import Cart from './pages/Cart'
 import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
 import { AdminRoute, RejectedRoute, ProtectedRoute } from './components/ProtectedRoute'
@@ -142,6 +143,14 @@ export default function useRouteElement() {
           element: (
             <MainLayout>
               <Payment />
+            </MainLayout>
+          )
+        },
+        {
+          path: path.cart,
+          element: (
+            <MainLayout>
+              <Cart />
             </MainLayout>
           )
         },

@@ -83,7 +83,7 @@ export default function Homepage() {
             style={{ minHeight: 500 }}
           />
           {/* Overlay for darken effect on mobile */}
-          <div className='absolute inset-0 bg-gradient-to-t from-neutral-950/80 to-transparent lg:bg-none'></div>
+          <div className='absolute inset-0 bg-linear-to-t from-neutral-950/80 to-transparent lg:bg-none'></div>
         </div>
       </section>
       {/* Custom spin animation */}

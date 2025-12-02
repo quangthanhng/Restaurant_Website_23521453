@@ -1,17 +1,28 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, useContext } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import dishApi from '../../apis/dish.api'
 import categoryApi from '../../apis/category.api'
+import { useCart } from '../../contexts/CartContext'
+import { AppContext } from '../../contexts/app.context'
+import { useToast } from '../../components/Toast'
 import type { Dish } from '../../types/dish.type'
 import type { Category } from '../../types/category.type'
 import DishDetailModal from './DishDetailModal'
+import path from '../../constants/path'
 
 export default function Menu() {
-  const [selectedCategory, setSelectedCategory] = useState<string>('') // '' means show first category
+  const [selectedCategoryState, setSelectedCategoryState] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedDish, setSelectedDish] = useState<Dish | null>(null)
   const [allDishes, setAllDishes] = useState<Dish[]>([])
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(true) // Toggle state for categories
+  const [addingDishId, setAddingDishId] = useState<string | null>(null) // Track which dish is being added
+
+  const { addToCart } = useCart()
+  const { isAuthenticated } = useContext(AppContext)
+  const { success, error } = useToast()
+  const navigate = useNavigate()
 
   // Fetch categories
   const { data: categoriesData } = useQuery({
@@ -19,7 +30,15 @@ export default function Menu() {
     queryFn: () => categoryApi.getCategories(),
     select: (response) => response.data.metadata || []
   })
-  const categories: Category[] = categoriesData || []
+  const categories: Category[] = useMemo(() => categoriesData || [], [categoriesData])
+
+  // Compute selectedCategory: use state if set, otherwise default to first category
+  const selectedCategory = useMemo(() => {
+    if (selectedCategoryState !== null) {
+      return selectedCategoryState
+    }
+    return categories.length > 0 ? categories[0]._id : ''
+  }, [selectedCategoryState, categories])
 
   // Fetch first page to get total pages
   const { data: firstPageData, isLoading: isLoadingFirstPage } = useQuery({
@@ -76,13 +95,6 @@ export default function Menu() {
     fetchAllDishes()
   }, [firstPageData])
 
-  // Auto-select first category when categories load
-  useEffect(() => {
-    if (categories.length > 0 && !selectedCategory) {
-      setSelectedCategory(categories[0]._id)
-    }
-  }, [categories, selectedCategory])
-
   // Filter dishes by selected category and search term
   const filteredDishes = allDishes.filter(dish => {
     const matchCategory = selectedCategory ? dish.categoryId._id === selectedCategory : true
@@ -104,10 +116,31 @@ export default function Menu() {
   // Get current category name
   const currentCategory = categories.find(c => c._id === selectedCategory)
 
+  // Handle quick add to cart
+  const handleQuickAddToCart = async (e: React.MouseEvent, dish: Dish) => {
+    e.stopPropagation() // Prevent opening modal
+
+    if (!isAuthenticated) {
+      error('Vui lòng đăng nhập để thêm món vào giỏ hàng!')
+      navigate(path.login)
+      return
+    }
+
+    try {
+      setAddingDishId(dish._id)
+      await addToCart(dish, 1)
+      success(`Đã thêm "${dish.name}" vào giỏ hàng!`)
+    } catch {
+      error('Có lỗi xảy ra khi thêm vào giỏ hàng!')
+    } finally {
+      setAddingDishId(null)
+    }
+  }
+
   return (
     <div className='min-h-screen w-full bg-neutral-950 pt-[74px]'>
       {/* Hero Section */}
-      <section className='relative h-[400px] w-full overflow-hidden bg-gradient-to-b from-neutral-900 to-neutral-950'>
+      <section className='relative h-[400px] w-full overflow-hidden bg-linear-to-b from-neutral-900 to-neutral-950'>
         {/* Background Pattern */}
         <div className='absolute inset-0 opacity-[0.03]'>
           <svg className='h-full w-full' xmlns='http://www.w3.org/2000/svg'>
@@ -212,16 +245,16 @@ export default function Menu() {
                       return (
                         <button
                           key={category._id}
-                          onClick={() => setSelectedCategory(category._id)}
+                          onClick={() => setSelectedCategoryState(category._id)}
                           className={`group flex w-full items-center justify-between rounded-lg px-4 py-3 text-left transition-all ${selectedCategory === category._id
-                              ? 'bg-savoria-gold text-neutral-900 shadow-md'
-                              : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
+                            ? 'bg-savoria-gold text-neutral-900 shadow-md'
+                            : 'text-neutral-300 hover:bg-neutral-800 hover:text-white'
                             }`}
                         >
                           <span className='font-medium'>{category.name}</span>
                           <span className={`text-xs ${selectedCategory === category._id
-                              ? 'text-neutral-900/70'
-                              : 'text-neutral-500 group-hover:text-neutral-400'
+                            ? 'text-neutral-900/70'
+                            : 'text-neutral-500 group-hover:text-neutral-400'
                             }`}>
                             {count}
                           </span>
@@ -292,7 +325,7 @@ export default function Menu() {
                         className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-110'
                       />
                       {/* Overlay */}
-                      <div className='absolute inset-0 bg-gradient-to-t from-neutral-900 via-neutral-900/20 to-transparent opacity-60' />
+                      <div className='absolute inset-0 bg-linear-to-t from-neutral-900 via-neutral-900/20 to-transparent opacity-60' />
 
                       {/* Badges */}
                       <div className='absolute left-4 top-4 flex gap-2'>
@@ -333,10 +366,20 @@ export default function Menu() {
                             </p>
                           )}
                         </div>
-                        <button className='flex h-12 w-12 items-center justify-center rounded-full bg-savoria-gold text-neutral-900 shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-savoria-gold/30'>
-                          <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2.5'>
-                            <path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
-                          </svg>
+                        <button className='flex h-12 w-12 items-center justify-center rounded-full bg-savoria-gold text-neutral-900 shadow-lg transition-all duration-300 hover:scale-110 hover:shadow-xl hover:shadow-savoria-gold/30 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
+                          onClick={(e) => handleQuickAddToCart(e, dish)}
+                          disabled={addingDishId === dish._id}
+                        >
+                          {addingDishId === dish._id ? (
+                            <svg className='h-5 w-5 animate-spin' fill='none' viewBox='0 0 24 24'>
+                              <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                              <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                            </svg>
+                          ) : (
+                            <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2.5'>
+                              <path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
+                            </svg>
+                          )}
                         </button>
                       </div>
                     </div>
