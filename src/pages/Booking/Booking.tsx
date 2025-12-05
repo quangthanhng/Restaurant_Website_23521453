@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useCart } from '../../contexts/CartContext'
@@ -9,9 +9,21 @@ import type { Table } from '../../types/table.type'
 import type { Discount } from '../../types/discount.type'
 import path from '../../constants/path'
 
+// Helper function to get default date
+const getDefaultDate = () => {
+  const today = new Date()
+  return today.toISOString().split('T')[0]
+}
+
+// Helper function to get default time
+const getDefaultTime = () => {
+  const today = new Date()
+  return today.toTimeString().slice(0, 5)
+}
+
 export default function Booking() {
   const navigate = useNavigate()
-  const { cartItems, updateQuantity, removeFromCart, getTotalPrice } = useCart()
+  const { cartItems, updateQuantity, removeFromCart, getTotalPrice, isLoading: isLoadingCart, fetchCart } = useCart()
   const { success, error } = useToast()
 
   // Form state
@@ -21,6 +33,15 @@ export default function Booking() {
   const [phone, setPhone] = useState('')
   const [notes, setNotes] = useState('')
   const [selectedDiscount, setSelectedDiscount] = useState<Discount | null>(null)
+
+  // Date & Time picker state - initialize with default values
+  const [bookingDate, setBookingDate] = useState<string>(getDefaultDate)
+  const [bookingTime, setBookingTime] = useState<string>(getDefaultTime)
+
+  // Fetch cart on mount
+  useEffect(() => {
+    fetchCart()
+  }, [fetchCart])
 
   // Fetch available tables
   const { data: tablesData, isLoading: isLoadingTables } = useQuery({
@@ -37,8 +58,45 @@ export default function Booking() {
     queryFn: () => getDiscounts(),
     select: (response) => response.data.metadata || []
   })
-  const discounts: Discount[] = discountsData || []
-  const activeDiscounts = discounts.filter(discount => discount.active)
+
+  // Filter discounts: active AND valid for selected booking date
+  const validDiscounts = useMemo(() => {
+    const discounts: Discount[] = discountsData || []
+    if (!bookingDate) return []
+
+    const selectedDate = new Date(bookingDate)
+    selectedDate.setHours(0, 0, 0, 0)
+
+    return discounts.filter(discount => {
+      if (!discount.active) return false
+
+      const validFrom = new Date(discount.validFrom)
+      const validTo = new Date(discount.validTo)
+      validFrom.setHours(0, 0, 0, 0)
+      validTo.setHours(23, 59, 59, 999)
+
+      return selectedDate >= validFrom && selectedDate <= validTo
+    })
+  }, [discountsData, bookingDate])
+
+  // Handle date change and reset discount if invalid
+  const handleDateChange = useCallback((newDate: string) => {
+    setBookingDate(newDate)
+    // Check if current discount is still valid for new date
+    if (selectedDiscount && newDate) {
+      const selectedDate = new Date(newDate)
+      selectedDate.setHours(0, 0, 0, 0)
+
+      const validFrom = new Date(selectedDiscount.validFrom)
+      const validTo = new Date(selectedDiscount.validTo)
+      validFrom.setHours(0, 0, 0, 0)
+      validTo.setHours(23, 59, 59, 999)
+
+      if (selectedDate < validFrom || selectedDate > validTo) {
+        setSelectedDiscount(null)
+      }
+    }
+  }, [selectedDiscount])
 
   // Calculate totals
   const subtotal = getTotalPrice()
@@ -53,14 +111,21 @@ export default function Booking() {
     }).format(price)
   }
 
-  // Format datetime
-  const currentDateTime = new Date().toLocaleString('vi-VN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
+  // Format booking datetime for display
+  const formattedBookingDateTime = useMemo(() => {
+    if (!bookingDate || !bookingTime) return ''
+    const date = new Date(`${bookingDate}T${bookingTime}`)
+    return date.toLocaleString('vi-VN', {
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit'
+    })
+  }, [bookingDate, bookingTime])
+
+  // Get min date (today)
+  const minDate = new Date().toISOString().split('T')[0]
 
   // Handle form submission
   const handleConfirm = () => {
@@ -77,14 +142,24 @@ export default function Booking() {
       error('Vui lòng điền đầy đủ thông tin')
       return
     }
+    if (!bookingDate || !bookingTime) {
+      error('Vui lòng chọn ngày và giờ đặt bàn')
+      return
+    }
 
     success('Đặt bàn thành công! Chuyển đến trang thanh toán...')
+
+    // Tìm thông tin bàn đã chọn
+    const selectedTable = tables.find(t => t._id === selectedTableId)
 
     // Navigate to payment with booking data
     navigate(path.payment, {
       state: {
         tableId: selectedTableId,
+        tableNumber: selectedTable?.tableNumber || '',
         totalAmount: total,
+        subtotal,
+        discountAmount,
         cartItems,
         customerInfo: {
           fullName,
@@ -92,8 +167,12 @@ export default function Booking() {
           phone,
           notes
         },
-        discountCode: selectedDiscount?.code || null,
-        bookingTime: currentDateTime
+        discount: selectedDiscount ? {
+          code: selectedDiscount.code,
+          percentage: selectedDiscount.percentage,
+          description: selectedDiscount.description
+        } : null,
+        bookingTime: formattedBookingDateTime
       }
     })
   }
@@ -210,7 +289,14 @@ export default function Booking() {
                 Giỏ hàng
               </h2>
 
-              {cartItems.length === 0 ? (
+              {isLoadingCart ? (
+                <div className='flex items-center justify-center py-12'>
+                  <svg className='h-8 w-8 animate-spin text-savoria-gold' fill='none' viewBox='0 0 24 24'>
+                    <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                    <path className='opacity-75' fill='currentColor' d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z' />
+                  </svg>
+                </div>
+              ) : cartItems.length === 0 ? (
                 <div className='py-12 text-center'>
                   <svg className='mx-auto mb-4 h-16 w-16 text-neutral-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                     <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='1.5' d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z' />
@@ -301,7 +387,7 @@ export default function Booking() {
 
                 <div className='text-sm text-neutral-400'>
                   <p>Thời gian đặt bàn:</p>
-                  <p className='font-medium text-white'>{currentDateTime}</p>
+                  <p className='font-medium text-white'>{formattedBookingDateTime || 'Chưa chọn'}</p>
                 </div>
               </div>
             </div>
@@ -344,18 +430,54 @@ export default function Booking() {
                   />
                 </div>
 
+                {/* Date & Time Picker */}
+                <div className='grid grid-cols-2 gap-4'>
+                  <div>
+                    <label className='mb-2 block text-sm text-neutral-400'>Ngày đặt bàn *</label>
+                    <input
+                      type='date'
+                      value={bookingDate}
+                      min={minDate}
+                      onChange={(e) => handleDateChange(e.target.value)}
+                      className='w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-white focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20 [&::-webkit-calendar-picker-indicator]:invert'
+                    />
+                  </div>
+                  <div>
+                    <label className='mb-2 block text-sm text-neutral-400'>Giờ đặt bàn *</label>
+                    <input
+                      type='time'
+                      value={bookingTime}
+                      onChange={(e) => setBookingTime(e.target.value)}
+                      className='w-full rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-2.5 text-white focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20 [&::-webkit-calendar-picker-indicator]:invert'
+                    />
+                  </div>
+                </div>
+
                 <div>
-                  <label className='mb-2 block text-sm text-neutral-400'>Mã giảm giá</label>
+                  <label className='mb-2 block text-sm text-neutral-400'>
+                    Mã giảm giá
+                    {bookingDate && (
+                      <span className='ml-2 text-xs text-neutral-500'>
+                        (Hiệu lực cho ngày {new Date(bookingDate).toLocaleDateString('vi-VN')})
+                      </span>
+                    )}
+                  </label>
                   {isLoadingDiscounts ? (
                     <div className='text-sm text-neutral-500'>Đang tải...</div>
-                  ) : activeDiscounts.length === 0 ? (
-                    <div className='text-sm text-neutral-500'>Không có mã giảm giá</div>
+                  ) : !bookingDate ? (
+                    <div className='rounded-lg border border-neutral-700 bg-neutral-800/50 p-3 text-sm text-neutral-500'>
+                      Vui lòng chọn ngày đặt bàn để xem mã giảm giá
+                    </div>
+                  ) : validDiscounts.length === 0 ? (
+                    <div className='rounded-lg border border-neutral-700 bg-neutral-800/50 p-3 text-sm text-neutral-500'>
+                      Không có mã giảm giá cho ngày này
+                    </div>
                   ) : (
                     <div className='space-y-2'>
-                      {activeDiscounts.map((discount) => (
+                      {validDiscounts.map((discount) => (
                         <button
                           key={discount._id}
-                          onClick={() => setSelectedDiscount(discount)}
+                          onClick={() => setSelectedDiscount(selectedDiscount?._id === discount._id ? null : discount)}
                           className={`w-full rounded-lg border p-3 text-left transition-all ${selectedDiscount?._id === discount._id
                             ? 'border-savoria-gold bg-savoria-gold/10'
                             : 'border-neutral-700 hover:border-savoria-gold/50'
@@ -365,6 +487,9 @@ export default function Booking() {
                             <div>
                               <p className='font-semibold text-white'>{discount.code}</p>
                               <p className='text-xs text-neutral-400'>{discount.description}</p>
+                              <p className='mt-1 text-xs text-neutral-500'>
+                                HSD: {new Date(discount.validFrom).toLocaleDateString('vi-VN')} - {new Date(discount.validTo).toLocaleDateString('vi-VN')}
+                              </p>
                             </div>
                             <span className='rounded-full bg-savoria-gold px-3 py-1 text-sm font-bold text-neutral-900'>
                               -{discount.percentage}%

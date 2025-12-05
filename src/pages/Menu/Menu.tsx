@@ -48,7 +48,7 @@ export default function Menu() {
       limit: 10,
       status: 'active'
     }),
-    select: (response) => response.data?.data
+    select: (response) => response.data?.metadata
   })
 
   // Fetch all dishes from all pages
@@ -80,7 +80,7 @@ export default function Menu() {
 
         const remainingPagesResults = await Promise.all(remainingPagesPromises)
         const remainingDishes = remainingPagesResults.flatMap(
-          result => result.data?.data?.dishes || []
+          result => result.data?.metadata?.dishes || []
         )
 
         // Combine all dishes

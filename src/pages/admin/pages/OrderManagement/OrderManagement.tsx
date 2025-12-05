@@ -498,8 +498,8 @@ export default function OrderManagement() {
                     key={index}
                     onClick={() => handlePageChange(page)}
                     className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === currentPage
-                        ? 'bg-savoria-gold text-neutral-900 shadow-md shadow-savoria-gold/30'
-                        : 'border border-neutral-700 text-neutral-400 hover:border-savoria-gold hover:bg-neutral-800 hover:text-savoria-gold'
+                      ? 'bg-savoria-gold text-neutral-900 shadow-md shadow-savoria-gold/30'
+                      : 'border border-neutral-700 text-neutral-400 hover:border-savoria-gold hover:bg-neutral-800 hover:text-savoria-gold'
                       }`}
                   >
                     {page}

@@ -17,7 +17,7 @@ export default function Homepage() {
 
   useEffect(() => {
     dishApi.getDishes({ page: 1, limit: 3, status: 'active' }).then(res => {
-      const data = res.data?.data?.dishes || []
+      const data = res.data?.metadata?.dishes || []
       setDishes(data.slice(0, 3))
     })
   }, [])

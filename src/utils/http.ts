@@ -34,7 +34,16 @@ class Http {
         const { url } = response.config
         if (url === '/users/login' || url === '/users/register') {
           const data = response.data
-          if (data.data) {
+          // Handle new API response structure (metadata)
+          if (data.metadata) {
+            this.accessToken = data.metadata.accessToken
+            setAccessTokenToLS(data.metadata.accessToken)
+            if (data.metadata.refreshToken) {
+              setRefreshTokenToLS(data.metadata.refreshToken)
+            }
+          }
+          // Handle legacy API response structure (data)
+          else if (data.data) {
             this.accessToken = data.data.accessToken
             setAccessTokenToLS(data.data.accessToken)
             setRefreshTokenToLS(data.data.refreshToken)

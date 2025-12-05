@@ -59,10 +59,10 @@ export default function ProductManagement() {
     select: (response) => response.data
   })
 
-  // Lấy dishes từ response - API trả về { data: { dishes: [...], totalPages, currentPage } }
-  const dishes = Array.isArray(dishesData?.data?.dishes) ? dishesData.data.dishes : []
-  const totalPages = dishesData?.data?.totalPages || 1
-  const currentPage = dishesData?.data?.currentPage || queryParams.page || 1
+  // Lấy dishes từ response - API trả về { metadata: { dishes: [...], totalPages, currentPage } }
+  const dishes = Array.isArray(dishesData?.metadata?.dishes) ? dishesData.metadata.dishes : []
+  const totalPages = dishesData?.metadata?.totalPages || 1
+  const currentPage = dishesData?.metadata?.currentPage || queryParams.page || 1
   const currentLimit = queryParams.limit || 10
 
   // Kiểm tra xem có còn trang tiếp theo không

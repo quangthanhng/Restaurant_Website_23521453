@@ -126,7 +126,7 @@ const CategoryManagement: React.FC = () => {
               <span className="hidden sm:inline text-xs sm:text-sm">Thêm danh mục</span>
             </span>
           }
-          className="!w-auto"
+          className="w-auto!"
         />
       </div>
       {/* Table for desktop/tablet */}

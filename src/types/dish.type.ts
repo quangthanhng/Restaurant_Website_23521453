@@ -33,10 +33,11 @@ export interface Pagination {
   totalPages?: number
 }
 
-// Response khi lấy danh sách dishes
+// Response khi lấy danh sách dishes (new API structure)
 export interface DishListResponse {
   message: string
-  data: {
+  statusCode: number
+  metadata: {
     dishes: Dish[]
     totalPages: number
     currentPage: number
@@ -45,9 +46,9 @@ export interface DishListResponse {
 
 // Response khi lấy chi tiết 1 dish
 export interface DishDetailResponse {
-  code: number
   message: string
-  data: Dish
+  statusCode: number
+  metadata: Dish
 }
 
 // Query params cho API lấy danh sách
