@@ -9,6 +9,7 @@ import { useToast } from '../../components/Toast'
 import type { Dish } from '../../types/dish.type'
 import type { Category } from '../../types/category.type'
 import path from '../../constants/path'
+import { FadeIn, StaggerContainer, StaggerItem } from '../../components/Animations'
 
 export default function Menu() {
   const [selectedCategoryState, setSelectedCategoryState] = useState<string | null>(null)
@@ -161,11 +162,11 @@ export default function Menu() {
             backgroundImage: 'url(https://images.unsplash.com/photo-1555126634-323283e090fa?w=1920&q=80)'
           }}
         >
-          <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70' />
+          <div className='absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/70' />
         </div>
 
         {/* Content */}
-        <div className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
+        <FadeIn className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
           <div className='mb-4 inline-flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/20 px-6 py-2 backdrop-blur-sm'>
             <svg className='h-5 w-5 text-amber-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path
@@ -184,7 +185,7 @@ export default function Menu() {
           <p className='max-w-2xl text-lg text-white/80'>
             Những món ăn truyền thống được chế biến từ nguyên liệu tươi ngon, mang đến hương vị đậm đà khó quên
           </p>
-        </div>
+        </FadeIn>
       </section>
 
       {/* Main Content with Sidebar */}
@@ -331,92 +332,93 @@ export default function Menu() {
 
             {/* Dishes Grid */}
             {!isLoading && filteredDishes.length > 0 && (
-              <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+              <StaggerContainer className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
                 {filteredDishes.map((dish) => (
-                  <Link
-                    key={dish._id}
-                    to={`/dish/${dish._id}`}
-                    className='group relative cursor-pointer overflow-hidden rounded-2xl border border-stone-200 bg-white transition-all duration-300 hover:border-amber-500 hover:bg-amber-50/30'
-                  >
-                    {/* Image */}
-                    <div className='relative h-64 w-full overflow-hidden bg-stone-100'>
-                      <img
-                        src={dish.image || 'https://via.placeholder.com/400x300'}
-                        alt={dish.name}
-                        className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
-                      />
+                  <StaggerItem key={dish._id}>
+                    <Link
+                      to={`/dish/${dish._id}`}
+                      className='group relative cursor-pointer overflow-hidden rounded-2xl border border-stone-200 bg-white transition-all duration-300 hover:border-amber-500 hover:bg-amber-50/30'
+                    >
+                      {/* Image */}
+                      <div className='relative h-64 w-full overflow-hidden bg-stone-100'>
+                        <img
+                          src={dish.image || 'https://via.placeholder.com/400x300'}
+                          alt={dish.name}
+                          className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
+                        />
 
-                      {/* Badges */}
-                      <div className='absolute left-4 top-4 flex gap-2'>
-                        {dish.bestSeller && (
-                          <span className='rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-gray-900'>
-                            Best Seller
-                          </span>
-                        )}
-                        {dish.discount > 0 && (
-                          <span className='rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-gray-900'>
-                            -{dish.discount}%
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className='p-6'>
-                      {/* Title */}
-                      <h3 className='mb-2 font-serif text-xl font-bold text-gray-900 transition-colors group-hover:text-amber-600'>
-                        {dish.name}
-                      </h3>
-
-                      {/* Description */}
-                      <p className='mb-4 line-clamp-2 text-sm text-gray-500'>{dish.description}</p>
-
-                      {/* Price & CTA */}
-                      <div className='flex items-center justify-between'>
-                        <div>
-                          <p className='text-2xl font-bold text-amber-600'>{formatPrice(dish.finalPrice)}</p>
+                        {/* Badges */}
+                        <div className='absolute left-4 top-4 flex gap-2'>
+                          {dish.bestSeller && (
+                            <span className='rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-gray-900'>
+                              Best Seller
+                            </span>
+                          )}
                           {dish.discount > 0 && (
-                            <p className='text-sm text-gray-400 line-through'>{formatPrice(dish.price)}</p>
+                            <span className='rounded-full bg-amber-500 px-3 py-1 text-xs font-bold text-gray-900'>
+                              -{dish.discount}%
+                            </span>
                           )}
                         </div>
-                        <button
-                          className='flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 text-neutral-900 transition-all duration-300 hover:scale-110 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
-                          onClick={(e) => handleQuickAddToCart(e, dish)}
-                          disabled={addingDishId === dish._id}
-                        >
-                          {addingDishId === dish._id ? (
-                            <svg className='h-5 w-5 animate-spin' fill='none' viewBox='0 0 24 24'>
-                              <circle
-                                className='opacity-25'
-                                cx='12'
-                                cy='12'
-                                r='10'
-                                stroke='currentColor'
-                                strokeWidth='4'
-                              />
-                              <path
-                                className='opacity-75'
-                                fill='currentColor'
-                                d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-                              />
-                            </svg>
-                          ) : (
-                            <svg
-                              className='h-5 w-5'
-                              fill='none'
-                              stroke='currentColor'
-                              viewBox='0 0 24 24'
-                              strokeWidth='2.5'
-                            >
-                              <path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
-                            </svg>
-                          )}
-                        </button>
                       </div>
-                    </div>
-                  </Link>
+
+                      {/* Content */}
+                      <div className='p-6'>
+                        {/* Title */}
+                        <h3 className='mb-2 font-serif text-xl font-bold text-gray-900 transition-colors group-hover:text-amber-600'>
+                          {dish.name}
+                        </h3>
+
+                        {/* Description */}
+                        <p className='mb-4 line-clamp-2 text-sm text-gray-500'>{dish.description}</p>
+
+                        {/* Price & CTA */}
+                        <div className='flex items-center justify-between'>
+                          <div>
+                            <p className='text-2xl font-bold text-amber-600'>{formatPrice(dish.finalPrice)}</p>
+                            {dish.discount > 0 && (
+                              <p className='text-sm text-gray-400 line-through'>{formatPrice(dish.price)}</p>
+                            )}
+                          </div>
+                          <button
+                            className='flex h-12 w-12 items-center justify-center rounded-full bg-amber-500 text-neutral-900 transition-all duration-300 hover:scale-110 hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
+                            onClick={(e) => handleQuickAddToCart(e, dish)}
+                            disabled={addingDishId === dish._id}
+                          >
+                            {addingDishId === dish._id ? (
+                              <svg className='h-5 w-5 animate-spin' fill='none' viewBox='0 0 24 24'>
+                                <circle
+                                  className='opacity-25'
+                                  cx='12'
+                                  cy='12'
+                                  r='10'
+                                  stroke='currentColor'
+                                  strokeWidth='4'
+                                />
+                                <path
+                                  className='opacity-75'
+                                  fill='currentColor'
+                                  d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                                />
+                              </svg>
+                            ) : (
+                              <svg
+                                className='h-5 w-5'
+                                fill='none'
+                                stroke='currentColor'
+                                viewBox='0 0 24 24'
+                                strokeWidth='2.5'
+                              >
+                                <path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
+                              </svg>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    </Link>
+                  </StaggerItem>
                 ))}
-              </div>
+              </StaggerContainer>
             )}
           </main>
         </div>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import blogApi from '../../apis/blog.api'
 import path from '../../constants/path'
+import { FadeIn, StaggerContainer, StaggerItem } from '../../components/Animations'
 
 interface Blog {
   _id: string
@@ -58,9 +59,9 @@ export default function Blog() {
             backgroundImage: 'url("https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1920&q=80")'
           }}
         />
-        <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70' />
+        <div className='absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/70' />
 
-        <div className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
+        <FadeIn className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
           <span className='mb-4 inline-block rounded-full bg-amber-500/20 px-6 py-2 text-sm font-medium text-amber-300 backdrop-blur'>
             Blog & Tin tức
           </span>
@@ -70,7 +71,7 @@ export default function Blog() {
           <p className='max-w-2xl text-lg text-white/80'>
             Những câu chuyện thú vị, công thức nấu ăn và bí quyết ẩm thực từ đội ngũ đầu bếp của chúng tôi
           </p>
-        </div>
+        </FadeIn>
       </section>
 
       {/* Main Content */}
@@ -131,63 +132,64 @@ export default function Blog() {
 
         {/* Blog Grid - 2 blogs per row */}
         {!isLoading && filteredBlogs.length > 0 && (
-          <div className='grid gap-8 md:grid-cols-2'>
+          <StaggerContainer className='grid gap-8 md:grid-cols-2'>
             {filteredBlogs.map((blog) => (
-              <Link
-                key={blog._id}
-                to={`/blog/${blog._id}`}
-                className='group block cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'
-              >
-                <div className='relative h-56 overflow-hidden sm:h-64'>
-                  {blog.image ? (
-                    <img
-                      src={blog.image}
-                      alt={blog.title}
-                      className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
-                    />
-                  ) : (
-                    <div className='flex h-full items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100'>
-                      <span className='text-6xl'>📝</span>
-                    </div>
-                  )}
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
-                </div>
-                <div className='p-6'>
-                  <div className='mb-3 flex items-center gap-2 text-sm text-gray-500'>
-                    <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                      <path
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                        strokeWidth='2'
-                        d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+              <StaggerItem key={blog._id}>
+                <Link
+                  to={`/blog/${blog._id}`}
+                  className='group block cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'
+                >
+                  <div className='relative h-56 overflow-hidden sm:h-64'>
+                    {blog.image ? (
+                      <img
+                        src={blog.image}
+                        alt={blog.title}
+                        className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-105'
                       />
-                    </svg>
-                    {formatDate(blog.createdAt)}
+                    ) : (
+                      <div className='flex h-full items-center justify-center bg-linear-to-br from-amber-100 to-orange-100'>
+                        <span className='text-6xl'>📝</span>
+                      </div>
+                    )}
+                    <div className='absolute inset-0 bg-linear-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
                   </div>
-                  <h3 className='mb-3 font-serif text-xl font-bold text-stone-800 transition-colors group-hover:text-amber-600 sm:text-2xl'>
-                    {blog.title}
-                  </h3>
-                  <p className='mb-4 text-sm text-gray-600 line-clamp-3'>{truncateContent(blog.content, 150)}</p>
-                  <span className='inline-flex items-center gap-2 text-sm font-semibold text-amber-600'>
-                    Đọc thêm
-                    <svg
-                      className='h-4 w-4 transition-transform group-hover:translate-x-1'
-                      fill='none'
-                      stroke='currentColor'
-                      viewBox='0 0 24 24'
-                    >
-                      <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
-                    </svg>
-                  </span>
-                </div>
-              </Link>
+                  <div className='p-6'>
+                    <div className='mb-3 flex items-center gap-2 text-sm text-gray-500'>
+                      <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <path
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                          strokeWidth='2'
+                          d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+                        />
+                      </svg>
+                      {formatDate(blog.createdAt)}
+                    </div>
+                    <h3 className='mb-3 font-serif text-xl font-bold text-stone-800 transition-colors group-hover:text-amber-600 sm:text-2xl'>
+                      {blog.title}
+                    </h3>
+                    <p className='mb-4 text-sm text-gray-600 line-clamp-3'>{truncateContent(blog.content, 150)}</p>
+                    <span className='inline-flex items-center gap-2 text-sm font-semibold text-amber-600'>
+                      Đọc thêm
+                      <svg
+                        className='h-4 w-4 transition-transform group-hover:translate-x-1'
+                        fill='none'
+                        stroke='currentColor'
+                        viewBox='0 0 24 24'
+                      >
+                        <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
+                      </svg>
+                    </span>
+                  </div>
+                </Link>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         )}
       </section>
 
       {/* CTA Section */}
-      <section className='bg-gradient-to-r from-amber-500 to-orange-500 py-16'>
+      <section className='bg-linear-to-r from-amber-500 to-orange-500 py-16'>
         <div className='mx-auto max-w-4xl px-6 text-center'>
           <h2 className='mb-4 font-serif text-3xl font-bold text-white md:text-4xl'>Muốn thưởng thức món ngon?</h2>
           <p className='mb-8 text-lg text-white/80'>Đặt bàn ngay để trải nghiệm những món ăn tuyệt vời</p>

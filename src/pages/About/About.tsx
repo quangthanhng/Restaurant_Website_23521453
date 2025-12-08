@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import path from '../../constants/path'
+import { FadeIn, StaggerContainer, StaggerItem } from '../../components/Animations'
 
 // Team members data
 const teamMembers = [
@@ -67,10 +68,10 @@ export default function About() {
             backgroundImage: 'url(https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1920&q=80)'
           }}
         >
-          <div className='absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70' />
+          <div className='absolute inset-0 bg-linear-to-b from-black/60 via-black/40 to-black/70' />
         </div>
 
-        <div className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
+        <FadeIn className='relative flex h-full flex-col items-center justify-center px-6 text-center'>
           <span className='mb-4 inline-block rounded-full bg-amber-500/20 px-6 py-2 text-sm font-medium text-amber-300 backdrop-blur'>
             Về chúng tôi
           </span>
@@ -80,7 +81,7 @@ export default function About() {
           <p className='max-w-2xl text-lg leading-relaxed text-white/80'>
             Nơi hội tụ tinh hoa ẩm thực Việt Nam, mang đến những trải nghiệm ẩm thực đáng nhớ nhất
           </p>
-        </div>
+        </FadeIn>
       </section>
 
       {/* Story Section */}
@@ -130,52 +131,53 @@ export default function About() {
       </section>
 
       {/* Stats Section */}
-      <section className='bg-gradient-to-r from-amber-500 to-orange-500 py-16'>
+      <section className='bg-linear-to-r from-amber-500 to-orange-500 py-16'>
         <div className='mx-auto max-w-7xl px-6'>
-          <div className='grid grid-cols-2 gap-8 md:grid-cols-4'>
+          <StaggerContainer className='grid grid-cols-2 gap-8 md:grid-cols-4'>
             {stats.map((stat, index) => (
-              <div key={index} className='text-center'>
-                <div className='mb-2 font-serif text-5xl font-bold text-white'>{stat.value}</div>
-                <div className='text-white/80'>{stat.label}</div>
-              </div>
+              <StaggerItem key={index}>
+                <div className='text-center'>
+                  <div className='mb-2 font-serif text-5xl font-bold text-white'>{stat.value}</div>
+                  <div className='text-white/80'>{stat.label}</div>
+                </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* Features Section */}
       <section className='bg-stone-50 py-20'>
         <div className='mx-auto max-w-7xl px-6'>
-          <div className='mb-16 text-center'>
+          <FadeIn className='mb-16 text-center'>
             <span className='mb-4 inline-block rounded-full bg-amber-100 px-4 py-1 text-sm font-semibold text-amber-700'>
               Tại sao chọn chúng tôi
             </span>
             <h2 className='font-serif text-4xl font-bold text-stone-800'>
               Điều làm nên <span className='text-amber-600'>sự khác biệt</span>
             </h2>
-          </div>
+          </FadeIn>
 
-          <div className='grid gap-8 md:grid-cols-2 lg:grid-cols-4'>
+          <StaggerContainer className='grid gap-8 md:grid-cols-2 lg:grid-cols-4'>
             {features.map((feature, index) => (
-              <div
-                key={index}
-                className='group rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'
-              >
-                <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-amber-100 text-3xl transition-colors group-hover:bg-amber-500'>
-                  {feature.icon}
+              <StaggerItem key={index}>
+                <div className='group rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'>
+                  <div className='mb-4 flex h-16 w-16 items-center justify-center rounded-xl bg-amber-100 text-3xl transition-colors group-hover:bg-amber-500'>
+                    {feature.icon}
+                  </div>
+                  <h3 className='mb-3 text-xl font-bold text-stone-800'>{feature.title}</h3>
+                  <p className='text-stone-600'>{feature.description}</p>
                 </div>
-                <h3 className='mb-3 text-xl font-bold text-stone-800'>{feature.title}</h3>
-                <p className='text-stone-600'>{feature.description}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* Team Section */}
       <section className='py-20'>
         <div className='mx-auto max-w-7xl px-6'>
-          <div className='mb-16 text-center'>
+          <FadeIn className='mb-16 text-center'>
             <span className='mb-4 inline-block rounded-full bg-amber-100 px-4 py-1 text-sm font-semibold text-amber-700'>
               Đội ngũ của chúng tôi
             </span>
@@ -185,30 +187,29 @@ export default function About() {
             <p className='mx-auto mt-4 max-w-2xl text-lg text-stone-600'>
               Những nghệ nhân đứng sau mỗi món ăn, mang đến hương vị tuyệt vời cho bạn
             </p>
-          </div>
+          </FadeIn>
 
-          <div className='grid gap-8 md:grid-cols-3'>
+          <StaggerContainer className='grid gap-8 md:grid-cols-3'>
             {teamMembers.map((member, index) => (
-              <div
-                key={index}
-                className='group overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'
-              >
-                <div className='relative h-80 overflow-hidden'>
-                  <img
-                    src={member.image}
-                    alt={member.name}
-                    className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-110'
-                  />
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
+              <StaggerItem key={index}>
+                <div className='group overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'>
+                  <div className='relative h-80 overflow-hidden'>
+                    <img
+                      src={member.image}
+                      alt={member.name}
+                      className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-110'
+                    />
+                    <div className='absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
+                  </div>
+                  <div className='p-6 text-center'>
+                    <h3 className='mb-1 text-xl font-bold text-stone-800'>{member.name}</h3>
+                    <p className='mb-3 font-medium text-amber-600'>{member.role}</p>
+                    <p className='text-sm text-stone-600'>{member.description}</p>
+                  </div>
                 </div>
-                <div className='p-6 text-center'>
-                  <h3 className='mb-1 text-xl font-bold text-stone-800'>{member.name}</h3>
-                  <p className='mb-3 font-medium text-amber-600'>{member.role}</p>
-                  <p className='text-sm text-stone-600'>{member.description}</p>
-                </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 

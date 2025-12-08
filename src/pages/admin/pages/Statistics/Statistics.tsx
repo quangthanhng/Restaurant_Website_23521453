@@ -6,13 +6,13 @@ import AnimatedNumber from '../../../../components/AnimatedNumber/AnimatedNumber
 
 interface CartItem {
   dishId:
-  | {
-    _id: string
-    name: string
-    price: number
-    image: string
-  }
-  | string
+    | {
+        _id: string
+        name: string
+        price: number
+        image: string
+      }
+    | string
   quantity: number
   _id?: string
 }
@@ -61,7 +61,6 @@ export default function Statistics() {
       return response.data
     }
   })
-
 
   // tablesData query removed - can be added later for table occupancy statistics
 
@@ -289,11 +288,7 @@ export default function Statistics() {
   return (
     <div className='relative min-h-screen space-y-6 p-6 overflow-hidden'>
       {/* Animated background gradient */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className='absolute inset-0 -z-10'
-      >
+      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className='absolute inset-0 -z-10'>
         <motion.div
           animate={{
             background: [
@@ -313,11 +308,7 @@ export default function Statistics() {
       </motion.div>
 
       {/* Header with fade in */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
         <h1 className='text-2xl font-bold text-gray-900'>Tổng quan</h1>
         <p className='text-sm text-gray-500'>Thống kê hoạt động của nhà hàng</p>
       </motion.div>
@@ -333,11 +324,10 @@ export default function Statistics() {
             boxShadow: '0 10px 30px rgba(99, 102, 241, 0.2)',
             borderColor: 'rgb(99, 102, 241)'
           }}
-          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+          className='rounded-xl border border-stone-200 bg-linear-to-br from-stone-50 to-white p-6 transition-all'
         >
           <div className='flex items-center justify-between mb-2'>
             <p className='text-sm text-gray-500'>Tổng doanh thu</p>
-
           </div>
           <div className='mt-2 flex items-baseline gap-2'>
             <span className='text-2xl font-bold text-gray-900'>
@@ -373,7 +363,7 @@ export default function Statistics() {
             boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
             borderColor: 'rgb(59, 130, 246)'
           }}
-          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+          className='rounded-xl border border-stone-200 bg-linear-to-br from-stone-50 to-white p-6 transition-all'
         >
           <div className='flex items-center justify-between mb-2'>
             <p className='text-sm text-gray-500'>Đơn hàng mới</p>
@@ -412,11 +402,10 @@ export default function Statistics() {
             boxShadow: '0 10px 30px rgba(236, 72, 153, 0.2)',
             borderColor: 'rgb(236, 72, 153)'
           }}
-          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+          className='rounded-xl border border-stone-200 bg-linear-to-br from-stone-50 to-white p-6 transition-all'
         >
           <div className='flex items-center justify-between mb-2'>
             <p className='text-sm text-gray-500'>Khách hàng mới</p>
-
           </div>
           <div className='mt-2 flex items-baseline gap-2'>
             <span className='text-2xl font-bold text-gray-900'>
@@ -523,7 +512,7 @@ export default function Statistics() {
                                 delay: 0.6 + index * 0.1,
                                 ease: 'linear'
                               }}
-                              className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent'
+                              className='absolute inset-0 bg-linear-to-r from-transparent via-white/30 to-transparent'
                             />
                           )}
                         </motion.div>
@@ -738,9 +727,7 @@ export default function Statistics() {
                     <span className='truncate text-sm text-gray-600' title={dish.name}>
                       {dish.name}
                     </span>
-                    <span className='ml-auto text-xs font-semibold text-gray-900'>
-                      {dish.percentage.toFixed(1)}%
-                    </span>
+                    <span className='ml-auto text-xs font-semibold text-gray-900'>{dish.percentage.toFixed(1)}%</span>
                   </motion.div>
                 ))}
               </div>

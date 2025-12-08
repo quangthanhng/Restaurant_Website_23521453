@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import blogApi from '../../apis/blog.api'
@@ -42,13 +42,15 @@ export default function BlogDetail() {
 
   const blog = data?.metadata as unknown as Blog
 
-  useEffect(() => {
-    if (allBlogsData && id) {
-      // Get 3 recent blogs excluding current
-      const filtered = allBlogsData.filter((b: Blog) => b._id !== id).slice(0, 3)
-      setRelatedBlogs(filtered)
-    }
+  // Use useMemo instead of useEffect + setState to avoid cascading renders
+  const computedRelatedBlogs = useMemo(() => {
+    if (!allBlogsData || !id) return []
+    return allBlogsData.filter((b: Blog) => b._id !== id).slice(0, 3)
   }, [allBlogsData, id])
+
+  useEffect(() => {
+    setRelatedBlogs(computedRelatedBlogs)
+  }, [computedRelatedBlogs])
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)

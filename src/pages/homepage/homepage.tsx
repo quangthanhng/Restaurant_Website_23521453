@@ -1,8 +1,10 @@
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import dishApi from '../../apis/dish.api'
 import ButtonPrimary from '../../components/ButtonPrimary'
 import { Link } from 'react-router-dom'
 import path from '../../constants/path'
+import { FadeIn, StaggerContainer, StaggerItem } from '../../components/Animations'
 
 // Hero images - high quality Vietnamese food photos
 const heroImages = [
@@ -17,6 +19,9 @@ interface Dish {
   image: string
   price: number
   description?: string
+  bestSeller?: boolean
+  status?: string
+  deleted?: boolean
 }
 
 // Stats data
@@ -82,9 +87,8 @@ export default function Homepage() {
     dishApi.getAllDishes().then((res) => {
       const data = res.data?.metadata || []
       // Lọc tất cả các món có bestSeller = true và status = active
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const bestSellerDishes = (data as any[]).filter(
-        (dish: any) => dish.bestSeller === true && dish.status === 'active' && !dish.deleted
+      const bestSellerDishes = (data as Dish[]).filter(
+        (dish) => dish.bestSeller === true && dish.status === 'active' && !dish.deleted
       )
       // Hiển thị tất cả bestSeller, nếu không có thì lấy 6 món đầu
       setDishes(bestSellerDishes.length > 0 ? bestSellerDishes : (data as Dish[]).slice(0, 6))
@@ -108,7 +112,7 @@ export default function Homepage() {
       {/* ========== HERO SECTION ========== */}
       <section className='relative min-h-screen w-full overflow-hidden pt-[74px]'>
         {/* Background with gradient overlay */}
-        <div className='absolute inset-0 bg-gradient-to-br from-stone-900 via-stone-800 to-amber-900'>
+        <div className='absolute inset-0 bg-linear-to-br from-stone-900 via-stone-800 to-amber-900'>
           <div
             className='absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out'
             style={{
@@ -125,29 +129,49 @@ export default function Homepage() {
         {/* Content */}
         <div className='relative z-10 mx-auto flex min-h-[calc(100vh-74px)] max-w-7xl flex-col items-center justify-center px-6 py-20 text-center'>
           {/* Badge */}
-          <div className='mb-6 inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2 backdrop-blur-sm'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className='mb-6 inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-2 backdrop-blur-sm'
+          >
             <span className='text-amber-400'>✦</span>
             <span className='text-sm font-medium text-amber-200'>Nhà hàng Việt Nam đích thực</span>
             <span className='text-amber-400'>✦</span>
-          </div>
+          </motion.div>
 
           {/* Main Title */}
-          <h1 className='mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl'>
+          <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className='mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl md:text-6xl lg:text-7xl'
+          >
             Trải Nghiệm
             <br />
-            <span className='bg-gradient-to-r from-amber-400 via-amber-500 to-orange-500 bg-clip-text text-transparent'>
+            <span className='bg-linear-to-r from-amber-400 via-amber-500 to-orange-500 bg-clip-text text-transparent'>
               Ẩm Thực Tinh Hoa
             </span>
-          </h1>
+          </motion.h1>
 
           {/* Description */}
-          <p className='mb-10 max-w-2xl text-lg text-stone-300 sm:text-xl'>
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className='mb-10 max-w-2xl text-lg text-stone-300 sm:text-xl'
+          >
             Khám phá hương vị đậm đà của ẩm thực Việt Nam với những món ăn truyền thống được chế biến từ tâm huyết và
             nguyên liệu tươi ngon nhất.
-          </p>
+          </motion.p>
 
           {/* CTA Buttons */}
-          <div className='flex flex-col items-center gap-4 sm:flex-row'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className='flex flex-col items-center gap-4 sm:flex-row'
+          >
             <ButtonPrimary to={path.booking} className='group px-8 py-4 text-lg'>
               <span>Đặt Bàn Ngay</span>
               <svg
@@ -173,7 +197,7 @@ export default function Homepage() {
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
               </svg>
             </Link>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -184,7 +208,7 @@ export default function Homepage() {
 
         <div className='relative mx-auto max-w-7xl px-6'>
           {/* Section Header */}
-          <div className='mb-16 text-center'>
+          <FadeIn className='mb-16 text-center'>
             <span className='mb-4 inline-block rounded-full bg-amber-100 px-4 py-1 text-sm font-semibold text-amber-700'>
               Thực đơn nổi bật
             </span>
@@ -194,56 +218,54 @@ export default function Homepage() {
             <p className='mx-auto max-w-2xl text-lg text-stone-600'>
               Những món ăn đặc sắc nhất của chúng tôi, được khách hàng đánh giá cao và yêu thích
             </p>
-          </div>
+          </FadeIn>
 
           {/* Dishes Grid */}
-          <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
-            {dishes.map((dish, index) => (
-              <div
-                key={dish._id}
-                className='group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl'
-                style={{ animationDelay: `${index * 100}ms` }}
-              >
-                {/* Image */}
-                <div className='relative aspect-[4/3] overflow-hidden'>
-                  <img
-                    src={dish.image}
-                    alt={dish.name}
-                    className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-110'
-                  />
-                  {/* Overlay on hover */}
-                  <div className='absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
-                  {/* Quick view button */}
-                  <Link
-                    to={`/dish/${dish._id}`}
-                    className='absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-10 rounded-full bg-amber-500 px-6 py-2 text-sm font-semibold text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-amber-600'
-                  >
-                    Xem chi tiết
-                  </Link>
-                </div>
+          <StaggerContainer className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+            {dishes.map((dish) => (
+              <StaggerItem key={dish._id}>
+                <div className='group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl'>
+                  {/* Image */}
+                  <div className='relative aspect-4/3 overflow-hidden'>
+                    <img
+                      src={dish.image}
+                      alt={dish.name}
+                      className='h-full w-full object-cover transition-transform duration-500 group-hover:scale-110'
+                    />
+                    {/* Overlay on hover */}
+                    <div className='absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100' />
+                    {/* Quick view button */}
+                    <Link
+                      to={`/dish/${dish._id}`}
+                      className='absolute bottom-4 left-1/2 -translate-x-1/2 translate-y-10 rounded-full bg-amber-500 px-6 py-2 text-sm font-semibold text-white opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100 hover:bg-amber-600'
+                    >
+                      Xem chi tiết
+                    </Link>
+                  </div>
 
-                {/* Content */}
-                <div className='p-6'>
-                  <h3 className='mb-2 text-xl font-bold text-stone-800 transition-colors group-hover:text-amber-600'>
-                    {dish.name}
-                  </h3>
-                  <p className='mb-4 line-clamp-2 text-sm text-stone-500'>
-                    {dish.description || 'Món ăn truyền thống được chế biến từ nguyên liệu tươi ngon'}
-                  </p>
-                  <div className='flex items-center justify-between'>
-                    <span className='text-xl font-bold text-amber-600'>{formatPrice(dish.price)}</span>
-                    <div className='flex items-center gap-1 text-amber-500'>
-                      {[...Array(5)].map((_, i) => (
-                        <svg key={i} className='h-4 w-4 fill-current' viewBox='0 0 20 20'>
-                          <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
-                        </svg>
-                      ))}
+                  {/* Content */}
+                  <div className='p-6'>
+                    <h3 className='mb-2 text-xl font-bold text-stone-800 transition-colors group-hover:text-amber-600'>
+                      {dish.name}
+                    </h3>
+                    <p className='mb-4 line-clamp-2 text-sm text-stone-500'>
+                      {dish.description || 'Món ăn truyền thống được chế biến từ nguyên liệu tươi ngon'}
+                    </p>
+                    <div className='flex items-center justify-between'>
+                      <span className='text-xl font-bold text-amber-600'>{formatPrice(dish.price)}</span>
+                      <div className='flex items-center gap-1 text-amber-500'>
+                        {[...Array(5)].map((_, i) => (
+                          <svg key={i} className='h-4 w-4 fill-current' viewBox='0 0 20 20'>
+                            <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                          </svg>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
 
           {/* View All Button */}
           <div className='mt-12 text-center'>
@@ -276,7 +298,7 @@ export default function Homepage() {
                 <img
                   src='https://images.unsplash.com/photo-1555126634-323283e090fa?w=1920&q=90'
                   alt='About our restaurant'
-                  className='aspect-[4/3] w-full object-cover'
+                  className='aspect-4/3 w-full object-cover'
                 />
                 {/* Floating badge */}
                 <div className='absolute bottom-4 right-4 rounded-2xl bg-amber-500 px-6 py-4 shadow-2xl'>
@@ -326,10 +348,10 @@ export default function Homepage() {
       </section>
 
       {/* ========== WHY CHOOSE US SECTION ========== */}
-      <section className='bg-gradient-to-b from-stone-50 to-white py-20'>
+      <section className='bg-linear-to-b from-stone-50 to-white py-20'>
         <div className='mx-auto max-w-7xl px-6'>
           {/* Section Header */}
-          <div className='mb-16 text-center'>
+          <FadeIn className='mb-16 text-center'>
             <span className='mb-4 inline-block rounded-full bg-amber-100 px-4 py-1 text-sm font-semibold text-amber-700'>
               Tại sao chọn chúng tôi
             </span>
@@ -339,24 +361,23 @@ export default function Homepage() {
             <p className='mx-auto max-w-2xl text-lg text-stone-600'>
               Chúng tôi cam kết mang đến trải nghiệm ẩm thực tuyệt vời nhất cho quý khách
             </p>
-          </div>
+          </FadeIn>
 
           {/* Features Grid */}
-          <div className='grid gap-8 sm:grid-cols-2 lg:grid-cols-4'>
+          <StaggerContainer className='grid gap-8 sm:grid-cols-2 lg:grid-cols-4'>
             {features.map((feature, index) => (
-              <div
-                key={index}
-                className='group rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl'
-              >
-                {/* Icon */}
-                <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-3xl shadow-lg transition-transform duration-300 group-hover:scale-110'>
-                  {feature.icon}
+              <StaggerItem key={index}>
+                <div className='group rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl'>
+                  {/* Icon */}
+                  <div className='mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-amber-400 to-orange-500 text-3xl shadow-lg transition-transform duration-300 group-hover:scale-110'>
+                    {feature.icon}
+                  </div>
+                  <h3 className='mb-3 text-xl font-bold text-stone-800'>{feature.title}</h3>
+                  <p className='text-stone-600'>{feature.description}</p>
                 </div>
-                <h3 className='mb-3 text-xl font-bold text-stone-800'>{feature.title}</h3>
-                <p className='text-stone-600'>{feature.description}</p>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
@@ -364,54 +385,53 @@ export default function Homepage() {
       <section className='bg-amber-50 py-20'>
         <div className='mx-auto max-w-7xl px-6'>
           {/* Section Header */}
-          <div className='mb-16 text-center'>
+          <FadeIn className='mb-16 text-center'>
             <span className='mb-4 inline-block rounded-full bg-amber-100 px-4 py-1 text-sm font-semibold text-amber-700'>
               Đánh giá khách hàng
             </span>
             <h2 className='mb-4 text-3xl font-bold text-stone-800 sm:text-4xl md:text-5xl'>
               Khách Hàng <span className='text-amber-600'>Nói Gì</span>
             </h2>
-          </div>
+          </FadeIn>
 
           {/* Testimonials Grid */}
-          <div className='grid gap-8 md:grid-cols-3'>
+          <StaggerContainer className='grid gap-8 md:grid-cols-3'>
             {testimonials.map((testimonial, index) => (
-              <div
-                key={index}
-                className='rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'
-              >
-                {/* Stars */}
-                <div className='mb-4 flex gap-1'>
-                  {[...Array(testimonial.rating)].map((_, i) => (
-                    <svg key={i} className='h-5 w-5 fill-amber-400' viewBox='0 0 20 20'>
-                      <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
-                    </svg>
-                  ))}
-                </div>
+              <StaggerItem key={index}>
+                <div className='rounded-2xl bg-white p-8 shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-xl'>
+                  {/* Stars */}
+                  <div className='mb-4 flex gap-1'>
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <svg key={i} className='h-5 w-5 fill-amber-400' viewBox='0 0 20 20'>
+                        <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                      </svg>
+                    ))}
+                  </div>
 
-                {/* Quote */}
-                <p className='mb-6 text-lg italic text-stone-600'>"{testimonial.comment}"</p>
+                  {/* Quote */}
+                  <p className='mb-6 text-lg italic text-stone-600'>"{testimonial.comment}"</p>
 
-                {/* Author */}
-                <div className='flex items-center gap-4'>
-                  <img
-                    src={testimonial.avatar}
-                    alt={testimonial.name}
-                    className='h-12 w-12 rounded-full object-cover'
-                  />
-                  <div>
-                    <div className='font-semibold text-stone-800'>{testimonial.name}</div>
-                    <div className='text-sm text-stone-500'>Khách hàng thân thiết</div>
+                  {/* Author */}
+                  <div className='flex items-center gap-4'>
+                    <img
+                      src={testimonial.avatar}
+                      alt={testimonial.name}
+                      className='h-12 w-12 rounded-full object-cover'
+                    />
+                    <div>
+                      <div className='font-semibold text-stone-800'>{testimonial.name}</div>
+                      <div className='text-sm text-stone-500'>Khách hàng thân thiết</div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </StaggerItem>
             ))}
-          </div>
+          </StaggerContainer>
         </div>
       </section>
 
       {/* ========== CTA SECTION ========== */}
-      <section className='relative overflow-hidden bg-gradient-to-r from-amber-600 via-amber-500 to-orange-500 py-20'>
+      <section className='relative overflow-hidden bg-linear-to-r from-amber-600 via-amber-500 to-orange-500 py-20'>
         {/* Background decoration */}
         <div className='absolute inset-0 opacity-20'>
           <svg className='h-full w-full' viewBox='0 0 100 100' preserveAspectRatio='none'>

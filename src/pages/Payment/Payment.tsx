@@ -141,7 +141,7 @@ export default function Payment() {
       // Sử dụng updateTable thay vì changeStatus vì changeStatus yêu cầu admin
       if (bookingData.tableId) {
         try {
-          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as any)
+          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as { status: string })
           console.log('Table status updated to reserved')
         } catch (tableErr) {
           console.error('Error updating table status:', tableErr)
@@ -207,7 +207,7 @@ export default function Payment() {
       // Sử dụng updateTable thay vì changeStatus vì changeStatus yêu cầu admin
       if (bookingData.tableId) {
         try {
-          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as any)
+          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as { status: string })
           console.log('Table status updated to reserved')
         } catch (tableErr) {
           console.error('Error updating table status:', tableErr)

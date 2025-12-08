@@ -65,31 +65,32 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   } = useForm<ProductFormData>({
     defaultValues: product
       ? {
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        discount: product.discount || 0,
-        image: product.image,
-        category: getCategory(),
-        status: product.status,
-        rating: product.rating,
-        bestSeller: product.bestSeller,
-        prepareTime: product.prepareTime !== undefined && product.prepareTime !== null ? String(product.prepareTime) : '',
-        ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(', ') : ''
-      }
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          discount: product.discount || 0,
+          image: product.image,
+          category: getCategory(),
+          status: product.status,
+          rating: product.rating,
+          bestSeller: product.bestSeller,
+          prepareTime:
+            product.prepareTime !== undefined && product.prepareTime !== null ? String(product.prepareTime) : '',
+          ingredients: Array.isArray(product.ingredients) ? product.ingredients.join(', ') : ''
+        }
       : {
-        name: '',
-        description: '',
-        price: 0,
-        discount: 0,
-        image: '',
-        category: '',
-        status: 'active',
-        rating: 4.5,
-        bestSeller: false,
-        prepareTime: '',
-        ingredients: ''
-      }
+          name: '',
+          description: '',
+          price: 0,
+          discount: 0,
+          image: '',
+          category: '',
+          status: 'active',
+          rating: 4.5,
+          bestSeller: false,
+          prepareTime: '',
+          ingredients: ''
+        }
   })
 
   // Tự động tính finalPrice khi price hoặc discount thay đổi
@@ -99,7 +100,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
   const mutation = useMutation({
     mutationFn: async (data: ProductFormData) => {
       // Tìm object category từ mảng categories dựa vào id đã chọn
-      const selectedCategory = categories.find(cat => cat._id === data.category)
+      const selectedCategory = categories.find((cat) => cat._id === data.category)
       const formData = new FormData()
       formData.append('name', data.name)
       formData.append('description', data.description)
@@ -108,8 +109,14 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       formData.append('status', data.status)
       formData.append('rating', data.rating !== undefined ? String(data.rating) : '4.5')
       formData.append('bestSeller', String(data.bestSeller))
-      formData.append('prepareTime', data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : '')
-      formData.append('ingredients', data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : '')
+      formData.append(
+        'prepareTime',
+        data.prepareTime !== undefined && data.prepareTime !== null ? String(data.prepareTime) : ''
+      )
+      formData.append(
+        'ingredients',
+        data.ingredients !== undefined && data.ingredients !== null ? String(data.ingredients) : ''
+      )
       if (selectedCategory) {
         formData.append('categoryId', selectedCategory._id)
       }
@@ -151,9 +158,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
       <div className='w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-gray-50 border border-gray-200 shadow-xl'>
         {/* Header */}
         <div className='flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0'>
-          <h2 className='text-xl font-semibold text-amber-600'>
-            {isEditing ? 'Chỉnh sửa món ăn' : 'Thêm món ăn mới'}
-          </h2>
+          <h2 className='text-xl font-semibold text-amber-600'>{isEditing ? 'Chỉnh sửa món ăn' : 'Thêm món ăn mới'}</h2>
           <button
             onClick={onClose}
             className='rounded-lg p-2 text-gray-500 transition-colors hover:bg-stone-50 hover:text-gray-900'
@@ -175,10 +180,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               <input
                 type='text'
                 {...register('name', { required: 'Vui lòng nhập tên món ăn' })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.name
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.name
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='Nhập tên món ăn'
               />
               {errors.name && <p className='mt-1 text-sm text-amber-400'>{errors.name.message}</p>}
@@ -196,15 +202,15 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   min: { value: 0, message: 'Giá phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.price
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.price
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='0'
               />
               {errors.price && <p className='mt-1 text-sm text-amber-400'>{errors.price.message}</p>}
             </div>
-
 
             {/* Discount */}
             <div>
@@ -216,10 +222,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   max: { value: 100, message: 'Giảm giá phải <= 100' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.discount
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.discount
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='0'
               />
               {errors.discount && <p className='mt-1 text-sm text-amber-400'>{errors.discount.message}</p>}
@@ -238,9 +245,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
             {/* Rating */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-gray-600'>
-                Đánh giá (1-5)
-              </label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Đánh giá (1-5)</label>
               <input
                 type='number'
                 step='0.1'
@@ -251,10 +256,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   max: { value: 5, message: 'Đánh giá tối đa là 5' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.rating
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.rating
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='4.5'
               />
               {errors.rating && <p className='mt-1 text-sm text-amber-400'>{errors.rating.message}</p>}
@@ -268,27 +274,27 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               <input
                 type='text'
                 {...register('ingredients')}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.ingredients
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.ingredients
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='Bánh phở, Thịt bò, Hành, Nước dùng'
               />
             </div>
 
             {/* Prepare Time */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-gray-600'>
-                Thời gian chuẩn bị (phút)
-              </label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Thời gian chuẩn bị (phút)</label>
               <input
                 type='number'
                 min={1}
                 {...register('prepareTime', { valueAsNumber: true })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.prepareTime
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.prepareTime
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='12'
               />
             </div>
@@ -300,10 +306,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
               </label>
               <select
                 {...register('category', { required: 'Vui lòng chọn danh mục' })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 focus:outline-none focus:ring-2 ${errors.category
-                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 focus:outline-none focus:ring-2 ${
+                  errors.category
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 disabled={isCategoriesLoading}
               >
                 <option value=''>{isCategoriesLoading ? 'Đang tải...' : 'Chọn danh mục'}</option>
@@ -326,20 +333,22 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 <button
                   type='button'
                   onClick={() => setUploadMode('file')}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'file'
-                    ? 'bg-amber-500 text-neutral-900'
-                    : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
-                    }`}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    uploadMode === 'file'
+                      ? 'bg-amber-500 text-neutral-900'
+                      : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
+                  }`}
                 >
                   Upload từ máy
                 </button>
                 <button
                   type='button'
                   onClick={() => setUploadMode('url')}
-                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'url'
-                    ? 'bg-amber-500 text-neutral-900'
-                    : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
-                    }`}
+                  className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${
+                    uploadMode === 'url'
+                      ? 'bg-amber-500 text-neutral-900'
+                      : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
+                  }`}
                 >
                   Nhập URL
                 </button>
@@ -354,7 +363,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                         alt='Preview'
                         className='h-28 w-28 rounded-lg border border-stone-200 object-cover'
                         onError={(e) => {
-                          ; (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112?text=Lỗi+ảnh'
+                          ;(e.target as HTMLImageElement).src = 'https://via.placeholder.com/112?text=Lỗi+ảnh'
                         }}
                       />
                       <button
@@ -458,10 +467,11 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                           setImagePreview(url)
                           setValue('image', url)
                         }}
-                        className={`w-full rounded-lg border px-4 py-2 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.image
-                          ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
-                          : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                          }`}
+                        className={`w-full rounded-lg border px-4 py-2 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                          errors.image
+                            ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                            : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                        }`}
                         placeholder='https://example.com/image.jpg'
                       />
                       <input type='hidden' {...register('image', { required: 'Vui lòng nhập URL ảnh' })} />

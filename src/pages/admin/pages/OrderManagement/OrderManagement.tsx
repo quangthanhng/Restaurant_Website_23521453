@@ -149,7 +149,7 @@ export default function OrderManagement() {
     const handlePaymentSuccess = (notification: OrderNotification) => {
       console.log('💰 Payment success notification:', notification)
       // Lấy order từ notification.data.order (cấu trúc backend)
-      const orderData = (notification.data as any)?.order || notification.data
+      const orderData = (notification.data as { order?: unknown })?.order || notification.data
       // Show popup
       setNewOrderPopup({ show: true, order: orderData })
       // Play notification sound for 5 seconds
@@ -162,7 +162,7 @@ export default function OrderManagement() {
     const handleNewOrder = (notification: OrderNotification) => {
       console.log('📦 New order notification:', notification)
       // Lấy order từ notification.data (có thể là order trực tiếp hoặc trong .order)
-      const orderData = (notification.data as any)?.order || notification.data
+      const orderData = (notification.data as { order?: unknown })?.order || notification.data
       // Show popup
       setNewOrderPopup({ show: true, order: orderData })
       // Play notification sound for 5 seconds
@@ -302,13 +302,29 @@ export default function OrderManagement() {
   const getDeliveryOptionsBadge = (deliveryOptions?: string) => {
     switch (deliveryOptions) {
       case 'dine-in':
-        return { bg: 'bg-gradient-to-r from-purple-100 to-violet-100 border border-purple-200', text: 'text-purple-700', label: 'Tại quán' }
+        return {
+          bg: 'bg-gradient-to-r from-purple-100 to-violet-100 border border-purple-200',
+          text: 'text-purple-700',
+          label: 'Tại quán'
+        }
       case 'delivery':
-        return { bg: 'bg-gradient-to-r from-blue-100 to-sky-100 border border-blue-200', text: 'text-blue-700', label: 'Giao hàng' }
+        return {
+          bg: 'bg-gradient-to-r from-blue-100 to-sky-100 border border-blue-200',
+          text: 'text-blue-700',
+          label: 'Giao hàng'
+        }
       case 'pickup':
-        return { bg: 'bg-gradient-to-r from-orange-100 to-amber-100 border border-orange-200', text: 'text-orange-700', label: 'Tự lấy' }
+        return {
+          bg: 'bg-gradient-to-r from-orange-100 to-amber-100 border border-orange-200',
+          text: 'text-orange-700',
+          label: 'Tự lấy'
+        }
       default:
-        return { bg: 'bg-gradient-to-r from-gray-100 to-slate-100 border border-gray-200', text: 'text-gray-600', label: 'Không xác định' }
+        return {
+          bg: 'bg-gradient-to-r from-gray-100 to-slate-100 border border-gray-200',
+          text: 'text-gray-600',
+          label: 'Không xác định'
+        }
     }
   }
 
@@ -317,13 +333,29 @@ export default function OrderManagement() {
     switch (typeOfPayment) {
       case 'cod':
       case 'cash':
-        return { bg: 'bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200', text: 'text-emerald-700', label: 'COD' }
+        return {
+          bg: 'bg-gradient-to-r from-emerald-100 to-green-100 border border-emerald-200',
+          text: 'text-emerald-700',
+          label: 'COD'
+        }
       case 'momo':
-        return { bg: 'bg-gradient-to-r from-pink-100 to-rose-100 border border-pink-200', text: 'text-pink-700', label: 'MoMo' }
+        return {
+          bg: 'bg-gradient-to-r from-pink-100 to-rose-100 border border-pink-200',
+          text: 'text-pink-700',
+          label: 'MoMo'
+        }
       case 'card':
-        return { bg: 'bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200', text: 'text-blue-700', label: 'Thẻ' }
+        return {
+          bg: 'bg-gradient-to-r from-blue-100 to-indigo-100 border border-blue-200',
+          text: 'text-blue-700',
+          label: 'Thẻ'
+        }
       default:
-        return { bg: 'bg-gradient-to-r from-gray-100 to-slate-100 border border-gray-200', text: 'text-gray-600', label: 'Chưa chọn' }
+        return {
+          bg: 'bg-gradient-to-r from-gray-100 to-slate-100 border border-gray-200',
+          text: 'text-gray-600',
+          label: 'Chưa chọn'
+        }
     }
   }
 
@@ -716,7 +748,9 @@ export default function OrderManagement() {
                             </svg>
                           </div>
                           <div className='min-w-0 flex-1'>
-                            <p className='truncate text-sm text-gray-900'>{(order.userId as User)?.username || 'N/A'}</p>
+                            <p className='truncate text-sm text-gray-900'>
+                              {(order.userId as User)?.username || 'N/A'}
+                            </p>
                             <p className='truncate text-xs text-gray-500'>
                               📞 {(order.userId as User)?.phoneNumber || 'Không có SĐT'}
                             </p>
@@ -740,10 +774,7 @@ export default function OrderManagement() {
                         ) : order.deliveryOptions === 'delivery' && order.deleveryAddress ? (
                           <div className='flex items-center gap-1'>
                             <span className='text-amber-500'>📍</span>
-                            <span
-                              className='truncate text-xs text-gray-600 max-w-[80px]'
-                              title={order.deleveryAddress}
-                            >
+                            <span className='truncate text-xs text-gray-600 max-w-[80px]' title={order.deleveryAddress}>
                               {order.deleveryAddress}
                             </span>
                           </div>
@@ -1003,10 +1034,11 @@ export default function OrderManagement() {
                   <button
                     key={index}
                     onClick={() => handlePageChange(page)}
-                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === currentPage
-                      ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
-                      : 'border border-stone-200 text-gray-500 hover:border-amber-500 hover:bg-stone-50 hover:text-amber-600'
-                      }`}
+                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
+                      page === currentPage
+                        ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
+                        : 'border border-stone-200 text-gray-500 hover:border-amber-500 hover:bg-stone-50 hover:text-amber-600'
+                    }`}
                   >
                     {page}
                   </button>

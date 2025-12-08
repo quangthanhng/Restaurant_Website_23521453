@@ -31,7 +31,8 @@ export default function Register() {
   })
 
   const onSubmit = handleSubmit((data) => {
-    const { confirmPassword, ...registerData } = data
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { confirmPassword: _confirmPassword, ...registerData } = data
     registerMutation.mutate(registerData, {
       onSuccess: () => {
         success('Đăng ký thành công! Vui lòng đăng nhập.')

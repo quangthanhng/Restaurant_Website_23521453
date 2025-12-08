@@ -32,33 +32,31 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
   className = ''
 }) => {
   return (
-    <div
-      className={`flex gap-2 items-center ${className} flex-col xs:flex-row w-full xs:w-auto`}
-    >
+    <div className={`flex gap-2 items-center ${className} flex-col xs:flex-row w-full xs:w-auto`}>
       {showEdit && (
         <button
-          type="button"
+          type='button'
           onClick={onEdit}
-          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
+          className='rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto'
         >
           {editLabel}
         </button>
       )}
       {showDelete && (
         <button
-          type="button"
+          type='button'
           onClick={onDelete}
           disabled={disabledDelete}
-          className="rounded-lg border border-amber-500 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50 w-full xs:w-auto"
+          className='rounded-lg border border-amber-500 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50 w-full xs:w-auto'
         >
           {deleteLabel}
         </button>
       )}
       {showAdd && (
         <button
-          type="button"
+          type='button'
           onClick={onAdd}
-          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
+          className='rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto'
         >
           {addLabel}
         </button>

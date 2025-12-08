@@ -7,18 +7,11 @@ export default function NotFound() {
       {/* 404 Display */}
       <div className='flex items-center justify-center gap-2 md:gap-4'>
         {/* Number 4 */}
-        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>
-          4
-        </span>
+        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>4</span>
 
         {/* Broken Wine Glass SVG */}
         <div className='relative h-[120px] w-20 md:h-[200px] md:w-[130px] lg:h-[280px] lg:w-[180px]'>
-          <svg
-            viewBox='0 0 100 150'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            className='h-full w-full'
-          >
+          <svg viewBox='0 0 100 150' fill='none' xmlns='http://www.w3.org/2000/svg' className='h-full w-full'>
             {/* Glass bowl with cracks */}
             <path
               d='M25 10 C25 10, 20 60, 35 80 C40 87, 45 90, 50 90 C55 90, 60 87, 65 80 C80 60, 75 10, 75 10'
@@ -53,13 +46,7 @@ export default function NotFound() {
               strokeLinecap='round'
               strokeLinejoin='round'
             />
-            <path
-              d='M55 18 L52 28'
-              stroke='#E6C2A1'
-              strokeWidth='1.5'
-              fill='none'
-              strokeLinecap='round'
-            />
+            <path d='M55 18 L52 28' stroke='#E6C2A1' strokeWidth='1.5' fill='none' strokeLinecap='round' />
 
             {/* Broken pieces floating */}
             <path
@@ -96,30 +83,15 @@ export default function NotFound() {
             />
 
             {/* Stem */}
-            <path
-              d='M50 90 L50 125'
-              stroke='#E6C2A1'
-              strokeWidth='2'
-              strokeLinecap='round'
-            />
+            <path d='M50 90 L50 125' stroke='#E6C2A1' strokeWidth='2' strokeLinecap='round' />
 
             {/* Base */}
-            <ellipse
-              cx='50'
-              cy='130'
-              rx='20'
-              ry='5'
-              stroke='#E6C2A1'
-              strokeWidth='2'
-              fill='none'
-            />
+            <ellipse cx='50' cy='130' rx='20' ry='5' stroke='#E6C2A1' strokeWidth='2' fill='none' />
           </svg>
         </div>
 
         {/* Number 4 */}
-        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>
-          4
-        </span>
+        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>4</span>
       </div>
 
       {/* Message */}
@@ -129,9 +101,7 @@ export default function NotFound() {
 
       {/* Back to Home Button */}
       <div className='mt-8 md:mt-10'>
-        <ButtonPrimary to={path.home}>
-          Back To Home
-        </ButtonPrimary>
+        <ButtonPrimary to={path.home}>Back To Home</ButtonPrimary>
       </div>
     </div>
   )
