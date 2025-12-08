@@ -11,7 +11,7 @@ import DeleteConfirmModal from '../../../../components/DeleteConfirmModal/Delete
 // Interface for new order notification popup
 interface NewOrderPopup {
   show: boolean
-  order: OrderNotification['data'] | null
+  order: Order | null
 }
 
 export default function OrderManagement() {
@@ -149,7 +149,7 @@ export default function OrderManagement() {
     const handlePaymentSuccess = (notification: OrderNotification) => {
       console.log('💰 Payment success notification:', notification)
       // Lấy order từ notification.data.order (cấu trúc backend)
-      const orderData = (notification.data as { order?: unknown })?.order || notification.data
+      const orderData = ((notification.data as { order?: unknown })?.order || notification.data) as Order
       // Show popup
       setNewOrderPopup({ show: true, order: orderData })
       // Play notification sound for 5 seconds
@@ -162,7 +162,7 @@ export default function OrderManagement() {
     const handleNewOrder = (notification: OrderNotification) => {
       console.log('📦 New order notification:', notification)
       // Lấy order từ notification.data (có thể là order trực tiếp hoặc trong .order)
-      const orderData = (notification.data as { order?: unknown })?.order || notification.data
+      const orderData = ((notification.data as { order?: unknown })?.order || notification.data) as Order
       // Show popup
       setNewOrderPopup({ show: true, order: orderData })
       // Play notification sound for 5 seconds
@@ -1034,11 +1034,10 @@ export default function OrderManagement() {
                   <button
                     key={index}
                     onClick={() => handlePageChange(page)}
-                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
-                      page === currentPage
+                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === currentPage
                         ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
                         : 'border border-stone-200 text-gray-500 hover:border-amber-500 hover:bg-stone-50 hover:text-amber-600'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -1386,7 +1385,7 @@ export default function OrderManagement() {
                       </div>
                       <span className='text-sm font-medium text-gray-900'>
                         {new Intl.NumberFormat('vi-VN').format(
-                          (item.price || item.dishId?.price || 0) * (item.quantity || 1)
+                          (item.dishId?.price || 0) * (item.quantity || 1)
                         )}{' '}
                         đ
                       </span>
