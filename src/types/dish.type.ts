@@ -57,6 +57,7 @@ export interface DishQueryParams {
   limit?: number
   category?: string
   status?: 'active' | 'inactive' | ''
+  keyword?: string
 }
 
 // Error response

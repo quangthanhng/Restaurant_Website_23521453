@@ -17,10 +17,17 @@ export interface ContactListResponse {
   metadata: Contact[]
 }
 
+export interface CreateContactRequest {
+  name: string
+  email: string
+  message: string
+}
+
 const contactApi = {
   getContacts: () => http.get<ContactListResponse>('/contacts'),
+  createContact: (data: CreateContactRequest) => http.post('/contacts/create', data),
   updateContactStatus: (id: string, data: { status: string }) => http.patch(`/contacts/edit/${id}`, data),
-  deleteContact: (id: string) => http.delete('/contacts/delete', { data: { id } })
+  deleteContact: (id: string) => http.delete(`/contacts/delete/${id}`)
 }
 
 export default contactApi

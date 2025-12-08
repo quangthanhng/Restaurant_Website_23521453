@@ -21,17 +21,17 @@ export default function TableForm({ table, onClose }: TableFormProps) {
   } = useForm<TableFormData>({
     defaultValues: table
       ? {
-        tableNumber: table.tableNumber,
-        maximumCapacity: table.maximumCapacity,
-        status: table.status,
-        position: table.position || ''
-      }
+          tableNumber: table.tableNumber,
+          maximumCapacity: table.maximumCapacity,
+          status: table.status,
+          position: table.position || ''
+        }
       : {
-        tableNumber: 1,
-        maximumCapacity: 4,
-        status: 'available',
-        position: ''
-      }
+          tableNumber: 1,
+          maximumCapacity: 4,
+          status: 'available',
+          position: ''
+        }
   })
 
   const mutation = useMutation({
@@ -80,15 +80,13 @@ export default function TableForm({ table, onClose }: TableFormProps) {
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70'>
-      <div className='w-full max-w-lg rounded-xl border border-neutral-800 bg-neutral-900 shadow-xl'>
+      <div className='w-full max-w-lg rounded-xl border border-gray-200 bg-gray-50 shadow-xl'>
         {/* Header */}
-        <div className='flex items-center justify-between border-b border-neutral-800 px-6 py-4'>
-          <h2 className='text-xl font-semibold text-savoria-gold'>
-            {isEditing ? 'Chỉnh sửa bàn' : 'Thêm bàn mới'}
-          </h2>
+        <div className='flex items-center justify-between border-b border-gray-200 px-6 py-4'>
+          <h2 className='text-xl font-semibold text-amber-600'>{isEditing ? 'Chỉnh sửa bàn' : 'Thêm bàn mới'}</h2>
           <button
             onClick={onClose}
-            className='rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-amber-50'
+            className='rounded-lg p-2 text-gray-500 transition-colors hover:bg-stone-50 hover:text-gray-900'
           >
             <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
@@ -101,8 +99,8 @@ export default function TableForm({ table, onClose }: TableFormProps) {
           <div className='space-y-5'>
             {/* Table Number */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Số bàn <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Số bàn <span className='text-amber-400'>*</span>
               </label>
               <input
                 type='number'
@@ -111,19 +109,20 @@ export default function TableForm({ table, onClose }: TableFormProps) {
                   min: { value: 1, message: 'Số bàn phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.tableNumber
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.tableNumber
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='Nhập số bàn'
               />
-              {errors.tableNumber && <p className='mt-1 text-sm text-red-400'>{errors.tableNumber.message}</p>}
+              {errors.tableNumber && <p className='mt-1 text-sm text-amber-400'>{errors.tableNumber.message}</p>}
             </div>
 
             {/* Maximum Capacity */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Sức chứa tối đa <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Sức chứa tối đa <span className='text-amber-400'>*</span>
               </label>
               <input
                 type='number'
@@ -132,34 +131,35 @@ export default function TableForm({ table, onClose }: TableFormProps) {
                   min: { value: 1, message: 'Sức chứa phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.maximumCapacity
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
-                  }`}
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
+                  errors.maximumCapacity
+                    ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                    : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
+                }`}
                 placeholder='Nhập sức chứa tối đa'
               />
               {errors.maximumCapacity && (
-                <p className='mt-1 text-sm text-red-400'>{errors.maximumCapacity.message}</p>
+                <p className='mt-1 text-sm text-amber-400'>{errors.maximumCapacity.message}</p>
               )}
             </div>
 
             {/* Position */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>Vị trí</label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Vị trí</label>
               <input
                 type='text'
                 {...register('position')}
-                className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 placeholder:text-neutral-500 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
+                className='w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
                 placeholder='VD: Tầng 1, Góc cửa sổ...'
               />
             </div>
 
             {/* Status */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>Trạng thái</label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Trạng thái</label>
               <select
                 {...register('status')}
-                className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
+                className='w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
               >
                 <option value='available'>Trống</option>
                 <option value='occupied'>Đang sử dụng</option>
@@ -169,18 +169,18 @@ export default function TableForm({ table, onClose }: TableFormProps) {
           </div>
 
           {/* Actions */}
-          <div className='mt-6 flex items-center justify-end gap-3 border-t border-neutral-800 pt-6'>
+          <div className='mt-6 flex items-center justify-end gap-3 border-t border-gray-200 pt-6'>
             <button
               type='button'
               onClick={onClose}
-              className='rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-amber-50'
+              className='rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-stone-50 hover:text-gray-900'
             >
               Hủy
             </button>
             <button
               type='submit'
               disabled={mutation.isPending}
-              className='rounded-lg bg-savoria-gold px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 disabled:opacity-50'
+              className='rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 disabled:opacity-50'
             >
               {mutation.isPending ? 'Đang xử lý...' : isEditing ? 'Cập nhật' : 'Thêm mới'}
             </button>

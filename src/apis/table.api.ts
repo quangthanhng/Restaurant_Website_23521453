@@ -22,9 +22,9 @@ const tableApi = {
     return http.delete<TableResponse>(`/tables/delete/${id}`)
   },
 
-  // Thay đổi trạng thái bàn
+  // Thay đổi trạng thái bàn - thử gọi với body nếu path param không hoạt động
   changeStatus: (id: string, status: 'available' | 'occupied' | 'reserved') => {
-    return http.patch<TableResponse>(`/tables/change-status/${id}/${status}`)
+    return http.patch<TableResponse>(`/tables/change-status/${id}`, { status })
   }
 }
 

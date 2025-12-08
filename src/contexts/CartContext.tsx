@@ -41,6 +41,14 @@ function CartProvider({ children }: { children: ReactNode }) {
     try {
       const response = await cartApi.getCart()
       const cartData = response.data.metadata
+
+      // Nếu cart có status 'cleared', coi như không có cart
+      if (cartData.status === 'cleared') {
+        setCart(null)
+        setCartItems([])
+        return
+      }
+
       setCart(cartData)
       const localItems = cartData.items.map(convertApiCartItemToLocal)
       setCartItems(localItems)
@@ -76,7 +84,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     const previousCart = cart
 
     // Optimistic update: cập nhật UI ngay lập tức
-    const existingItemIndex = cartItems.findIndex(item => item.dish._id === dish._id)
+    const existingItemIndex = cartItems.findIndex((item) => item.dish._id === dish._id)
 
     if (existingItemIndex >= 0) {
       // Món đã có trong giỏ -> tăng số lượng
@@ -122,7 +130,7 @@ function CartProvider({ children }: { children: ReactNode }) {
 
   // Xóa món khỏi giỏ hàng với Optimistic Update
   const removeFromCart = async (dishId: string) => {
-    const currentItem = cartItems.find(item => item.dish._id === dishId)
+    const currentItem = cartItems.find((item) => item.dish._id === dishId)
     if (!currentItem) {
       console.error('Item not found in cart')
       return
@@ -133,7 +141,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     const previousCart = cart
 
     // Optimistic update: xóa ngay khỏi UI
-    const newItems = cartItems.filter(item => item.dish._id !== dishId)
+    const newItems = cartItems.filter((item) => item.dish._id !== dishId)
     setCartItems(newItems)
 
     // Cập nhật tổng tiền local
@@ -142,15 +150,12 @@ function CartProvider({ children }: { children: ReactNode }) {
       setCart({
         ...cart,
         totalPrice: cart.totalPrice - removedAmount,
-        items: cart.items.filter(item => item.dishId._id !== dishId)
+        items: cart.items.filter((item) => item.dishId._id !== dishId)
       })
     }
 
     try {
-      await cartApi.changeQuantity({
-        dishId,
-        quantity: currentItem.quantity
-      })
+      await cartApi.removeFromCart({ dishId })
       // Sync với server
       await fetchCartInternal()
     } catch (error) {
@@ -164,7 +169,7 @@ function CartProvider({ children }: { children: ReactNode }) {
 
   // Cập nhật số lượng với Optimistic Update
   const updateQuantity = async (dishId: string, newQuantity: number) => {
-    const currentItem = cartItems.find(item => item.dish._id === dishId)
+    const currentItem = cartItems.find((item) => item.dish._id === dishId)
     if (!currentItem) {
       console.error('Item not found in cart')
       return
@@ -185,11 +190,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     const previousCart = cart
 
     // Optimistic update: cập nhật số lượng ngay
-    const newItems = cartItems.map(item =>
-      item.dish._id === dishId
-        ? { ...item, quantity: newQuantity }
-        : item
-    )
+    const newItems = cartItems.map((item) => (item.dish._id === dishId ? { ...item, quantity: newQuantity } : item))
     setCartItems(newItems)
 
     // Cập nhật tổng tiền local
@@ -202,17 +203,11 @@ function CartProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      if (delta > 0) {
-        await cartApi.addToCart({
-          dishId,
-          quantity: delta
-        })
-      } else {
-        await cartApi.changeQuantity({
-          dishId,
-          quantity: Math.abs(delta)
-        })
-      }
+      // Gọi API change với số lượng mới
+      await cartApi.changeQuantity({
+        dishId,
+        quantity: newQuantity
+      })
       // Sync với server
       await fetchCartInternal()
     } catch (error) {
@@ -256,7 +251,7 @@ function CartProvider({ children }: { children: ReactNode }) {
     const calculatedTotal = cartItems.reduce((total, item) => {
       const price = item.dish?.finalPrice || item.dish?.price || 0
       const quantity = item.quantity || 0
-      return total + (price * quantity)
+      return total + price * quantity
     }, 0)
 
     // Nếu có cart.totalPrice và hợp lệ, so sánh để debug

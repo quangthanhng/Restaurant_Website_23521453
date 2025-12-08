@@ -76,13 +76,13 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
       onClick={onClose}
     >
       <div
-        className='relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-neutral-800 bg-neutral-900 shadow-2xl'
+        className='relative max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border border-gray-200 bg-gray-50 shadow-2xl'
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
           onClick={onClose}
-          className='absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-neutral-950/80 text-white backdrop-blur-sm transition-all hover:bg-savoria-gold hover:text-neutral-900'
+          className='absolute right-4 top-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/80 text-gray-900 backdrop-blur-sm transition-all hover:bg-amber-500 hover:text-neutral-900'
         >
           <svg className='h-6 w-6' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
             <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
@@ -90,23 +90,23 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
         </button>
 
         {/* Image */}
-        <div className='relative h-96 w-full overflow-hidden bg-neutral-800'>
+        <div className='relative h-96 w-full overflow-hidden bg-gray-100'>
           <img
             src={dish.image || 'https://via.placeholder.com/800x600'}
             alt={dish.name}
             className='h-full w-full object-cover'
           />
-          <div className='absolute inset-0 bg-linear-to-t from-neutral-900 via-transparent to-transparent' />
+          <div className='absolute inset-0 bg-linear-to-t from-gray-50 via-transparent to-transparent' />
 
           {/* Badges */}
           <div className='absolute bottom-6 left-6 flex gap-2'>
             {dish.bestSeller && (
-              <span className='rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-white shadow-lg'>
+              <span className='rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg'>
                 ⭐ Best Seller
               </span>
             )}
             {dish.discount > 0 && (
-              <span className='rounded-full bg-red-500 px-4 py-2 text-sm font-bold text-white shadow-lg'>
+              <span className='rounded-full bg-amber-500 px-4 py-2 text-sm font-bold text-gray-900 shadow-lg'>
                 🔥 {dish.discount}% OFF
               </span>
             )}
@@ -116,7 +116,7 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
         {/* Content */}
         <div className='p-8'>
           {/* Category */}
-          <span className='mb-3 inline-flex items-center gap-2 rounded-full bg-savoria-gold/20 px-4 py-1.5 text-sm font-medium text-savoria-gold'>
+          <span className='mb-3 inline-flex items-center gap-2 rounded-full bg-amber-500/20 px-4 py-1.5 text-sm font-medium text-amber-600'>
             <svg className='h-4 w-4' fill='currentColor' viewBox='0 0 20 20'>
               <path d='M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 00.553.894l2 1A1 1 0 0018 13V7a1 1 0 00-1.447-.894l-2 1z' />
             </svg>
@@ -124,26 +124,26 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
           </span>
 
           {/* Title */}
-          <h2 className='mb-4 font-serif text-4xl font-bold text-white'>
+          <h2 className='mb-4 font-serif text-4xl font-bold text-gray-900'>
             {dish.name}
           </h2>
 
           {/* Description */}
-          <p className='mb-6 text-lg leading-relaxed text-neutral-300'>
+          <p className='mb-6 text-lg leading-relaxed text-gray-600'>
             {dish.description}
           </p>
 
           {/* Price & Quantity Section */}
-          <div className='mb-8 rounded-xl border border-neutral-800 bg-neutral-950/50 p-6'>
+          <div className='mb-8 rounded-xl border border-gray-200 bg-white/50 p-6'>
             {/* Price per item */}
             <div className='mb-6'>
-              <p className='mb-1 text-sm text-neutral-400'>Đơn giá</p>
+              <p className='mb-1 text-sm text-gray-500'>Đơn giá</p>
               <div className='flex items-baseline gap-3'>
-                <p className='text-2xl font-bold text-savoria-gold'>
+                <p className='text-2xl font-bold text-amber-600'>
                   {formatPrice(dish.finalPrice)}
                 </p>
                 {dish.discount > 0 && (
-                  <p className='text-lg text-neutral-500 line-through'>
+                  <p className='text-lg text-gray-400 line-through'>
                     {formatPrice(dish.price)}
                   </p>
                 )}
@@ -152,13 +152,13 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
 
             {/* Quantity Selector */}
             <div className='mb-6'>
-              <p className='mb-3 text-sm text-neutral-400'>Số lượng</p>
+              <p className='mb-3 text-sm text-gray-500'>Số lượng</p>
               <div className='flex items-center gap-4'>
-                <div className='flex items-center rounded-xl border border-neutral-700 bg-neutral-800'>
+                <div className='flex items-center rounded-xl border border-stone-200 bg-gray-100'>
                   <button
                     onClick={handleDecreaseQuantity}
                     disabled={quantity <= 1}
-                    className='flex h-12 w-12 items-center justify-center rounded-l-xl text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-neutral-300'
+                    className='flex h-12 w-12 items-center justify-center rounded-l-xl text-gray-600 transition-all hover:bg-neutral-700 hover:text-gray-900 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent disabled:hover:text-gray-600'
                   >
                     <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2.5'>
                       <path strokeLinecap='round' strokeLinejoin='round' d='M20 12H4' />
@@ -169,38 +169,38 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
                     min='1'
                     value={quantity}
                     onChange={handleQuantityChange}
-                    className='h-12 w-16 border-x border-neutral-700 bg-transparent text-center text-lg font-semibold text-white outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
+                    className='h-12 w-16 border-x border-stone-200 bg-transparent text-center text-lg font-semibold text-gray-900 outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none'
                   />
                   <button
                     onClick={handleIncreaseQuantity}
-                    className='flex h-12 w-12 items-center justify-center rounded-r-xl text-neutral-300 transition-all hover:bg-neutral-700 hover:text-white'
+                    className='flex h-12 w-12 items-center justify-center rounded-r-xl text-gray-600 transition-all hover:bg-neutral-700 hover:text-gray-900'
                   >
                     <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2.5'>
                       <path strokeLinecap='round' strokeLinejoin='round' d='M12 4v16m8-8H4' />
                     </svg>
                   </button>
                 </div>
-                <span className='text-sm text-neutral-400'>
+                <span className='text-sm text-gray-500'>
                   {quantity > 1 && `(${quantity} phần)`}
                 </span>
               </div>
             </div>
 
             {/* Divider */}
-            <div className='mb-6 border-t border-neutral-800' />
+            <div className='mb-6 border-t border-gray-200' />
 
             {/* Total & Add to Cart */}
             <div className='flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
               <div>
-                <p className='mb-1 text-sm text-neutral-400'>Tổng cộng</p>
-                <p className='text-3xl font-bold text-savoria-gold'>
+                <p className='mb-1 text-sm text-gray-500'>Tổng cộng</p>
+                <p className='text-3xl font-bold text-amber-600'>
                   {formatPrice(totalPrice)}
                 </p>
               </div>
               <button
                 onClick={handleAddToCart}
                 disabled={isAdding || isCartLoading}
-                className='flex items-center justify-center gap-3 rounded-xl bg-savoria-gold px-8 py-4 font-semibold text-neutral-900 shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
+                className='flex items-center justify-center gap-3 rounded-xl bg-amber-500 px-8 py-4 font-semibold text-neutral-900 shadow-lg transition-all hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100'
               >
                 {isAdding ? (
                   <>
@@ -223,11 +223,11 @@ export default function DishDetailModal({ dish, onClose }: DishDetailModalProps)
 
             {/* Login hint */}
             {!isAuthenticated && (
-              <p className='mt-4 text-center text-sm text-neutral-500'>
+              <p className='mt-4 text-center text-sm text-gray-400'>
                 <svg className='mr-1 inline-block h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z' />
                 </svg>
-                Bạn cần <span className='text-savoria-gold cursor-pointer hover:underline' onClick={() => { onClose(); navigate(path.login) }}>đăng nhập</span> để thêm món vào giỏ hàng
+                Bạn cần <span className='text-amber-600 cursor-pointer hover:underline' onClick={() => { onClose(); navigate(path.login) }}>đăng nhập</span> để thêm món vào giỏ hàng
               </p>
             )}
           </div>

@@ -3,11 +3,11 @@ import ButtonPrimary from '../../components/ButtonPrimary'
 
 export default function NotFound() {
   return (
-    <div className='flex min-h-screen flex-col items-center justify-center bg-neutral-950 px-4'>
+    <div className='flex min-h-screen flex-col items-center justify-center bg-white px-4'>
       {/* 404 Display */}
       <div className='flex items-center justify-center gap-2 md:gap-4'>
         {/* Number 4 */}
-        <span className='text-[120px] font-bold leading-none text-white md:text-[200px] lg:text-[280px]'>
+        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>
           4
         </span>
 
@@ -117,13 +117,13 @@ export default function NotFound() {
         </div>
 
         {/* Number 4 */}
-        <span className='text-[120px] font-bold leading-none text-white md:text-[200px] lg:text-[280px]'>
+        <span className='text-[120px] font-bold leading-none text-gray-900 md:text-[200px] lg:text-[280px]'>
           4
         </span>
       </div>
 
       {/* Message */}
-      <p className='mt-6 max-w-md text-center text-base text-neutral-400 md:mt-8 md:text-lg'>
+      <p className='mt-6 max-w-md text-center text-base text-gray-500 md:mt-8 md:text-lg'>
         Sorry, we couldn't find the page you were looking for. Click the button below to go back to the home page
       </p>
 

@@ -1,7 +1,6 @@
-import { Link } from 'react-router-dom'
-import { useContext } from 'react'
+import { Link, useLocation } from 'react-router-dom'
+import { useContext, useState, useEffect } from 'react'
 import path from '../../constants/path'
-import { useState } from 'react'
 import UserDropdown from '../UserDropdown'
 import ButtonPrimary from '../ButtonPrimary'
 import { AppContext } from '../../contexts/app.context'
@@ -9,208 +8,224 @@ import { useCart } from '../../contexts/CartContext'
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const { isAuthenticated } = useContext(AppContext)
   const { getTotalItems } = useCart()
   const totalItems = getTotalItems()
+  const location = useLocation()
+
+  // Only homepage gets transparent header
+  const isHomepage = location.pathname === '/'
+
+  // Track scroll for header background change
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  // Header should be solid (white) if: not on homepage OR scrolled
+  const useSolidHeader = !isHomepage || isScrolled
+
+  const isActive = (pathName: string) => location.pathname === pathName
+
+  const navLinks = [
+    { to: path.home, label: 'Trang chủ' },
+    { to: path.menu, label: 'Thực đơn' },
+    { to: path.about, label: 'Giới thiệu' },
+    { to: path.blog, label: 'Tin tức' }
+  ]
+
+  // Scroll to top function
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   return (
-    <header className='fixed left-0 right-0 top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md shadow-lg border-b border-neutral-900 transition-colors duration-300'>
-      <div className='relative flex h-[74px] w-full items-center'>
-        {/* Left section - Logo positioned at left with 100px margin, flexible */}
-        <div className='flex items-center' style={{ marginLeft: '100px' }}>
-          <Link
-            to={path.home}
-            className='font-serif text-4xl font-medium capitalize leading-logo tracking-logo text-savoria-gold transition-colors hover:text-amber-50'
-          >
-            TS Restaurant
-          </Link>
-        </div>
-
-        {/* Spacer to create flexible space */}
-        <div className='flex-1'></div>
-
-        {/* Center section - Desktop Navigation - positioned in center */}
-        <nav className='hidden absolute left-1/2 -translate-x-1/2 transform items-center gap-12 lg:flex'>
-          <Link
-            to={path.home}
-            className='group relative pb-1 text-base font-normal text-neutral-300 transition-colors hover:text-amber-50'
-          >
-            Home
-            <span className='absolute bottom-0 left-0 h-0.5 w-0 bg-amber-50 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            to={path.menu}
-            className='group relative pb-1 text-base font-normal text-neutral-300 transition-colors hover:text-amber-50'
-          >
-            Menu
-            <span className='absolute bottom-0 left-0 h-0.5 w-0 bg-amber-50 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            to={path.about}
-            className='group relative pb-1 text-base font-normal text-neutral-300 transition-colors hover:text-amber-50'
-          >
-            About
-            <span className='absolute bottom-0 left-0 h-0.5 w-0 bg-amber-50 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-          <Link
-            to={path.blog}
-            className='group relative pb-1 text-base font-normal text-neutral-300 transition-colors hover:text-amber-50'
-          >
-            Blog
-            <span className='absolute bottom-0 left-0 h-0.5 w-0 bg-amber-50 transition-all duration-300 group-hover:w-full'></span>
-          </Link>
-        </nav>
-
-        {/* Another spacer for right side */}
-        <div className='flex-1'></div>
-
-        {/* Right section - Cart, Book A Table Button, and User Dropdown with 100px margin from right edge */}
-        <div className='flex items-center gap-4' style={{ marginRight: '100px' }}>
-          {/* Cart Icon - Only show when authenticated - Desktop Only */}
-          {isAuthenticated && (
-            <Link
-              to={path.cart}
-              className='relative hidden lg:flex h-10 w-10 items-center justify-center rounded-full bg-neutral-800 text-neutral-300 transition-all hover:bg-savoria-gold hover:text-neutral-900'
-            >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
+    <header
+      className={`fixed left-0 right-0 top-0 z-50 transition-all duration-300 ${
+        useSolidHeader ? 'bg-white/95 backdrop-blur-lg shadow-lg border-b border-stone-100' : 'bg-transparent'
+      }`}
+    >
+      <div className='mx-auto max-w-7xl px-6'>
+        <div className='flex h-20 items-center justify-between'>
+          {/* Logo */}
+          <Link to={path.home} className='group flex items-center gap-3' onClick={scrollToTop}>
+            <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 shadow-lg transition-transform group-hover:scale-105'>
+              <span className='text-2xl'>🍜</span>
+            </div>
+            <div>
+              <span
+                className={`block text-xl font-bold transition-colors ${useSolidHeader ? 'text-stone-800' : 'text-white'} group-hover:text-amber-500`}
               >
+                TS Restaurant
+              </span>
+              <span className={`block text-xs ${useSolidHeader ? 'text-stone-500' : 'text-white/70'}`}>
+                Ẩm thực Việt Nam
+              </span>
+            </div>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <nav className='hidden items-center gap-1 lg:flex'>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={scrollToTop}
+                className={`relative px-4 py-2 text-sm font-medium transition-all duration-300 rounded-full ${
+                  isActive(link.to)
+                    ? 'bg-amber-500 text-white shadow-lg'
+                    : useSolidHeader
+                      ? 'text-stone-600 hover:text-amber-600 hover:bg-amber-50'
+                      : 'text-white/90 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Right Actions */}
+          <div className='flex items-center gap-3'>
+            {/* Cart */}
+            {isAuthenticated && (
+              <Link
+                to={path.cart}
+                className={`relative hidden lg:flex h-11 w-11 items-center justify-center rounded-full transition-all duration-300 ${
+                  useSolidHeader
+                    ? 'bg-stone-100 text-stone-600 hover:bg-amber-500 hover:text-white'
+                    : 'bg-white/10 text-white hover:bg-amber-500'
+                }`}
+              >
+                <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                  />
+                </svg>
+                {totalItems > 0 && (
+                  <span className='absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white animate-pulse'>
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            {/* Book Table Button */}
+            <ButtonPrimary to={path.booking} className='hidden lg:flex shadow-lg hover:shadow-xl transition-shadow'>
+              <svg className='mr-2 h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
-                  d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
                 />
               </svg>
-              {/* Badge showing total items */}
-              {totalItems > 0 && (
-                <span className='absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white'>
-                  {totalItems > 99 ? '99+' : totalItems}
-                </span>
-              )}
-            </Link>
-          )}
+              Đặt bàn
+            </ButtonPrimary>
 
-          {/* Book A Table Button - Desktop Only */}
-          <ButtonPrimary to={path.booking} className='hidden lg:flex'>
-            Book A Table
-          </ButtonPrimary>
+            {/* User Dropdown */}
+            <div className='hidden lg:block'>
+              <UserDropdown />
+            </div>
 
-          {/* User Dropdown - Desktop Only */}
-          <div className='hidden lg:block'>
-            <UserDropdown />
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className={`flex h-11 w-11 flex-col items-center justify-center gap-1.5 rounded-xl lg:hidden transition-colors ${
+                useSolidHeader ? 'bg-stone-100' : 'bg-white/10'
+              }`}
+            >
+              <span
+                className={`h-0.5 w-6 transition-all duration-300 ${useSolidHeader ? 'bg-stone-700' : 'bg-white'} ${
+                  isMenuOpen ? 'translate-y-2 rotate-45' : ''
+                }`}
+              />
+              <span
+                className={`h-0.5 w-6 transition-all duration-300 ${useSolidHeader ? 'bg-stone-700' : 'bg-white'} ${
+                  isMenuOpen ? 'opacity-0' : ''
+                }`}
+              />
+              <span
+                className={`h-0.5 w-6 transition-all duration-300 ${useSolidHeader ? 'bg-stone-700' : 'bg-white'} ${
+                  isMenuOpen ? '-translate-y-2 -rotate-45' : ''
+                }`}
+              />
+            </button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className='relative z-50 flex h-10 w-10 flex-col items-center justify-center gap-1.5 rounded-lg bg-neutral-800 p-2 transition-colors hover:bg-neutral-700 lg:hidden'
-            aria-label='Toggle menu'
-          >
-            <span
-              className={`h-0.5 w-6 bg-amber-50 transition-all duration-300 ${isMenuOpen ? 'translate-y-2 rotate-45' : ''
-                }`}
-            />
-            <span
-              className={`h-0.5 w-6 bg-amber-50 transition-all duration-300 ${isMenuOpen ? 'opacity-0' : ''
-                }`}
-            />
-            <span
-              className={`h-0.5 w-6 bg-amber-50 transition-all duration-300 ${isMenuOpen ? '-translate-y-2 -rotate-45' : ''
-                }`}
-            />
-          </button>
         </div>
       </div>
 
       {/* Mobile Menu */}
       <div
-        className={`absolute left-0 top-full w-full overflow-hidden border-b border-neutral-800 bg-neutral-900/98 backdrop-blur-md transition-all duration-300 lg:hidden ${isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
-          }`}
+        className={`absolute left-0 top-full w-full overflow-hidden transition-all duration-300 lg:hidden ${
+          isMenuOpen ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
       >
-        <nav className='flex flex-col gap-1 px-4 py-6'>
-          <Link
-            to={path.home}
-            onClick={() => setIsMenuOpen(false)}
-            className='rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
-          >
-            Home
-          </Link>
-          <Link
-            to={path.menu}
-            onClick={() => setIsMenuOpen(false)}
-            className='rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
-          >
-            Menu
-          </Link>
-          <Link
-            to={path.about}
-            onClick={() => setIsMenuOpen(false)}
-            className='rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
-          >
-            About
-          </Link>
-          <Link
-            to={path.blog}
-            onClick={() => setIsMenuOpen(false)}
-            className='rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
-          >
-            Blog
-          </Link>
-
-          {/* Cart Link - Mobile - Only show when authenticated */}
-          {isAuthenticated && (
-            <Link
-              to={path.cart}
-              onClick={() => setIsMenuOpen(false)}
-              className='flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium uppercase tracking-wider text-amber-50 transition-colors hover:bg-neutral-800 hover:text-amber-100'
-            >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
+        <div className='border-b border-stone-200 bg-white/95 backdrop-blur-lg'>
+          <nav className='mx-auto max-w-7xl flex flex-col gap-1 px-6 py-6'>
+            {navLinks.map((link) => (
+              <Link
+                key={link.to}
+                to={link.to}
+                onClick={() => {
+                  setIsMenuOpen(false)
+                  scrollToTop()
+                }}
+                className={`flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium transition-all ${
+                  isActive(link.to)
+                    ? 'bg-amber-500 text-white'
+                    : 'text-stone-700 hover:bg-amber-50 hover:text-amber-600'
+                }`}
               >
+                {link.label}
+              </Link>
+            ))}
+
+            {isAuthenticated && (
+              <Link
+                to={path.cart}
+                onClick={() => {
+                  setIsMenuOpen(false)
+                  scrollToTop()
+                }}
+                className='flex items-center gap-3 rounded-xl px-4 py-3 text-base font-medium text-stone-700 hover:bg-amber-50 hover:text-amber-600'
+              >
+                <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                  />
+                </svg>
+                Giỏ hàng
+                {totalItems > 0 && (
+                  <span className='ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white'>
+                    {totalItems}
+                  </span>
+                )}
+              </Link>
+            )}
+
+            <Link
+              to={path.booking}
+              onClick={() => setIsMenuOpen(false)}
+              className='mt-4 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 px-8 py-4 text-base font-semibold text-white shadow-lg'
+            >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
-                  d='M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z'
+                  d='M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
                 />
               </svg>
-              Giỏ hàng
-              {totalItems > 0 && (
-                <span className='ml-auto flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white'>
-                  {totalItems > 99 ? '99+' : totalItems}
-                </span>
-              )}
+              Đặt bàn ngay
             </Link>
-          )}
-
-          <Link
-            to={path.booking}
-            onClick={() => setIsMenuOpen(false)}
-            className='mt-4 flex items-center justify-center gap-2 rounded-full bg-amber-600 px-8 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-lg transition-all hover:bg-amber-500'
-          >
-            Book A Table
-            <svg
-              className='h-4 w-4'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'
-            >
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M17 8l4 4m0 0l-4 4m4-4H3'
-              />
-            </svg>
-          </Link>
-        </nav>
+          </nav>
+        </div>
       </div>
     </header>
   )

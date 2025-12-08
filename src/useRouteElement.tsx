@@ -1,19 +1,29 @@
+import { Suspense } from 'react'
 import { Navigate, useRoutes } from 'react-router-dom'
 import path from './constants/path'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Homepage from './pages/homepage'
 import AdminLayout from './pages/admin/AdminLayout'
+import AdminLogin from './pages/admin/pages/AdminLogin'
 import MainLayout from './layouts/MainLayout'
 import RegisterLayout from './layouts/RegisterLayout'
 import Menu from './pages/Menu'
+import DishDetail from './pages/DishDetail'
 import About from './pages/About'
 import Blog from './pages/Blog'
+import BlogDetail from './pages/BlogDetail'
 import Booking from './pages/Booking'
 import Payment from './pages/Payment'
+import PaymentResult from './pages/PaymentResult'
+import Checkout from './pages/Checkout'
 import Cart from './pages/Cart'
 import ForgotPassword from './pages/ForgotPassword'
+import VerifyOtp from './pages/VerifyOtp'
+import ResetPassword from './pages/ResetPassword'
 import NotFound from './pages/NotFound'
+import Profile from './pages/Profile'
+import OrderHistory from './pages/OrderHistory'
 import { AdminRoute, RejectedRoute, ProtectedRoute } from './components/ProtectedRoute'
 import ProductManagement from './pages/admin/pages/ProductManagement'
 import TableManagement from './pages/admin/pages/TableManagement'
@@ -22,6 +32,7 @@ import DiscountManagement from './pages/admin/pages/DiscountManagement'
 import BlogManagement from './pages/admin/pages/BlogManagement'
 import ContactManagement from './pages/admin/pages/ContactManagement'
 import OrderManagement from './pages/admin/pages/OrderManagement'
+import Statistics from './pages/admin/pages/Statistics'
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -32,6 +43,11 @@ export default function useRouteElement() {
           <Homepage />
         </MainLayout>
       )
+    },
+    // Admin Login - Trang đăng nhập riêng cho admin
+    {
+      path: path.adminLogin,
+      element: <AdminLogin />
     },
     // Rejected Routes - Chỉ cho user chưa đăng nhập
     {
@@ -56,7 +72,7 @@ export default function useRouteElement() {
         }
       ]
     },
-    // Admin Routes - Chỉ cho admin
+    // Admin Routes - Chỉ cho admin (phải đăng nhập qua /admin/login)
     {
       path: '',
       element: <AdminRoute />,
@@ -67,7 +83,11 @@ export default function useRouteElement() {
           children: [
             {
               index: true,
-              element: <Navigate to={path.adminProducts} replace />
+              element: <Navigate to={path.adminStatistics} replace />
+            },
+            {
+              path: path.adminStatistics,
+              element: <Statistics />
             },
             {
               path: path.adminProducts,
@@ -106,6 +126,24 @@ export default function useRouteElement() {
       element: (
         <MainLayout>
           <Menu />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.dishDetail,
+      element: (
+        <MainLayout>
+          <DishDetail />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.blogDetail,
+      element: (
+        <MainLayout>
+          <Suspense>
+            <BlogDetail />
+          </Suspense>
         </MainLayout>
       )
     },
@@ -155,10 +193,26 @@ export default function useRouteElement() {
           )
         },
         {
+          path: path.checkout,
+          element: (
+            <MainLayout>
+              <Checkout />
+            </MainLayout>
+          )
+        },
+        {
           path: path.profile,
           element: (
             <MainLayout>
-              <div>Profile Page (Coming Soon)</div>
+              <Profile />
+            </MainLayout>
+          )
+        },
+        {
+          path: path.orders,
+          element: (
+            <MainLayout>
+              <OrderHistory />
             </MainLayout>
           )
         }
@@ -167,8 +221,40 @@ export default function useRouteElement() {
     {
       path: path.forgot_password,
       element: (
-        <MainLayout>
+        <RegisterLayout>
           <ForgotPassword />
+        </RegisterLayout>
+      )
+    },
+    {
+      path: path.verify_otp,
+      element: (
+        <RegisterLayout>
+          <VerifyOtp />
+        </RegisterLayout>
+      )
+    },
+    {
+      path: path.reset_password,
+      element: (
+        <RegisterLayout>
+          <ResetPassword />
+        </RegisterLayout>
+      )
+    },
+    {
+      path: path.paymentResult,
+      element: (
+        <MainLayout>
+          <PaymentResult />
+        </MainLayout>
+      )
+    },
+    {
+      path: path.paymentResultLegacy,
+      element: (
+        <MainLayout>
+          <PaymentResult />
         </MainLayout>
       )
     },

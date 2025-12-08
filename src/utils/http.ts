@@ -1,6 +1,9 @@
 import axios, { type AxiosInstance, AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import { getAccessTokenFromLS, setAccessTokenToLS, setRefreshTokenToLS, clearLS } from './auth'
 
+// Flag to prevent multiple redirects
+let isRedirecting = false
+
 class Http {
   instance: AxiosInstance
   private accessToken: string
@@ -55,6 +58,27 @@ class Http {
         return response
       },
       (error: AxiosError) => {
+        // Handle 401 Unauthorized - Token expired or invalid
+        if (error.response?.status === 401) {
+          // Clear local storage and reset access token
+          this.accessToken = ''
+          clearLS()
+
+          // Redirect to login page (prevent multiple redirects)
+          if (!isRedirecting) {
+            isRedirecting = true
+            // Use window.location for redirect to ensure full page reload and context reset
+            const currentPath = window.location.pathname
+            // Don't redirect if already on login page
+            if (currentPath !== '/login') {
+              window.location.href = '/login'
+            }
+            // Reset flag after a short delay
+            setTimeout(() => {
+              isRedirecting = false
+            }, 1000)
+          }
+        }
         return Promise.reject(error)
       }
     )

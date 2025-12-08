@@ -38,3 +38,16 @@ export const clearLS = () => {
   const clearLSEvent = new Event('clearLS')
   LocalStorageEventTarget.dispatchEvent(clearLSEvent)
 }
+
+// Admin Auth - Lưu riêng để admin phải đăng nhập riêng
+export const setAdminAuthenticatedToLS = (value: boolean) => {
+  localStorage.setItem('isAdminAuthenticated', value ? 'true' : 'false')
+}
+
+export const getAdminAuthenticatedFromLS = (): boolean => {
+  return localStorage.getItem('isAdminAuthenticated') === 'true'
+}
+
+export const clearAdminAuth = () => {
+  localStorage.removeItem('isAdminAuthenticated')
+}

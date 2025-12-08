@@ -37,7 +37,7 @@ export default function UserDropdown() {
       {/* User Avatar Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className='flex h-10 w-10 items-center justify-center rounded-full border-2 border-neutral-700 bg-neutral-800 transition-all hover:border-savoria-gold hover:bg-neutral-700'
+        className='flex h-10 w-10 items-center justify-center rounded-full border-2 border-stone-300 bg-stone-100 transition-all hover:border-amber-500 hover:bg-stone-200'
         aria-label='User menu'
       >
         {isAuthenticated && profile?.avatar ? (
@@ -47,11 +47,7 @@ export default function UserDropdown() {
             className='h-full w-full rounded-full object-cover'
           />
         ) : (
-          <svg
-            className='h-6 w-6 text-white'
-            fill='currentColor'
-            viewBox='0 0 24 24'
-          >
+          <svg className='h-6 w-6 text-gray-600' fill='currentColor' viewBox='0 0 24 24'>
             <path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z' />
           </svg>
         )}
@@ -59,35 +55,26 @@ export default function UserDropdown() {
 
       {/* Dropdown Menu */}
       <div
-        className={`absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-lg border border-neutral-800 bg-neutral-900 shadow-xl transition-all duration-200 ${isOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
-          }`}
+        className={`absolute right-0 top-full mt-2 w-52 overflow-hidden rounded-lg border border-gray-200 bg-white shadow-xl transition-all duration-200 ${
+          isOpen ? 'visible translate-y-0 opacity-100' : 'invisible -translate-y-2 opacity-0'
+        }`}
       >
         {isAuthenticated ? (
           // Menu khi đã đăng nhập
           <div className='py-2'>
             {/* User Info Header */}
-            <div className='border-b border-neutral-800 px-4 py-3'>
-              <p className='text-sm font-medium text-white truncate'>
-                {profile?.username || 'Người dùng'}
-              </p>
-              <p className='text-xs text-neutral-400 truncate'>
-                {profile?.email}
-              </p>
+            <div className='border-b border-gray-200 px-4 py-3'>
+              <p className='text-sm font-medium text-gray-900 truncate'>{profile?.username || 'Người dùng'}</p>
+              <p className='text-xs text-gray-500 truncate'>{profile?.email}</p>
             </div>
 
             {/* Profile Link */}
             <Link
               to='/profile'
               onClick={() => setIsOpen(false)}
-              className='flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-savoria-gold'
+              className='flex items-center gap-3 px-4 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-amber-600'
             >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
-              >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -101,15 +88,9 @@ export default function UserDropdown() {
             <Link
               to='/orders'
               onClick={() => setIsOpen(false)}
-              className='flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-savoria-gold'
+              className='flex items-center gap-3 px-4 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-amber-600'
             >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
-              >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -120,20 +101,14 @@ export default function UserDropdown() {
             </Link>
 
             {/* Divider */}
-            <div className='my-1 border-t border-neutral-800'></div>
+            <div className='my-1 border-t border-gray-200'></div>
 
             {/* Logout Button */}
             <button
               onClick={handleLogout}
-              className='flex w-full items-center gap-3 px-4 py-3 text-sm text-red-400 transition-colors hover:bg-neutral-800 hover:text-red-300'
+              className='flex w-full items-center gap-3 px-4 py-3 text-sm text-amber-600 transition-colors hover:bg-gray-100 hover:text-amber-700'
             >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
-              >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -149,15 +124,9 @@ export default function UserDropdown() {
             <Link
               to={path.login}
               onClick={() => setIsOpen(false)}
-              className='flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-savoria-gold'
+              className='flex items-center gap-3 px-4 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-amber-600'
             >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
-              >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -169,15 +138,9 @@ export default function UserDropdown() {
             <Link
               to={path.register}
               onClick={() => setIsOpen(false)}
-              className='flex items-center gap-3 px-4 py-3 text-sm text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-savoria-gold'
+              className='flex items-center gap-3 px-4 py-3 text-sm text-gray-600 transition-colors hover:bg-gray-100 hover:text-amber-600'
             >
-              <svg
-                className='h-5 w-5'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-                strokeWidth='2'
-              >
+              <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24' strokeWidth='2'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'

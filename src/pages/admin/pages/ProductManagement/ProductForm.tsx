@@ -148,15 +148,15 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
   return (
     <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4'>
-      <div className='w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-neutral-900 border border-neutral-800 shadow-xl'>
+      <div className='w-full max-w-2xl max-h-[90vh] flex flex-col rounded-xl bg-gray-50 border border-gray-200 shadow-xl'>
         {/* Header */}
-        <div className='flex items-center justify-between border-b border-neutral-800 px-6 py-4 shrink-0'>
-          <h2 className='text-xl font-semibold text-savoria-gold'>
+        <div className='flex items-center justify-between border-b border-gray-200 px-6 py-4 shrink-0'>
+          <h2 className='text-xl font-semibold text-amber-600'>
             {isEditing ? 'Chỉnh sửa món ăn' : 'Thêm món ăn mới'}
           </h2>
           <button
             onClick={onClose}
-            className='rounded-lg p-2 text-neutral-400 transition-colors hover:bg-neutral-800 hover:text-amber-50'
+            className='rounded-lg p-2 text-gray-500 transition-colors hover:bg-stone-50 hover:text-gray-900'
           >
             <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
               <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
@@ -169,25 +169,25 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
           <div className='grid grid-cols-2 gap-6'>
             {/* Name */}
             <div className='col-span-2'>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Tên Món Ăn <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Tên Món Ăn <span className='text-amber-400'>*</span>
               </label>
               <input
                 type='text'
                 {...register('name', { required: 'Vui lòng nhập tên món ăn' })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.name
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.name
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='Nhập tên món ăn'
               />
-              {errors.name && <p className='mt-1 text-sm text-red-400'>{errors.name.message}</p>}
+              {errors.name && <p className='mt-1 text-sm text-amber-400'>{errors.name.message}</p>}
             </div>
 
             {/* Price */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Giá (VNĐ) <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Giá (VNĐ) <span className='text-amber-400'>*</span>
               </label>
               <input
                 type='number'
@@ -196,19 +196,19 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   min: { value: 0, message: 'Giá phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.price
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.price
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='0'
               />
-              {errors.price && <p className='mt-1 text-sm text-red-400'>{errors.price.message}</p>}
+              {errors.price && <p className='mt-1 text-sm text-amber-400'>{errors.price.message}</p>}
             </div>
 
 
             {/* Discount */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>Giảm giá (%)</label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Giảm giá (%)</label>
               <input
                 type='number'
                 {...register('discount', {
@@ -216,19 +216,19 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   max: { value: 100, message: 'Giảm giá phải <= 100' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.discount
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.discount
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='0'
               />
-              {errors.discount && <p className='mt-1 text-sm text-red-400'>{errors.discount.message}</p>}
+              {errors.discount && <p className='mt-1 text-sm text-amber-400'>{errors.discount.message}</p>}
             </div>
             {/* Final Price Preview */}
-            <div className='col-span-2 rounded-lg border border-neutral-700 bg-neutral-800/50 p-4'>
-              <p className='text-sm text-neutral-400'>
+            <div className='col-span-2 rounded-lg border border-stone-200 bg-stone-50/50 p-4'>
+              <p className='text-sm text-gray-500'>
                 Giá sau giảm:{' '}
-                <span className='text-lg font-semibold text-savoria-gold'>
+                <span className='text-lg font-semibold text-amber-600'>
                   {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(
                     (price || 0) - ((price || 0) * (discount || 0)) / 100
                   )}
@@ -238,7 +238,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
             {/* Rating */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
                 Đánh giá (1-5)
               </label>
               <input
@@ -251,26 +251,26 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   max: { value: 5, message: 'Đánh giá tối đa là 5' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.rating
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.rating
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='4.5'
               />
-              {errors.rating && <p className='mt-1 text-sm text-red-400'>{errors.rating.message}</p>}
+              {errors.rating && <p className='mt-1 text-sm text-amber-400'>{errors.rating.message}</p>}
             </div>
 
             {/* Ingredients */}
             <div className='col-span-2'>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
                 Nguyên liệu (phân tách bằng dấu phẩy)
               </label>
               <input
                 type='text'
                 {...register('ingredients')}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.ingredients
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.ingredients
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='Bánh phở, Thịt bò, Hành, Nước dùng'
               />
@@ -278,16 +278,16 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
             {/* Prepare Time */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
                 Thời gian chuẩn bị (phút)
               </label>
               <input
                 type='number'
                 min={1}
                 {...register('prepareTime', { valueAsNumber: true })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.prepareTime
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.prepareTime
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 placeholder='12'
               />
@@ -295,14 +295,14 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
 
             {/* Category */}
             <div>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Danh mục <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Danh mục <span className='text-amber-400'>*</span>
               </label>
               <select
                 {...register('category', { required: 'Vui lòng chọn danh mục' })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-neutral-800 text-amber-50 focus:outline-none focus:ring-2 ${errors.category
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                  : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 focus:outline-none focus:ring-2 ${errors.category
+                  ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                  : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                   }`}
                 disabled={isCategoriesLoading}
               >
@@ -313,13 +313,13 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   </option>
                 ))}
               </select>
-              {errors.category && <p className='mt-1 text-sm text-red-400'>{errors.category.message}</p>}
+              {errors.category && <p className='mt-1 text-sm text-amber-400'>{errors.category.message}</p>}
             </div>
 
             {/* Image Upload */}
             <div className='col-span-2'>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>
-                Hình ảnh <span className='text-red-400'>*</span>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>
+                Hình ảnh <span className='text-amber-400'>*</span>
               </label>
               {/* Toggle upload mode */}
               <div className='mb-3 flex gap-2'>
@@ -327,8 +327,8 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   type='button'
                   onClick={() => setUploadMode('file')}
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'file'
-                    ? 'bg-savoria-gold text-neutral-900'
-                    : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
+                    ? 'bg-amber-500 text-neutral-900'
+                    : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
                     }`}
                 >
                   Upload từ máy
@@ -337,8 +337,8 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   type='button'
                   onClick={() => setUploadMode('url')}
                   className={`rounded-lg px-3 py-1.5 text-sm font-medium transition-colors ${uploadMode === 'url'
-                    ? 'bg-savoria-gold text-neutral-900'
-                    : 'border border-neutral-700 text-neutral-400 hover:bg-neutral-800'
+                    ? 'bg-amber-500 text-neutral-900'
+                    : 'border border-stone-200 text-gray-500 hover:bg-stone-50'
                     }`}
                 >
                   Nhập URL
@@ -352,7 +352,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       <img
                         src={imagePreview}
                         alt='Preview'
-                        className='h-28 w-28 rounded-lg border border-neutral-700 object-cover'
+                        className='h-28 w-28 rounded-lg border border-stone-200 object-cover'
                         onError={(e) => {
                           ; (e.target as HTMLImageElement).src = 'https://via.placeholder.com/112?text=Lỗi+ảnh'
                         }}
@@ -367,7 +367,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                             fileInputRef.current.value = ''
                           }
                         }}
-                        className='absolute -right-2 -top-2 rounded-full bg-red-500 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600'
+                        className='absolute -right-2 -top-2 rounded-full bg-amber-500 p-1 text-gray-900 opacity-0 transition-opacity group-hover:opacity-100 hover:bg-amber-600'
                       >
                         <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                           <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
@@ -375,8 +375,8 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       </button>
                     </div>
                   ) : (
-                    <div className='flex h-28 w-28 items-center justify-center rounded-lg border-2 border-dashed border-neutral-700 bg-neutral-800'>
-                      <svg className='h-8 w-8 text-neutral-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                    <div className='flex h-28 w-28 items-center justify-center rounded-lg border-2 border-dashed border-stone-200 bg-stone-50'>
+                      <svg className='h-8 w-8 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                         <path
                           strokeLinecap='round'
                           strokeLinejoin='round'
@@ -391,7 +391,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 <div className='flex flex-1 flex-col gap-2'>
                   {uploadMode === 'file' ? (
                     <>
-                      <p className='text-xs text-neutral-500 mb-1'>
+                      <p className='text-xs text-gray-400 mb-1'>
                         Chọn ảnh từ máy tính (PNG, JPG, JPEG, GIF, WEBP - Tối đa 10MB)
                       </p>
                       <input
@@ -422,7 +422,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                       <button
                         type='button'
                         onClick={() => fileInputRef.current?.click()}
-                        className='w-full rounded-lg border-2 border-dashed px-4 py-4 text-sm transition-colors border-neutral-600 bg-neutral-800 text-neutral-300 hover:border-savoria-gold hover:bg-neutral-700'
+                        className='w-full rounded-lg border-2 border-dashed px-4 py-4 text-sm transition-colors border-stone-300 bg-stone-50 text-gray-600 hover:border-amber-500 hover:bg-neutral-700'
                       >
                         {selectedFile ? (
                           <span className='flex items-center justify-center gap-2 text-green-400'>
@@ -449,7 +449,7 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                     </>
                   ) : (
                     <>
-                      <p className='text-xs text-neutral-500 mb-1'>Nhập URL ảnh (Cloudinary, Imgur, ...)</p>
+                      <p className='text-xs text-gray-400 mb-1'>Nhập URL ảnh (Cloudinary, Imgur, ...)</p>
                       <input
                         type='text'
                         value={imagePreview}
@@ -458,9 +458,9 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                           setImagePreview(url)
                           setValue('image', url)
                         }}
-                        className={`w-full rounded-lg border px-4 py-2 text-sm bg-neutral-800 text-amber-50 placeholder:text-neutral-500 focus:outline-none focus:ring-2 ${errors.image
-                          ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-                          : 'border-neutral-700 focus:border-savoria-gold focus:ring-savoria-gold/20'
+                        className={`w-full rounded-lg border px-4 py-2 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.image
+                          ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
+                          : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
                           }`}
                         placeholder='https://example.com/image.jpg'
                       />
@@ -469,16 +469,16 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                   )}
                 </div>
               </div>
-              {errors.image && <p className='mt-2 text-sm text-red-400'>{errors.image.message}</p>}
+              {errors.image && <p className='mt-2 text-sm text-amber-400'>{errors.image.message}</p>}
             </div>
 
             {/* Description */}
             <div className='col-span-2'>
-              <label className='mb-2 block text-sm font-medium text-neutral-300'>Mô tả</label>
+              <label className='mb-2 block text-sm font-medium text-gray-600'>Mô tả</label>
               <textarea
                 {...register('description')}
                 rows={3}
-                className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 placeholder:text-neutral-500 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
+                className='w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
                 placeholder='Nhập mô tả món ăn'
               />
             </div>
@@ -487,10 +487,10 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
             <div className='col-span-2 flex items-center gap-8'>
               {/* Status */}
               <div className='flex items-center gap-3'>
-                <label className='text-sm text-neutral-300'>Trạng thái:</label>
+                <label className='text-sm text-gray-600'>Trạng thái:</label>
                 <select
                   {...register('status')}
-                  className='rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
+                  className='rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
                 >
                   <option value='active'>Hoạt động</option>
                   <option value='inactive'>Tạm ẩn</option>
@@ -501,25 +501,25 @@ export default function ProductForm({ product, onClose }: ProductFormProps) {
                 <input
                   type='checkbox'
                   {...register('bestSeller')}
-                  className='h-4 w-4 rounded border-neutral-600 bg-neutral-800 text-savoria-gold focus:ring-savoria-gold'
+                  className='h-4 w-4 rounded border-stone-300 bg-stone-50 text-amber-600 focus:ring-savoria-gold'
                 />
-                <span className='text-sm text-neutral-300'>Bán chạy</span>
+                <span className='text-sm text-gray-600'>Bán chạy</span>
               </label>
             </div>
           </div>
           {/* Actions */}
-          <div className='mt-6 flex items-center justify-end gap-3 border-t border-neutral-800 pt-6'>
+          <div className='mt-6 flex items-center justify-end gap-3 border-t border-gray-200 pt-6'>
             <button
               type='button'
               onClick={onClose}
-              className='rounded-lg border border-neutral-700 px-4 py-2.5 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-800 hover:text-amber-50'
+              className='rounded-lg border border-stone-200 px-4 py-2.5 text-sm font-medium text-gray-600 transition-colors hover:bg-stone-50 hover:text-gray-900'
             >
               Hủy
             </button>
             <button
               type='submit'
               disabled={mutation.isPending}
-              className='rounded-lg bg-savoria-gold px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 disabled:opacity-50'
+              className='rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 disabled:opacity-50'
             >
               {mutation.isPending ? 'Đang xử lý...' : isEditing ? 'Cập nhật' : 'Thêm mới'}
             </button>

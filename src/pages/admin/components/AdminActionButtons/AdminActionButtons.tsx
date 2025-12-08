@@ -39,7 +39,7 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
         <button
           type="button"
           onClick={onEdit}
-          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
+          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
         >
           {editLabel}
         </button>
@@ -49,7 +49,7 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
           type="button"
           onClick={onDelete}
           disabled={disabledDelete}
-          className="rounded-lg border border-red-500 px-3 py-1.5 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50 w-full xs:w-auto"
+          className="rounded-lg border border-amber-500 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50 w-full xs:w-auto"
         >
           {deleteLabel}
         </button>
@@ -58,7 +58,7 @@ const AdminActionButtons: React.FC<AdminActionButtonsProps> = ({
         <button
           type="button"
           onClick={onAdd}
-          className="rounded-lg bg-savoria-gold px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
+          className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200 w-full xs:w-auto"
         >
           {addLabel}
         </button>

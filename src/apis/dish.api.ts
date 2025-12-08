@@ -16,9 +16,14 @@ export interface DishFormData {
 }
 
 const dishApi = {
-  // Lấy danh sách món ăn
+  // Lấy danh sách món ăn (có phân trang)
   getDishes: (params?: DishQueryParams) => {
     return http.get<DishListResponse>('/dishes', { params })
+  },
+
+  // Lấy TẤT CẢ món ăn (không phân trang)
+  getAllDishes: () => {
+    return http.get<{ message: string; metadata: unknown[] }>('/dishes/all')
   },
 
   // Lấy chi tiết món ăn

@@ -1,5 +1,11 @@
+import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import path from '../../constants/path'
+import { useToast } from '../../components/Toast'
+import { useCart } from '../../contexts/CartContext'
+import orderApi from '../../apis/order.api'
+import paymentApi from '../../apis/payment.api'
+import tableApi from '../../apis/table.api'
 
 // Types cho Payment
 interface PaymentDish {
@@ -29,6 +35,8 @@ interface PaymentCustomerInfo {
 }
 
 interface PaymentBookingData {
+  // Booking data (order chưa được tạo)
+  cartId: string
   tableId: string
   tableNumber: string
   totalAmount: number
@@ -72,14 +80,18 @@ const calculateSubtotal = (cartItems: PaymentCartItem[]): number => {
 export default function Payment() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { success, error } = useToast()
+  const { clearCart } = useCart()
+  const [isMoMoProcessing, setIsMoMoProcessing] = useState(false)
+  const [isCashProcessing, setIsCashProcessing] = useState(false)
   const bookingData = location.state as PaymentBookingData | null
 
   if (!bookingData) {
     return (
-      <div className='min-h-screen bg-neutral-950 pt-[74px]'>
+      <div className='min-h-screen bg-white pt-[74px]'>
         <div className='mx-auto max-w-4xl px-6 py-12 text-center'>
-          <h1 className='mb-4 text-2xl font-bold text-white'>Không tìm thấy thông tin đặt bàn</h1>
-          <button onClick={() => navigate(path.booking)} className='text-savoria-gold hover:underline'>
+          <h1 className='mb-4 text-2xl font-bold text-gray-900'>Không tìm thấy thông tin đặt bàn</h1>
+          <button onClick={() => navigate(path.booking)} className='text-amber-600 hover:underline'>
             Quay lại trang đặt bàn
           </button>
         </div>
@@ -96,35 +108,156 @@ export default function Payment() {
   const discountAmount = Number(bookingData.discountAmount) || (subtotal * discountPercentage) / 100
   const totalAmount = Number(bookingData.totalAmount) || subtotal - discountAmount
 
+  // Xử lý thanh toán MoMo
+  const handleMoMoPayment = async () => {
+    if (!bookingData.cartId) {
+      error('Không tìm thấy thông tin giỏ hàng!')
+      return
+    }
+
+    if (!bookingData.customerInfo?.email) {
+      error('Không tìm thấy email khách hàng!')
+      return
+    }
+
+    // Ngăn double-click
+    if (isMoMoProcessing) return
+    setIsMoMoProcessing(true)
+
+    try {
+      // Tạo order với typeOfPayment = 'momo'
+      const orderResponse = await orderApi.createOrder({
+        cartId: bookingData.cartId,
+        tableId: bookingData.tableId,
+        deliveryOptions: 'dine-in',
+        totalPrice: totalAmount,
+        typeOfPayment: 'momo'
+      })
+
+      const createdOrder = orderResponse.data.metadata
+      console.log('Created Order for MoMo:', createdOrder)
+
+      // Cập nhật trạng thái bàn thành 'reserved' (dùng cho dine-in)
+      // Sử dụng updateTable thay vì changeStatus vì changeStatus yêu cầu admin
+      if (bookingData.tableId) {
+        try {
+          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as any)
+          console.log('Table status updated to reserved')
+        } catch (tableErr) {
+          console.error('Error updating table status:', tableErr)
+        }
+      }
+
+      // Gọi API tạo link thanh toán MoMo
+      const response = await paymentApi.createMoMoPayment({
+        email: bookingData.customerInfo.email,
+        id: createdOrder._id
+      })
+
+      console.log('MoMo Payment Response:', response.data)
+
+      // Truy cập payUrl
+      const payUrl = response.data?.data?.payUrl
+
+      if (payUrl) {
+        // Clear cart trước khi chuyển sang trang thanh toán MoMo
+        await clearCart()
+        // Redirect đến trang thanh toán MoMo
+        window.location.href = payUrl
+      } else {
+        console.error('PayUrl not found in response:', response.data)
+        error('Không thể tạo link thanh toán MoMo. Vui lòng thử lại!')
+      }
+    } catch (err: unknown) {
+      console.error('MoMo Payment error:', err)
+      if (err && typeof err === 'object' && 'response' in err) {
+        const axiosError = err as { response?: { data?: unknown; status?: number } }
+        console.error('Error response:', axiosError.response?.data)
+      }
+      error('Có lỗi xảy ra khi tạo thanh toán MoMo. Vui lòng thử lại!')
+    } finally {
+      setIsMoMoProcessing(false)
+    }
+  }
+
+  // Xử lý thanh toán tiền mặt
+  const handleCashPayment = async () => {
+    if (!bookingData.cartId) {
+      error('Không tìm thấy thông tin giỏ hàng!')
+      return
+    }
+
+    // Ngăn double-click
+    if (isCashProcessing) return
+    setIsCashProcessing(true)
+
+    try {
+      // Tạo order với typeOfPayment = 'cash'
+      const orderResponse = await orderApi.createOrder({
+        cartId: bookingData.cartId,
+        tableId: bookingData.tableId,
+        deliveryOptions: 'dine-in',
+        totalPrice: totalAmount,
+        typeOfPayment: 'cash'
+      })
+
+      console.log('Created Order for Cash:', orderResponse.data.metadata)
+
+      // Cập nhật trạng thái bàn thành 'reserved' (dùng cho dine-in)
+      // Sử dụng updateTable thay vì changeStatus vì changeStatus yêu cầu admin
+      if (bookingData.tableId) {
+        try {
+          await tableApi.updateTable(bookingData.tableId, { status: 'reserved' } as any)
+          console.log('Table status updated to reserved')
+        } catch (tableErr) {
+          console.error('Error updating table status:', tableErr)
+        }
+      }
+
+      // Clear cart sau khi đặt thành công
+      await clearCart()
+
+      success('Đặt bàn thành công! Bạn sẽ thanh toán tiền mặt tại nhà hàng.')
+
+      // Redirect về trang home
+      navigate(path.home)
+    } catch (err) {
+      console.error('Payment error:', err)
+      error('Có lỗi xảy ra khi xác nhận đơn hàng. Vui lòng thử lại!')
+    } finally {
+      setIsCashProcessing(false)
+    }
+  }
+
   return (
-    <div className='min-h-screen bg-neutral-950 pt-[74px]'>
+    <div className='min-h-screen bg-white pt-[74px]'>
       <div className='mx-auto max-w-4xl px-6 py-12'>
-        <div className='rounded-2xl border border-neutral-800 bg-neutral-900/50 p-8 md:p-12'>
-          <h1 className='mb-8 text-center font-serif text-3xl font-bold text-white md:text-4xl'>
+        <div className='rounded-2xl border border-gray-200 bg-gray-50 p-8 md:p-12'>
+          <h1 className='mb-8 text-center font-serif text-3xl font-bold text-gray-900 md:text-4xl'>
             Xác nhận thanh toán
           </h1>
 
-          <div className='space-y-6 text-neutral-300'>
+          <div className='space-y-6 text-gray-600'>
             {/* Customer & Booking Info */}
-            <div className='grid grid-cols-1 gap-4 border-b border-neutral-800 pb-6 md:grid-cols-2'>
+            <div className='grid grid-cols-1 gap-4 border-b border-gray-200 pb-6 md:grid-cols-2'>
               <div>
-                <p className='text-sm text-neutral-500'>Khách hàng</p>
-                <p className='font-semibold text-white'>{bookingData.customerInfo?.fullName || 'N/A'}</p>
+                <p className='text-sm text-gray-400'>Khách hàng</p>
+                <p className='font-semibold text-gray-900'>{bookingData.customerInfo?.fullName || 'N/A'}</p>
                 <p>{bookingData.customerInfo?.phone || 'N/A'}</p>
                 <p>{bookingData.customerInfo?.email || 'N/A'}</p>
               </div>
               <div className='text-left md:text-right'>
-                <p className='text-sm text-neutral-500'>Thời gian</p>
-                <p className='font-semibold text-white'>{bookingData.bookingTime || 'Chưa chọn'}</p>
-                <p className='text-savoria-gold'>Bàn số: {bookingData.tableNumber || 'Chưa chọn'}</p>
+                <p className='text-sm text-gray-400'>Thời gian</p>
+                <p className='font-semibold text-gray-900'>{bookingData.bookingTime || 'Chưa chọn'}</p>
+                <p className='text-amber-600'>Bàn số: {bookingData.tableNumber || 'Chưa chọn'}</p>
               </div>
             </div>
 
             {/* Cart Items */}
             <div>
-              <p className='mb-4 text-sm text-neutral-500'>Món ăn đã chọn ({cartItems.length} món)</p>
+              <p className='mb-4 text-sm text-gray-400'>Món ăn đã chọn ({cartItems.length} món)</p>
               {cartItems.length === 0 ? (
-                <p className='text-neutral-500 italic'>Không có món ăn nào</p>
+                <p className='text-gray-400 italic'>Không có món ăn nào</p>
               ) : (
                 <div className='space-y-2'>
                   {cartItems.map((item: PaymentCartItem, index: number) => {
@@ -145,8 +278,8 @@ export default function Payment() {
             </div>
 
             {/* Subtotal */}
-            <div className='border-t border-neutral-800 pt-4'>
-              <div className='flex justify-between text-neutral-400'>
+            <div className='border-t border-gray-200 pt-4'>
+              <div className='flex justify-between text-gray-500'>
                 <span>Tạm tính</span>
                 <span>{formatPrice(subtotal)}</span>
               </div>
@@ -181,8 +314,8 @@ export default function Payment() {
             )}
 
             {/* Total */}
-            <div className='border-t border-neutral-800 pt-6'>
-              <div className='flex justify-between text-xl font-bold text-savoria-gold'>
+            <div className='border-t border-gray-200 pt-6'>
+              <div className='flex justify-between text-xl font-bold text-amber-600'>
                 <span>Tổng thanh toán</span>
                 <span>{formatPrice(totalAmount)}</span>
               </div>
@@ -190,22 +323,94 @@ export default function Payment() {
 
             {/* Notes */}
             {bookingData.customerInfo?.notes && (
-              <div className='rounded-lg border border-neutral-800 bg-neutral-900 p-4'>
-                <p className='text-sm text-neutral-500'>Ghi chú</p>
-                <p className='text-neutral-300'>{bookingData.customerInfo.notes}</p>
+              <div className='rounded-lg border border-gray-200 bg-gray-50 p-4'>
+                <p className='text-sm text-gray-400'>Ghi chú</p>
+                <p className='text-gray-600'>{bookingData.customerInfo.notes}</p>
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className='flex flex-col gap-4 pt-4 md:flex-row'>
+            {/* Payment Method Selection */}
+            <div className='space-y-3'>
+              <p className='text-sm font-medium text-gray-500'>Chọn phương thức thanh toán</p>
+
+              {/* MoMo Button */}
+              <button
+                onClick={handleMoMoPayment}
+                disabled={isMoMoProcessing || isCashProcessing}
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
+                  isMoMoProcessing || isCashProcessing
+                    ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
+                    : 'bg-[#A50064] text-gray-900 hover:scale-105 hover:shadow-xl hover:shadow-[#A50064]/30'
+                }`}
+              >
+                {isMoMoProcessing ? (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='h-5 w-5 animate-spin' fill='none' viewBox='0 0 24 24'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                      <path
+                        className='opacity-75'
+                        fill='currentColor'
+                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                      />
+                    </svg>
+                    Đang xử lý...
+                  </span>
+                ) : (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='h-6 w-6' viewBox='0 0 24 24' fill='currentColor'>
+                      <path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z' />
+                    </svg>
+                    Thanh toán MoMo
+                  </span>
+                )}
+              </button>
+
+              {/* Cash Payment Button */}
+              <button
+                onClick={handleCashPayment}
+                disabled={isMoMoProcessing || isCashProcessing}
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
+                  isMoMoProcessing || isCashProcessing
+                    ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
+                    : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
+                }`}
+              >
+                {isCashProcessing ? (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='h-5 w-5 animate-spin' fill='none' viewBox='0 0 24 24'>
+                      <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
+                      <path
+                        className='opacity-75'
+                        fill='currentColor'
+                        d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                      />
+                    </svg>
+                    Đang xử lý...
+                  </span>
+                ) : (
+                  <span className='flex items-center justify-center gap-2'>
+                    <svg className='h-6 w-6' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth='2'
+                        d='M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z'
+                      />
+                    </svg>
+                    Thanh toán tiền mặt tại nhà hàng
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Back Button */}
+            <div className='pt-2'>
               <button
                 onClick={() => navigate(path.booking)}
-                className='flex-1 rounded-xl border border-neutral-700 py-4 font-bold text-neutral-300 transition-all hover:border-neutral-600 hover:bg-neutral-800'
+                disabled={isMoMoProcessing || isCashProcessing}
+                className='w-full rounded-xl border border-stone-200 py-3 font-medium text-gray-500 transition-all hover:border-stone-300 hover:bg-gray-100 hover:text-gray-600'
               >
-                Quay lại chỉnh sửa
-              </button>
-              <button className='flex-1 rounded-xl bg-savoria-gold py-4 font-bold text-neutral-900 shadow-lg transition-all hover:scale-105'>
-                Thanh toán ngay
+                ← Quay lại chỉnh sửa
               </button>
             </div>
           </div>

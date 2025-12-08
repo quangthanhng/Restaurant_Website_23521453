@@ -4,6 +4,7 @@ import TableForm from './TableForm'
 import tableApi from '../../../../apis/table.api'
 import type { Table } from '../../../../types/table.type'
 import { useToast } from '../../../../components/Toast'
+import DeleteConfirmModal from '../../../../components/DeleteConfirmModal/DeleteConfirmModal'
 
 export default function TableManagement() {
   const queryClient = useQueryClient()
@@ -12,6 +13,10 @@ export default function TableManagement() {
   const [editingTable, setEditingTable] = useState<Table | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<string>('')
+
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [tableToDelete, setTableToDelete] = useState<Table | null>(null)
 
   // Fetch tables từ API
   const {
@@ -34,6 +39,7 @@ export default function TableManagement() {
     onSuccess: async () => {
       await queryClient.refetchQueries({ queryKey: ['admin-tables'] })
       toast.success('Xóa bàn thành công!')
+      closeDeleteModal()
     },
     onError: (error: Error) => {
       toast.error('Lỗi khi xóa bàn: ' + error.message)
@@ -58,9 +64,19 @@ export default function TableManagement() {
     setIsFormOpen(true)
   }
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa bàn này?')) {
-      deleteMutation.mutate(id)
+  const openDeleteModal = (table: Table) => {
+    setTableToDelete(table)
+    setDeleteModalOpen(true)
+  }
+
+  const closeDeleteModal = () => {
+    setTableToDelete(null)
+    setDeleteModalOpen(false)
+  }
+
+  const confirmDelete = () => {
+    if (tableToDelete) {
+      deleteMutation.mutate(tableToDelete._id)
     }
   }
 
@@ -89,20 +105,20 @@ export default function TableManagement() {
         }
       case 'occupied':
         return {
-          bg: 'bg-red-500/20',
-          text: 'text-red-400',
+          bg: 'bg-amber-500/20',
+          text: 'text-amber-400',
           label: 'Đang sử dụng'
         }
       case 'reserved':
         return {
-          bg: 'bg-amber-500/20',
+          bg: 'bg-amber-400/20',
           text: 'text-amber-400',
           label: 'Đã đặt trước'
         }
       default:
         return {
           bg: 'bg-neutral-500/20',
-          text: 'text-neutral-400',
+          text: 'text-gray-500',
           label: status
         }
     }
@@ -121,12 +137,12 @@ export default function TableManagement() {
       {/* Header */}
       <div className='mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between'>
         <div>
-          <h1 className='text-xl font-bold text-amber-50 sm:text-2xl'>Quản lý bàn</h1>
-          <p className='mt-1 text-sm text-neutral-400'>Quản lý tất cả bàn của nhà hàng</p>
+          <h1 className='text-xl font-bold text-gray-900 sm:text-2xl'>Quản lý bàn</h1>
+          <p className='mt-1 text-sm text-gray-500'>Quản lý tất cả bàn của nhà hàng</p>
         </div>
         <button
           onClick={() => setIsFormOpen(true)}
-          className='flex w-full items-center justify-center gap-2 rounded-lg bg-savoria-gold px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 sm:w-auto'
+          className='flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 px-4 py-2.5 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200 sm:w-auto'
         >
           <svg className='h-5 w-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
             <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M12 4v16m8-8H4' />
@@ -137,10 +153,10 @@ export default function TableManagement() {
 
       {/* Statistics Cards */}
       <div className='mb-6 grid grid-cols-1 sm:grid-cols-2 gap-4 lg:grid-cols-4'>
-        <div className='rounded-xl border border-neutral-800 bg-neutral-950 p-4'>
+        <div className='rounded-xl border border-gray-100 bg-white p-4'>
           <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-savoria-gold/20'>
-              <svg className='h-5 w-5 text-savoria-gold' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20'>
+              <svg className='h-5 w-5 text-amber-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -150,13 +166,13 @@ export default function TableManagement() {
               </svg>
             </div>
             <div>
-              <p className='text-2xl font-bold text-amber-50'>{stats.total}</p>
-              <p className='text-xs text-neutral-400'>Tổng số bàn</p>
+              <p className='text-2xl font-bold text-gray-900'>{stats.total}</p>
+              <p className='text-xs text-gray-500'>Tổng số bàn</p>
             </div>
           </div>
         </div>
 
-        <div className='rounded-xl border border-neutral-800 bg-neutral-950 p-4'>
+        <div className='rounded-xl border border-gray-100 bg-white p-4'>
           <div className='flex items-center gap-3'>
             <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-green-500/20'>
               <svg className='h-5 w-5 text-green-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -165,15 +181,15 @@ export default function TableManagement() {
             </div>
             <div>
               <p className='text-2xl font-bold text-green-400'>{stats.available}</p>
-              <p className='text-xs text-neutral-400'>Bàn trống</p>
+              <p className='text-xs text-gray-500'>Bàn trống</p>
             </div>
           </div>
         </div>
 
-        <div className='rounded-xl border border-neutral-800 bg-neutral-950 p-4'>
+        <div className='rounded-xl border border-gray-100 bg-white p-4'>
           <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-red-500/20'>
-              <svg className='h-5 w-5 text-red-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20'>
+              <svg className='h-5 w-5 text-amber-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -183,15 +199,15 @@ export default function TableManagement() {
               </svg>
             </div>
             <div>
-              <p className='text-2xl font-bold text-red-400'>{stats.occupied}</p>
-              <p className='text-xs text-neutral-400'>Đang sử dụng</p>
+              <p className='text-2xl font-bold text-amber-400'>{stats.occupied}</p>
+              <p className='text-xs text-gray-500'>Đang sử dụng</p>
             </div>
           </div>
         </div>
 
-        <div className='rounded-xl border border-neutral-800 bg-neutral-950 p-4'>
+        <div className='rounded-xl border border-gray-100 bg-white p-4'>
           <div className='flex items-center gap-3'>
-            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/20'>
+            <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-amber-400/20'>
               <svg className='h-5 w-5 text-amber-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
@@ -203,7 +219,7 @@ export default function TableManagement() {
             </div>
             <div>
               <p className='text-2xl font-bold text-amber-400'>{stats.reserved}</p>
-              <p className='text-xs text-neutral-400'>Đã đặt trước</p>
+              <p className='text-xs text-gray-500'>Đã đặt trước</p>
             </div>
           </div>
         </div>
@@ -213,7 +229,7 @@ export default function TableManagement() {
       <div className='mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4'>
         <div className='relative flex-1'>
           <svg
-            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-neutral-500'
+            className='absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400'
             fill='none'
             stroke='currentColor'
             viewBox='0 0 24 24'
@@ -230,13 +246,13 @@ export default function TableManagement() {
             placeholder='Tìm theo số bàn hoặc vị trí...'
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className='w-full rounded-lg border border-neutral-700 bg-neutral-800 py-2.5 pl-10 pr-4 text-sm text-amber-50 placeholder:text-neutral-500 focus:border-savoria-gold focus:outline-none focus:ring-1 focus:ring-savoria-gold'
+            className='w-full rounded-lg border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-savoria-gold'
           />
         </div>
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-4 py-2.5 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none focus:ring-1 focus:ring-savoria-gold sm:w-auto'
+          className='w-full rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-savoria-gold sm:w-auto'
         >
           <option value=''>Tất cả trạng thái</option>
           <option value='available'>Trống</option>
@@ -247,7 +263,7 @@ export default function TableManagement() {
 
       {/* Error State */}
       {isError && (
-        <div className='mb-6 rounded-lg border border-red-800 bg-red-900/50 p-4 text-red-300'>
+        <div className='mb-6 rounded-lg border border-amber-800 bg-amber-900/50 p-4 text-amber-300'>
           <p className='font-medium'>Có lỗi xảy ra!</p>
           <p className='text-sm'>{(error as Error)?.message || 'Không thể tải danh sách bàn'}</p>
         </div>
@@ -256,7 +272,7 @@ export default function TableManagement() {
       {/* Loading State */}
       {isLoading && (
         <div className='flex flex-col items-center justify-center py-12'>
-          <svg className='h-8 w-8 animate-spin text-savoria-gold' fill='none' viewBox='0 0 24 24'>
+          <svg className='h-8 w-8 animate-spin text-amber-600' fill='none' viewBox='0 0 24 24'>
             <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
             <path
               className='opacity-75'
@@ -264,7 +280,7 @@ export default function TableManagement() {
               d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
             />
           </svg>
-          <span className='mt-3 text-neutral-400'>Đang tải dữ liệu...</span>
+          <span className='mt-3 text-gray-500'>Đang tải dữ liệu...</span>
         </div>
       )}
 
@@ -272,13 +288,8 @@ export default function TableManagement() {
       {!isLoading && (
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {filteredTables.length === 0 ? (
-            <div className='col-span-full rounded-xl border border-neutral-800 bg-neutral-950 p-8 text-center'>
-              <svg
-                className='mx-auto h-12 w-12 text-neutral-600'
-                fill='none'
-                stroke='currentColor'
-                viewBox='0 0 24 24'
-              >
+            <div className='col-span-full rounded-xl border border-gray-100 bg-white p-8 text-center'>
+              <svg className='mx-auto h-12 w-12 text-gray-300' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                 <path
                   strokeLinecap='round'
                   strokeLinejoin='round'
@@ -286,7 +297,7 @@ export default function TableManagement() {
                   d='M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M12 20a8 8 0 100-16 8 8 0 000 16z'
                 />
               </svg>
-              <p className='mt-2 text-neutral-400'>Không tìm thấy bàn nào</p>
+              <p className='mt-2 text-gray-500'>Không tìm thấy bàn nào</p>
             </div>
           ) : (
             filteredTables.map((table) => {
@@ -294,20 +305,22 @@ export default function TableManagement() {
               return (
                 <div
                   key={table._id}
-                  className='group rounded-xl border border-neutral-800 bg-neutral-950 p-5 transition-all hover:border-neutral-700'
+                  className='group rounded-xl border border-gray-100 bg-white p-5 transition-all hover:border-stone-200'
                 >
                   {/* Table Header */}
                   <div className='mb-4 flex items-start justify-between'>
                     <div className='flex items-center gap-3'>
-                      <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-savoria-gold/20'>
-                        <span className='text-lg font-bold text-savoria-gold'>{table.tableNumber}</span>
+                      <div className='flex h-12 w-12 items-center justify-center rounded-xl bg-amber-500/20'>
+                        <span className='text-lg font-bold text-amber-600'>{table.tableNumber}</span>
                       </div>
                       <div>
-                        <h3 className='font-semibold text-amber-50'>Bàn {table.tableNumber}</h3>
-                        <p className='text-xs text-neutral-400'>{table.position || 'Chưa xác định vị trí'}</p>
+                        <h3 className='font-semibold text-gray-900'>Bàn {table.tableNumber}</h3>
+                        <p className='text-xs text-gray-500'>{table.position || 'Chưa xác định vị trí'}</p>
                       </div>
                     </div>
-                    <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusBadge.bg} ${statusBadge.text}`}>
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusBadge.bg} ${statusBadge.text}`}
+                    >
                       {statusBadge.label}
                     </span>
                   </div>
@@ -315,7 +328,7 @@ export default function TableManagement() {
                   {/* Table Info */}
                   <div className='mb-4 space-y-2'>
                     <div className='flex items-center gap-2 text-sm'>
-                      <svg className='h-4 w-4 text-neutral-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <svg className='h-4 w-4 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                         <path
                           strokeLinecap='round'
                           strokeLinejoin='round'
@@ -323,12 +336,12 @@ export default function TableManagement() {
                           d='M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z'
                         />
                       </svg>
-                      <span className='text-neutral-400'>Sức chứa:</span>
-                      <span className='font-medium text-amber-50'>{table.maximumCapacity} người</span>
+                      <span className='text-gray-500'>Sức chứa:</span>
+                      <span className='font-medium text-gray-900'>{table.maximumCapacity} người</span>
                     </div>
                     {table.reserved && (
                       <div className='flex items-center gap-2 text-sm'>
-                        <svg className='h-4 w-4 text-amber-500' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                        <svg className='h-4 w-4 text-gray-9000' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                           <path
                             strokeLinecap='round'
                             strokeLinejoin='round'
@@ -343,7 +356,7 @@ export default function TableManagement() {
 
                   {/* Status Selector */}
                   <div className='mb-4'>
-                    <label className='mb-1.5 block text-xs text-neutral-500'>Thay đổi trạng thái</label>
+                    <label className='mb-1.5 block text-xs text-gray-400'>Thay đổi trạng thái</label>
                     <select
                       value={table.status}
                       onChange={(e) =>
@@ -353,7 +366,7 @@ export default function TableManagement() {
                         })
                       }
                       disabled={changeStatusMutation.isPending}
-                      className='w-full rounded-lg border border-neutral-700 bg-neutral-800 px-3 py-2 text-sm text-amber-50 focus:border-savoria-gold focus:outline-none disabled:opacity-50'
+                      className='w-full rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-gray-900 focus:border-amber-500 focus:outline-none disabled:opacity-50'
                     >
                       <option value='available'>Trống</option>
                       <option value='occupied'>Đang sử dụng</option>
@@ -365,14 +378,14 @@ export default function TableManagement() {
                   <div className='flex gap-2'>
                     <button
                       onClick={() => handleEdit(table)}
-                      className='flex-1 rounded-lg bg-savoria-gold py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200'
+                      className='flex-1 rounded-lg bg-amber-500 py-2 text-sm font-medium text-neutral-900 transition-colors hover:bg-amber-200'
                     >
                       Sửa
                     </button>
                     <button
-                      onClick={() => handleDelete(table._id)}
+                      onClick={() => openDeleteModal(table)}
                       disabled={deleteMutation.isPending}
-                      className='flex-1 rounded-lg border border-red-500 py-2 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-50'
+                      className='flex-1 rounded-lg border border-amber-500 py-2 text-sm font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50'
                     >
                       Xóa
                     </button>
@@ -386,6 +399,23 @@ export default function TableManagement() {
 
       {/* Table Form Modal */}
       {isFormOpen && <TableForm table={editingTable} onClose={handleCloseForm} />}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmModal
+        isOpen={deleteModalOpen}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDelete}
+        title='Xác nhận xóa bàn'
+        message='Bàn này sẽ bị xóa vĩnh viễn khỏi hệ thống'
+        itemName={tableToDelete ? `Bàn ${tableToDelete.tableNumber}` : undefined}
+        itemDetails={
+          tableToDelete
+            ? `Sức chứa: ${tableToDelete.maximumCapacity} người - ${tableToDelete.position || 'Chưa xác định vị trí'}`
+            : undefined
+        }
+        confirmText='Xóa bàn'
+        isDeleting={deleteMutation.isPending}
+      />
     </div>
   )
 }

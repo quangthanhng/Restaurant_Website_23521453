@@ -20,9 +20,9 @@ export interface TableListResponse {
 
 // Response khi tạo/cập nhật table
 export interface TableResponse {
-  code: number
   message: string
-  data: Table
+  statusCode: number
+  metadata: Table
 }
 
 // Form data khi tạo/update bàn

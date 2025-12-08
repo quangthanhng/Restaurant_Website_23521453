@@ -25,6 +25,31 @@ export default {
       },
       lineHeight: {
         logo: '46.8px'
+      },
+      keyframes: {
+        'pie-grow': {
+          '0%': { transform: 'scale(0) rotate(-90deg)', opacity: '0' },
+          '50%': { transform: 'scale(1.05) rotate(0deg)', opacity: '1' },
+          '100%': { transform: 'scale(1) rotate(0deg)', opacity: '1' }
+        },
+        'fade-in-right': {
+          '0%': { transform: 'translateX(20px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' }
+        },
+        'bar-grow': {
+          '0%': { transform: 'scaleY(0)' },
+          '100%': { transform: 'scaleY(1)' }
+        },
+        'fade-in-up': {
+          '0%': { transform: 'translateY(20px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' }
+        }
+      },
+      animation: {
+        'pie-grow': 'pie-grow 0.8s ease-out forwards',
+        'fade-in-right': 'fade-in-right 0.5s ease-out forwards',
+        'bar-grow': 'bar-grow 0.6s ease-out forwards',
+        'fade-in-up': 'fade-in-up 0.5s ease-out forwards'
       }
     }
   },

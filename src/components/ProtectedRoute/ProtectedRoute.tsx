@@ -26,18 +26,15 @@ export function RejectedRoute() {
 
 /**
  * AdminRoute - Bảo vệ các route chỉ dành cho admin
- * Nếu chưa đăng nhập -> redirect về trang login
- * Nếu đã đăng nhập nhưng không phải admin -> hiện trang 404
+ * Admin phải đăng nhập riêng qua trang /admin/login
+ * Nếu chưa đăng nhập admin -> redirect về trang admin login
  */
 export function AdminRoute() {
-  const { isAuthenticated, profile } = useContext(AppContext)
+  const { isAdminAuthenticated, profile } = useContext(AppContext)
 
-  if (!isAuthenticated) {
-    return <Navigate to={path.login} replace />
-  }
-
-  if (!profile?.isAdmin) {
-    return <Navigate to={path.home} replace />
+  // Phải đăng nhập admin riêng VÀ phải là admin
+  if (!isAdminAuthenticated || !profile?.isAdmin) {
+    return <Navigate to={path.adminLogin} replace />
   }
 
   return <Outlet />

@@ -2,6 +2,7 @@ import http from '../utils/http'
 
 export const blogApi = {
   getBlogs: () => http.get('/blogs'),
+  getBlogById: (id: string) => http.get(`/blogs/detail/${id}`),
   createBlog: (data: FormData) =>
     http.post('/blogs/create', data, {
       headers: { 'Content-Type': 'multipart/form-data' }

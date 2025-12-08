@@ -18,12 +18,16 @@ export interface CartUser {
   email: string
 }
 
+// Cart status type
+export type CartStatus = 'active' | 'cleared'
+
 // Type cho Cart response từ API
 export interface Cart {
   _id: string
   userId: CartUser
   items: CartItem[]
   totalPrice: number
+  status: CartStatus
   createdAt: string
   updatedAt: string
 }
@@ -45,6 +49,11 @@ export interface AddToCartRequest {
 export interface ChangeQuantityRequest {
   dishId: string
   quantity: number
+}
+
+// Request body cho remove from cart
+export interface RemoveFromCartRequest {
+  dishId: string
 }
 
 // Response khi thêm/cập nhật giỏ hàng
