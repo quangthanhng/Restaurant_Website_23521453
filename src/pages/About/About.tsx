@@ -10,13 +10,13 @@ const teamMembers = [
     description: 'Với hơn 15 năm kinh nghiệm, đầu bếp Anh đã mang đến những món ăn tinh tế nhất.'
   },
   {
-    name: 'Nguyễn Thị Hương',
+    name: 'Lê Minh Tuấn',
     role: 'Pastry Chef',
     image: 'https://images.unsplash.com/photo-1595273670150-bd0c3c392e46?w=400&h=400&fit=crop',
     description: 'Chuyên gia về các món tráng miệng và bánh ngọt truyền thống Việt Nam.'
   },
   {
-    name: 'Lê Minh Tuấn',
+    name: 'Nguyễn Thị Hương',
     role: 'Sous Chef',
     image: 'https://images.unsplash.com/photo-1556909114-44e3e70034e2?w=400&h=400&fit=crop',
     description: 'Đam mê sáng tạo những món ăn fusion độc đáo kết hợp Đông - Tây.'

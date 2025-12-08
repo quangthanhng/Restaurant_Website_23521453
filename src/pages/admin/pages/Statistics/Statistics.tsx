@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
+import { motion } from 'framer-motion'
 import orderApi from '../../../../apis/order.api'
+import AnimatedNumber from '../../../../components/AnimatedNumber/AnimatedNumber'
 
 interface CartItem {
   dishId:
@@ -256,8 +258,27 @@ export default function Statistics() {
 
   if (ordersLoading) {
     return (
-      <div className='flex h-full items-center justify-center'>
-        <div className='h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent'></div>
+      <div className='flex h-full flex-col items-center justify-center gap-4 p-6'>
+        <motion.div
+          animate={{
+            scale: [1, 1.2, 1],
+            rotate: [0, 180, 360]
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: 'easeInOut'
+          }}
+          className='h-12 w-12 rounded-full border-4 border-indigo-500 border-t-transparent'
+        />
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+          className='text-sm text-gray-500'
+        >
+          Đang tải dữ liệu thống kê...
+        </motion.p>
       </div>
     )
   }
@@ -266,67 +287,189 @@ export default function Statistics() {
   const maxBooking = Math.max(...bookingByHour.map((h) => h.count), 1)
 
   return (
-    <div className='space-y-6 p-6'>
-      <div>
+    <div className='relative min-h-screen space-y-6 p-6 overflow-hidden'>
+      {/* Animated background gradient */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className='absolute inset-0 -z-10'
+      >
+        <motion.div
+          animate={{
+            background: [
+              'radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)',
+              'radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.05) 0%, transparent 50%)',
+              'radial-gradient(circle at 40% 60%, rgba(16, 185, 129, 0.05) 0%, transparent 50%)',
+              'radial-gradient(circle at 20% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 50%)'
+            ]
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: 'linear'
+          }}
+          className='absolute inset-0'
+        />
+      </motion.div>
+
+      {/* Header with fade in */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
         <h1 className='text-2xl font-bold text-gray-900'>Tổng quan</h1>
         <p className='text-sm text-gray-500'>Thống kê hoạt động của nhà hàng</p>
-      </div>
+      </motion.div>
 
       <div className='grid gap-4 md:grid-cols-3'>
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <p className='text-sm text-gray-500'>Tổng doanh thu</p>
-          <div className='mt-2 flex items-baseline gap-2'>
-            <span className='text-2xl font-bold text-gray-900'>{formatCurrency(stats.totalRevenue)}</span>
+        {/* Revenue Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0 }}
+          whileHover={{
+            scale: 1.02,
+            boxShadow: '0 10px 30px rgba(99, 102, 241, 0.2)',
+            borderColor: 'rgb(99, 102, 241)'
+          }}
+          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+        >
+          <div className='flex items-center justify-between mb-2'>
+            <p className='text-sm text-gray-500'>Tổng doanh thu</p>
+
           </div>
-          <div className='mt-3 flex items-center gap-1 text-sm'>
-            <span className={stats.revenueGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}>
+          <div className='mt-2 flex items-baseline gap-2'>
+            <span className='text-2xl font-bold text-gray-900'>
+              <AnimatedNumber value={stats.totalRevenue} formatFn={formatCurrency} duration={1.2} />
+            </span>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            className='mt-3 flex items-center gap-1 text-sm'
+          >
+            <motion.span
+              initial={{ y: 5 }}
+              animate={{ y: [5, -2, 5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+              className={stats.revenueGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}
+            >
               ↗ {stats.revenueGrowth >= 0 ? '+' : ''}
               {stats.revenueGrowth.toFixed(1)}%
-            </span>
+            </motion.span>
             <span className='text-gray-400'>so với tuần trước</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <p className='text-sm text-gray-500'>Đơn hàng mới</p>
-          <div className='mt-2 flex items-baseline gap-2'>
-            <span className='text-2xl font-bold text-gray-900'>{stats.totalOrders}</span>
+        {/* Orders Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          whileHover={{
+            scale: 1.02,
+            boxShadow: '0 10px 30px rgba(59, 130, 246, 0.2)',
+            borderColor: 'rgb(59, 130, 246)'
+          }}
+          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+        >
+          <div className='flex items-center justify-between mb-2'>
+            <p className='text-sm text-gray-500'>Đơn hàng mới</p>
           </div>
-          <div className='mt-3 flex items-center gap-1 text-sm'>
-            <span className={stats.ordersGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}>
+          <div className='mt-2 flex items-baseline gap-2'>
+            <span className='text-2xl font-bold text-gray-900'>
+              <AnimatedNumber value={stats.totalOrders} duration={1} />
+            </span>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+            className='mt-3 flex items-center gap-1 text-sm'
+          >
+            <motion.span
+              initial={{ y: 5 }}
+              animate={{ y: [5, -2, 5] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+              className={stats.ordersGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}
+            >
               ↗ {stats.ordersGrowth >= 0 ? '+' : ''}
               {stats.ordersGrowth.toFixed(1)}%
-            </span>
+            </motion.span>
             <span className='text-gray-400'>so với tuần trước</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <p className='text-sm text-gray-500'>Khách hàng mới</p>
-          <div className='mt-2 flex items-baseline gap-2'>
-            <span className='text-2xl font-bold text-gray-900'>{stats.uniqueCustomers}</span>
+        {/* Customers Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          whileHover={{
+            scale: 1.02,
+            boxShadow: '0 10px 30px rgba(236, 72, 153, 0.2)',
+            borderColor: 'rgb(236, 72, 153)'
+          }}
+          className='rounded-xl border border-stone-200 bg-gradient-to-br from-stone-50 to-white p-6 transition-all'
+        >
+          <div className='flex items-center justify-between mb-2'>
+            <p className='text-sm text-gray-500'>Khách hàng mới</p>
+
           </div>
-          <div className='mt-3 flex items-center gap-1 text-sm'>
-            <span className={stats.customersGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}>
+          <div className='mt-2 flex items-baseline gap-2'>
+            <span className='text-2xl font-bold text-gray-900'>
+              <AnimatedNumber value={stats.uniqueCustomers} duration={1} />
+            </span>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className='mt-3 flex items-center gap-1 text-sm'
+          >
+            <motion.span
+              initial={{ y: 5 }}
+              animate={{ y: [5, -2, 5] }}
+              transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+              className={stats.customersGrowth >= 0 ? 'text-green-400' : 'text-amber-400'}
+            >
               ↗ {stats.customersGrowth >= 0 ? '+' : ''}
               {stats.customersGrowth.toFixed(1)}%
-            </span>
+            </motion.span>
             <span className='text-gray-400'>so với tuần trước</span>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <div className='mb-6 flex items-center justify-between'>
+        {/* Daily Revenue Chart - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+            className='mb-6 flex items-center justify-between'
+          >
             <div>
               <h2 className='text-lg font-semibold text-gray-900'>Doanh thu trong tuần</h2>
               <p className='text-sm text-gray-500'>7 ngày gần nhất</p>
             </div>
-            <div className='rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-600'>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', stiffness: 200, delay: 0.5 }}
+              className='rounded-full bg-green-500/10 px-3 py-1 text-sm font-medium text-green-600'
+            >
               Tổng: {formatCurrency(dailyRevenueData.reduce((sum, d) => sum + d.revenue, 0))}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
           <div className='h-64'>
             <div className='flex h-full'>
               <div className='flex flex-col justify-between pr-4 text-right text-xs text-gray-400'>
@@ -352,21 +495,65 @@ export default function Statistics() {
 
                     return (
                       <div key={index} className='group relative flex flex-1 flex-col items-center h-full justify-end'>
-                        {/* Bar */}
-                        <div
-                          className={`w-full rounded-t-lg transition-all duration-300 hover:opacity-80 ${barColor}`}
-                          style={{ height: `${percentage}%`, minHeight: day.revenue > 0 ? '4px' : '2px' }}
-                        />
+                        {/* Bar with grow animation */}
+                        <motion.div
+                          initial={{ height: 0, opacity: 0, scale: 0.8 }}
+                          animate={{ height: `${percentage}%`, opacity: 1, scale: 1 }}
+                          transition={{
+                            duration: 0.8,
+                            delay: 0.6 + index * 0.1,
+                            ease: [0.34, 1.56, 0.64, 1]
+                          }}
+                          whileHover={{
+                            opacity: 0.8,
+                            scale: 1.05,
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.2)'
+                          }}
+                          className={`w-full rounded-t-lg ${barColor} relative overflow-hidden`}
+                          style={{ minHeight: day.revenue > 0 ? '4px' : '2px' }}
+                        >
+                          {/* Shimmer effect */}
+                          {day.revenue > 0 && (
+                            <motion.div
+                              initial={{ x: '-100%' }}
+                              animate={{ x: '200%' }}
+                              transition={{
+                                duration: 2,
+                                repeat: Infinity,
+                                delay: 0.6 + index * 0.1,
+                                ease: 'linear'
+                              }}
+                              className='absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent'
+                            />
+                          )}
+                        </motion.div>
 
-                        {/* Tooltip with full value */}
-                        <div className='absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 group-hover:block z-10'>
-                          <div className='whitespace-nowrap rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg'>
+                        {/* Tooltip with fade-in animation */}
+                        <motion.div
+                          initial={{ opacity: 0, y: 5 }}
+                          whileHover={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className='absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 group-hover:block z-10'
+                        >
+                          <motion.div
+                            initial={{ scale: 0.8 }}
+                            whileHover={{ scale: 1 }}
+                            className='whitespace-nowrap rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg'
+                          >
                             <div className='font-semibold'>{day.label}</div>
                             <div className='text-green-400'>{formatCurrency(day.revenue)}</div>
-                            {isHighest && <div className='text-amber-400 mt-1'>🏆 Ngày cao nhất</div>}
-                          </div>
+                            {isHighest && (
+                              <motion.div
+                                animate={{ scale: [1, 1.1, 1] }}
+                                transition={{ duration: 1, repeat: Infinity }}
+                                className='text-amber-400 mt-1'
+                              >
+                                🏆 Ngày cao nhất
+                              </motion.div>
+                            )}
+                          </motion.div>
                           <div className='absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-800'></div>
-                        </div>
+                        </motion.div>
                       </div>
                     )
                   })}
@@ -376,16 +563,27 @@ export default function Statistics() {
                   {dailyRevenueData.map((day, index) => {
                     const isHighest = day.revenue === maxRevenue && day.revenue > 0
                     return (
-                      <div key={index} className='flex-1 text-center'>
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.7 + index * 0.1 }}
+                        className='flex-1 text-center'
+                      >
                         <span className={`text-xs ${isHighest ? 'font-bold text-amber-600' : 'text-gray-400'}`}>
                           {day.label}
                         </span>
                         {day.revenue > 0 && (
-                          <div className={`text-xs font-semibold ${isHighest ? 'text-amber-600' : 'text-gray-600'}`}>
+                          <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.0 + index * 0.1 }}
+                            className={`text-xs font-semibold ${isHighest ? 'text-amber-600' : 'text-gray-600'}`}
+                          >
                             {formatShortCurrency(day.revenue)}
-                          </div>
+                          </motion.div>
                         )}
-                      </div>
+                      </motion.div>
                     )
                   })}
                 </div>
@@ -394,91 +592,209 @@ export default function Statistics() {
           </div>
 
           {/* Summary */}
-          <div className='mt-4 flex justify-between rounded-lg bg-stone-100 p-3'>
-            <div className='text-center'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.8 }}
+            className='mt-4 flex justify-between rounded-lg bg-stone-100 p-3'
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 1.9 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-green-600'>
                 {formatShortCurrency(dailyRevenueData.reduce((sum, d) => sum + d.revenue, 0))}
               </div>
               <div className='text-xs text-gray-500'>Tổng tuần</div>
-            </div>
-            <div className='text-center'>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 2.0 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-blue-600'>
                 {formatShortCurrency(dailyRevenueData.reduce((sum, d) => sum + d.revenue, 0) / 7)}
               </div>
               <div className='text-xs text-gray-500'>Trung bình/ngày</div>
-            </div>
-            <div className='text-center'>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 2.1 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-amber-600'>
                 {dailyRevenueData.reduce((best, d) => (d.revenue > best.revenue ? d : best), dailyRevenueData[0])
                   ?.label || '-'}
               </div>
               <div className='text-xs text-gray-500'>Ngày đỉnh</div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <h2 className='mb-6 text-lg font-semibold text-gray-900'>Món ăn phổ biến</h2>
+        {/* Popular Dishes Chart - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'
+        >
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className='mb-6 text-lg font-semibold text-gray-900'
+          >
+            Món ăn phổ biến
+          </motion.h2>
           {dishRevenueData.length > 0 ? (
             <div className='flex items-center gap-8'>
-              <svg viewBox='0 0 200 200' className='h-40 w-40 shrink-0'>
-                {(() => {
-                  let cumulativePercent = 0
-                  return dishRevenueData.map((dish, index) => {
-                    const percent = dish.percentage
-                    const startAngle = cumulativePercent * 3.6 - 90
-                    cumulativePercent += percent
-                    const endAngle = cumulativePercent * 3.6 - 90
-                    const startRad = (startAngle * Math.PI) / 180
-                    const endRad = (endAngle * Math.PI) / 180
-                    const radius = 80
-                    const cx = 100,
-                      cy = 100
-                    const x1 = cx + radius * Math.cos(startRad)
-                    const y1 = cy + radius * Math.sin(startRad)
-                    const x2 = cx + radius * Math.cos(endRad)
-                    const y2 = cy + radius * Math.sin(endRad)
-                    const largeArc = percent > 50 ? 1 : 0
-                    const path = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`
-                    return <path key={index} d={path} fill={dish.color} stroke='white' strokeWidth='2' />
-                  })
-                })()}
-                <circle cx='100' cy='100' r='40' fill='#fafaf9' />
-              </svg>
+              <div className='relative'>
+                <svg viewBox='0 0 200 200' className='h-40 w-40 shrink-0'>
+                  {(() => {
+                    let cumulativePercent = 0
+                    return dishRevenueData.map((dish, index) => {
+                      const percent = dish.percentage
+                      const startAngle = cumulativePercent * 3.6 - 90
+                      cumulativePercent += percent
+                      const endAngle = cumulativePercent * 3.6 - 90
+                      const startRad = (startAngle * Math.PI) / 180
+                      const endRad = (endAngle * Math.PI) / 180
+                      const radius = 80
+                      const cx = 100,
+                        cy = 100
+                      const x1 = cx + radius * Math.cos(startRad)
+                      const y1 = cy + radius * Math.sin(startRad)
+                      const x2 = cx + radius * Math.cos(endRad)
+                      const y2 = cy + radius * Math.sin(endRad)
+                      const largeArc = percent > 50 ? 1 : 0
+                      const path = `M ${cx} ${cy} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`
+                      return (
+                        <motion.path
+                          key={index}
+                          d={path}
+                          fill={dish.color}
+                          stroke='white'
+                          strokeWidth='2'
+                          initial={{ scale: 0, opacity: 0, rotate: -180 }}
+                          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+                          transition={{
+                            duration: 0.8,
+                            delay: 1.5 + index * 0.15,
+                            ease: [0.34, 1.56, 0.64, 1]
+                          }}
+                          style={{ transformOrigin: '100px 100px' }}
+                          whileHover={{
+                            scale: 1.08,
+                            filter: 'brightness(1.2)'
+                          }}
+                        />
+                      )
+                    })
+                  })()}
+                  <motion.circle
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 1.6, type: 'spring' }}
+                    cx='100'
+                    cy='100'
+                    r='40'
+                    fill='#fafaf9'
+                  />
+                </svg>
+                {/* Center label */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 2.0, type: 'spring' }}
+                  className='absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center'
+                >
+                  <div className='text-2xl font-bold text-gray-900'>
+                    {dishRevenueData.reduce((sum, d) => sum + d.totalQuantity, 0)}
+                  </div>
+                  <div className='text-xs text-gray-500'>món đã bán</div>
+                </motion.div>
+              </div>
               <div className='flex-1 space-y-2'>
                 {dishRevenueData.map((dish, index) => (
-                  <div key={index} className='flex items-center gap-2'>
-                    <span className='h-3 w-3 rounded-sm' style={{ backgroundColor: dish.color }}></span>
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 1.5 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, x: 5 }}
+                    className='flex items-center gap-2'
+                  >
+                    <motion.span
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: 1.6 + index * 0.1, type: 'spring' }}
+                      className='h-3 w-3 rounded-sm'
+                      style={{ backgroundColor: dish.color }}
+                    ></motion.span>
                     <span className='truncate text-sm text-gray-600' title={dish.name}>
                       {dish.name}
                     </span>
-                  </div>
+                    <span className='ml-auto text-xs font-semibold text-gray-900'>
+                      {dish.percentage.toFixed(1)}%
+                    </span>
+                  </motion.div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className='flex h-40 items-center justify-center text-gray-400'>Không có dữ liệu</div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className='flex h-40 items-center justify-center text-gray-400'
+            >
+              Không có dữ liệu
+            </motion.div>
           )}
-        </div>
+        </motion.div>
       </div>
 
       <div className='grid gap-6 lg:grid-cols-2'>
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <div className='mb-6 flex items-center justify-between'>
+        {/* Booking by Hour Chart - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.5 }}
+          className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'
+        >
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className='mb-6 flex items-center justify-between'
+          >
             <div>
               <h2 className='text-lg font-semibold text-gray-900'>Thống kê đặt bàn theo giờ</h2>
               <p className='text-sm text-gray-500'>Khung giờ đặt bàn trong tuần</p>
             </div>
             <div className='flex items-center gap-4'>
-              <span className='flex items-center gap-2 text-sm'>
+              <motion.span
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.7 }}
+                className='flex items-center gap-2 text-sm'
+              >
                 <span className='h-3 w-3 rounded-full bg-amber-500'></span>
                 <span className='text-gray-500'>Giờ cao điểm</span>
-              </span>
-              <span className='rounded-full bg-blue-500/10 px-3 py-1 text-sm text-blue-400'>
+              </motion.span>
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', delay: 0.8 }}
+                className='rounded-full bg-blue-500/10 px-3 py-1 text-sm text-blue-400'
+              >
                 Tổng: {bookingByHour.reduce((sum, h) => sum + h.count, 0)} đơn
-              </span>
+              </motion.span>
             </div>
-          </div>
+          </motion.div>
           <div className='h-56'>
             <div className='flex h-full items-end gap-2'>
               {bookingByHour.map((hour, index) => {
@@ -492,14 +808,27 @@ export default function Statistics() {
 
                 return (
                   <div key={index} className='group relative flex flex-1 flex-col items-center'>
-                    {/* Bar */}
-                    <div
-                      className={`w-full rounded-t-lg transition-all duration-300 hover:opacity-80 ${barColor}`}
-                      style={{ height: `${Math.max(percentage, 5)}%`, minHeight: '8px' }}
+                    {/* Bar with animation */}
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: `${Math.max(percentage, 5)}%`, opacity: 1 }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.9 + index * 0.05,
+                        ease: 'easeOut'
+                      }}
+                      whileHover={{ opacity: 0.8, scale: 1.05 }}
+                      className={`w-full rounded-t-lg ${barColor}`}
+                      style={{ minHeight: '8px' }}
                     />
 
                     {/* Tooltip */}
-                    <div className='absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 group-hover:block z-10'>
+                    <motion.div
+                      initial={{ opacity: 0, y: 5 }}
+                      whileHover={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className='absolute bottom-full left-1/2 mb-2 hidden -translate-x-1/2 group-hover:block z-10'
+                    >
                       <div className='whitespace-nowrap rounded-lg bg-gray-800 px-3 py-2 text-xs text-white shadow-lg'>
                         <div className='font-semibold'>
                           {hour.hour}:00 - {hour.hour + 1}:00
@@ -508,12 +837,17 @@ export default function Statistics() {
                         {isPeakHour && <div className='text-amber-400 mt-1'>🔥 Giờ cao điểm</div>}
                       </div>
                       <div className='absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-800'></div>
-                    </div>
+                    </motion.div>
 
                     {/* Hour label */}
-                    <span className={`mt-2 text-xs ${isPeakHour ? 'font-bold text-amber-600' : 'text-gray-400'}`}>
+                    <motion.span
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.9 + index * 0.05 }}
+                      className={`mt-2 text-xs ${isPeakHour ? 'font-bold text-amber-600' : 'text-gray-400'}`}
+                    >
                       {hour.hour}h
-                    </span>
+                    </motion.span>
                   </div>
                 )
               })}
@@ -521,48 +855,93 @@ export default function Statistics() {
           </div>
 
           {/* Summary */}
-          <div className='mt-4 flex justify-between rounded-lg bg-stone-100 p-3'>
-            <div className='text-center'>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 2.2 }}
+            className='mt-4 flex justify-between rounded-lg bg-stone-100 p-3'
+          >
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 2.3 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-gray-900'>
                 {bookingByHour.reduce((max, h) => (h.count > max ? h.hour : max), 0)}:00
               </div>
               <div className='text-xs text-gray-500'>Giờ đông nhất</div>
-            </div>
-            <div className='text-center'>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 2.4 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-amber-600'>{Math.max(...bookingByHour.map((h) => h.count))}</div>
               <div className='text-xs text-gray-500'>Đơn cao nhất/giờ</div>
-            </div>
-            <div className='text-center'>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', delay: 2.5 }}
+              className='text-center'
+            >
               <div className='text-lg font-bold text-blue-600'>
                 {(bookingByHour.reduce((sum, h) => sum + h.count, 0) / bookingByHour.length).toFixed(1)}
               </div>
               <div className='text-xs text-gray-500'>Trung bình/giờ</div>
-            </div>
-          </div>
-        </div>
+            </motion.div>
+          </motion.div>
+        </motion.div>
 
-        <div className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'>
-          <h2 className='mb-4 text-lg font-semibold text-gray-900'>Đơn hàng gần đây</h2>
+        {/* Recent Orders Table - Enhanced */}
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.6 }}
+          className='rounded-xl border border-stone-200 bg-stone-50/50 p-6'
+        >
+          <motion.h2
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className='mb-4 text-lg font-semibold text-gray-900'
+          >
+            Đơn hàng gần đây
+          </motion.h2>
           <div className='overflow-x-auto'>
             <table className='w-full text-sm'>
               <thead>
-                <tr className='border-b border-stone-200 text-left text-gray-500'>
+                <motion.tr
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 }}
+                  className='border-b border-stone-200 text-left text-gray-500'
+                >
                   <th className='pb-3 font-medium'>Khách hàng</th>
                   <th className='pb-3 font-medium'>Số món</th>
                   <th className='pb-3 font-medium'>Tổng tiền</th>
                   <th className='pb-3 font-medium'>Trạng thái</th>
                   <th className='pb-3 font-medium'>Thời gian</th>
-                </tr>
+                </motion.tr>
               </thead>
               <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order._id} className='border-b border-stone-200/50'>
+                {recentOrders.map((order, index) => (
+                  <motion.tr
+                    key={order._id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.9 + index * 0.1 }}
+                    whileHover={{ backgroundColor: 'rgba(0,0,0,0.02)', scale: 1.01 }}
+                    className='border-b border-stone-200/50'
+                  >
                     <td className='py-3 text-gray-900'>{order.userId?.username || 'Khách'}</td>
                     <td className='py-3 text-gray-600'>{order.cartId?.items?.length || 0}</td>
                     <td className='py-3 text-gray-600'>{formatCurrency(order.totalPrice)}</td>
                     <td className='py-3'>{getStatusBadge(order.status)}</td>
                     <td className='py-3 text-gray-400'>{formatTime(order.createdAt)}</td>
-                  </tr>
+                  </motion.tr>
                 ))}
                 {recentOrders.length === 0 && (
                   <tr>
@@ -574,7 +953,7 @@ export default function Statistics() {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   )

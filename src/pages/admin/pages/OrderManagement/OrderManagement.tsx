@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import orderApi from '../../../../apis/order.api'
 import type { Order, OrderQueryParams } from '../../../../types/order.type'
@@ -32,18 +32,90 @@ export default function OrderManagement() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [orderToDelete, setOrderToDelete] = useState<Order | null>(null)
 
-  // Fetch orders - sử dụng getAllOrders cho admin
+  // Fetch orders - sử dụng getAllOrders cho admin (không gửi filter params vì backend không hỗ trợ đầy đủ)
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['admin-orders', queryParams],
-    queryFn: () => orderApi.getAllOrders(queryParams),
+    queryKey: ['admin-orders'],
+    queryFn: () => orderApi.getAllOrders(),
     select: (res) => res.data
   })
 
   // Xử lý cả hai dạng response: array hoặc object có orders
   const ordersData = data?.metadata
-  const orders: Order[] = Array.isArray(ordersData) ? ordersData : ordersData?.orders || []
-  const totalPages = Array.isArray(ordersData) ? 1 : ordersData?.totalPages || 1
-  const currentPage = Array.isArray(ordersData) ? 1 : ordersData?.currentPage || 1
+  const rawOrders: Order[] = useMemo(() => {
+    return Array.isArray(ordersData) ? ordersData : ordersData?.orders || []
+  }, [ordersData])
+
+  // Client-side filtering - lọc theo tất cả các điều kiện (AND)
+  const orders: Order[] = useMemo(() => {
+    // Debug log
+    console.log('=== FILTER DEBUG ===')
+    console.log('Filter params:', JSON.stringify(queryParams))
+    console.log('Raw orders count:', rawOrders.length)
+
+    // Nếu không có filter nào được chọn, trả về tất cả orders
+    const hasStatusFilter = queryParams.status && queryParams.status !== ''
+    const hasPayedFilter = queryParams.payed !== undefined
+    const hasDeliveryFilter = queryParams.deliveryOptions && queryParams.deliveryOptions !== ''
+    const hasPaymentFilter = queryParams.typeOfPayment && queryParams.typeOfPayment !== ''
+
+    console.log('Has filters:', { hasStatusFilter, hasPayedFilter, hasDeliveryFilter, hasPaymentFilter })
+
+    if (!hasStatusFilter && !hasPayedFilter && !hasDeliveryFilter && !hasPaymentFilter) {
+      console.log('No filters active, returning all orders')
+      return rawOrders
+    }
+
+    const filtered = rawOrders.filter((order) => {
+      // Filter theo status (Trạng thái)
+      if (hasStatusFilter) {
+        if (order.status !== queryParams.status) {
+          return false
+        }
+      }
+
+      // Filter theo payed (Đã thanh toán / Chưa thanh toán)
+      if (hasPayedFilter) {
+        const orderIsPaid = order.payed || order.status === 'confirmed' || order.status === 'completed'
+        if (queryParams.payed !== orderIsPaid) {
+          return false
+        }
+      }
+
+      // Filter theo deliveryOptions (Hình thức: dine-in, delivery, pickup)
+      if (hasDeliveryFilter) {
+        if (order.deliveryOptions !== queryParams.deliveryOptions) {
+          return false
+        }
+      }
+
+      // Filter theo typeOfPayment (PTTT: cod, momo, card, cash)
+      if (hasPaymentFilter) {
+        const orderPaymentType = order.typeOfPayment?.toLowerCase() || ''
+        const filterPaymentType = queryParams.typeOfPayment?.toLowerCase() || ''
+
+        // Handle COD which can be 'cod' or 'cash'
+        if (filterPaymentType === 'cod') {
+          if (orderPaymentType !== 'cod' && orderPaymentType !== 'cash') {
+            console.log(`❌ Order ${order._id} excluded: typeOfPayment=${orderPaymentType} !== cod/cash`)
+            return false
+          }
+        } else if (orderPaymentType !== filterPaymentType) {
+          console.log(`❌ Order ${order._id} excluded: typeOfPayment=${orderPaymentType} !== ${filterPaymentType}`)
+          return false
+        }
+      }
+
+      return true
+    })
+
+    console.log('Filtered orders count:', filtered.length)
+    console.log('=== END FILTER DEBUG ===')
+    return filtered
+  }, [rawOrders, queryParams])
+
+  // Pagination info (client-side pagination not implemented yet, showing all filtered results)
+  const totalPages = 1
+  const currentPage = 1
 
   // Update status mutation - định nghĩa trước để dùng trong callback
   const updateStatusMutation = useMutation({
@@ -260,22 +332,22 @@ export default function OrderManagement() {
     return order.payed || order.status === 'confirmed' || order.status === 'completed'
   }
 
-  // Statistics
+  // Statistics - sử dụng rawOrders để thống kê tổng quan (không bị ảnh hưởng bởi filter)
   const stats = {
-    total: orders.length,
-    pending: orders.filter((o) => o.status === 'pending').length,
-    completed: orders.filter((o) => o.status === 'completed').length,
-    cancelled: orders.filter((o) => o.status === 'cancelled').length,
-    totalRevenue: orders.filter((o) => isPaid(o)).reduce((sum, o) => sum + o.totalPrice, 0),
+    total: rawOrders.length,
+    pending: rawOrders.filter((o) => o.status === 'pending').length,
+    completed: rawOrders.filter((o) => o.status === 'completed').length,
+    cancelled: rawOrders.filter((o) => o.status === 'cancelled').length,
+    totalRevenue: rawOrders.filter((o) => isPaid(o)).reduce((sum, o) => sum + o.totalPrice, 0),
     // Thống kê theo hình thức
-    dineIn: orders.filter((o) => o.deliveryOptions === 'dine-in').length,
-    delivery: orders.filter((o) => o.deliveryOptions === 'delivery').length,
-    pickup: orders.filter((o) => o.deliveryOptions === 'pickup').length,
+    dineIn: rawOrders.filter((o) => o.deliveryOptions === 'dine-in').length,
+    delivery: rawOrders.filter((o) => o.deliveryOptions === 'delivery').length,
+    pickup: rawOrders.filter((o) => o.deliveryOptions === 'pickup').length,
     // Thống kê thanh toán - confirmed/completed = đã thanh toán
-    payed: orders.filter((o) => isPaid(o)).length,
-    unpayed: orders.filter((o) => !isPaid(o)).length,
-    cod: orders.filter((o) => o.typeOfPayment === 'cod' || o.typeOfPayment === 'cash').length,
-    momo: orders.filter((o) => o.typeOfPayment === 'momo').length
+    payed: rawOrders.filter((o) => isPaid(o)).length,
+    unpayed: rawOrders.filter((o) => !isPaid(o)).length,
+    cod: rawOrders.filter((o) => o.typeOfPayment === 'cod' || o.typeOfPayment === 'cash').length,
+    momo: rawOrders.filter((o) => o.typeOfPayment === 'momo').length
   }
 
   // Generate page numbers
@@ -557,42 +629,42 @@ export default function OrderManagement() {
       {/* Table for desktop/tablet */}
       {!isLoading && (
         <div className='hidden overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm sm:block'>
-          <table className='min-w-full divide-y divide-neutral-800'>
+          <table className='w-full table-fixed'>
             <thead className='bg-gray-50'>
               <tr>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[80px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Mã đơn
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[180px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Khách hàng
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[90px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Loại đơn
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[140px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Bàn/Địa chỉ
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[100px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Tổng tiền
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[120px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Trạng thái
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[115px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Thanh toán
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[70px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   PTTT
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[150px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Ngày tạo
                 </th>
-                <th className='px-4 py-4 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[130px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Hành động
                 </th>
               </tr>
             </thead>
-            <tbody className='divide-y divide-neutral-800 bg-white'>
+            <tbody className='divide-y divide-gray-100 bg-white'>
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan={10} className='px-6 py-10 text-center text-gray-500'>
@@ -621,14 +693,16 @@ export default function OrderManagement() {
                   const shortId = order._id.slice(-6).toUpperCase()
                   return (
                     <tr key={order._id} className='hover:bg-gray-50'>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* Mã đơn */}
+                      <td className='px-3 py-3 align-middle'>
                         <span className='font-medium text-amber-600'>#{shortId}</span>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
-                        <div className='flex items-center gap-3'>
-                          <div className='flex h-8 w-8 items-center justify-center rounded-full bg-amber-500/20'>
+                      {/* Khách hàng */}
+                      <td className='px-3 py-3 align-middle'>
+                        <div className='flex items-center gap-2'>
+                          <div className='flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500/20'>
                             <svg
-                              className='h-4 w-4 text-amber-600'
+                              className='h-3.5 w-3.5 text-amber-600'
                               fill='none'
                               stroke='currentColor'
                               viewBox='0 0 24 24'
@@ -641,55 +715,53 @@ export default function OrderManagement() {
                               />
                             </svg>
                           </div>
-                          <div className='flex flex-col'>
-                            <span className='text-gray-900'>{(order.userId as User)?.username || 'N/A'}</span>
-                            <span className='text-xs text-gray-500'>
+                          <div className='min-w-0 flex-1'>
+                            <p className='truncate text-sm text-gray-900'>{(order.userId as User)?.username || 'N/A'}</p>
+                            <p className='truncate text-xs text-gray-500'>
                               📞 {(order.userId as User)?.phoneNumber || 'Không có SĐT'}
-                            </span>
+                            </p>
                           </div>
                         </div>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* Loại đơn */}
+                      <td className='px-3 py-3 align-middle'>
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${deliveryBadge.bg} ${deliveryBadge.text}`}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${deliveryBadge.bg} ${deliveryBadge.text}`}
                         >
                           {deliveryBadge.label}
                         </span>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* Bàn/Địa chỉ */}
+                      <td className='px-3 py-3 align-middle'>
                         {order.deliveryOptions === 'dine-in' && order.tableId ? (
-                          <div className='flex flex-col items-center text-center'>
-                            <span className='inline-flex items-center justify-center rounded-full bg-amber-500/20 px-2.5 py-1 text-xs font-medium text-amber-600'>
-                              Bàn {(order.tableId as Table).tableNumber}
-                            </span>
-                            {order.bookingTime && (
-                              <span className='mt-1 text-xs text-gray-500'>
-                                🕐 {new Date(order.bookingTime).toLocaleString('vi-VN')}
-                              </span>
-                            )}
-                          </div>
+                          <span className='inline-flex items-center rounded-full bg-amber-500/20 px-2 py-1 text-xs font-medium text-amber-600'>
+                            Bàn {(order.tableId as Table).tableNumber}
+                          </span>
                         ) : order.deliveryOptions === 'delivery' && order.deleveryAddress ? (
-                          <div className='flex flex-col items-center text-center'>
+                          <div className='flex items-center gap-1'>
+                            <span className='text-amber-500'>📍</span>
                             <span
-                              className='max-w-[150px] truncate text-sm text-gray-600'
+                              className='truncate text-xs text-gray-600 max-w-[80px]'
                               title={order.deleveryAddress}
                             >
-                              📍 {order.deleveryAddress}
+                              {order.deleveryAddress}
                             </span>
                           </div>
                         ) : (
-                          <span className='text-gray-400'>—</span>
+                          <span className='text-gray-400 text-xs'>—</span>
                         )}
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
-                        <span className='font-semibold text-gray-900'>{formatPrice(order.totalPrice)}</span>
+                      {/* Tổng tiền */}
+                      <td className='px-3 py-3 align-middle'>
+                        <span className='text-sm font-semibold text-gray-900'>{formatPrice(order.totalPrice)}</span>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* Trạng thái */}
+                      <td className='px-3 py-3 align-middle'>
                         <select
                           value={order.status}
                           onChange={(e) => updateStatusMutation.mutate({ id: order._id, status: e.target.value })}
                           disabled={updateStatusMutation.isPending}
-                          className={`rounded-lg border-0 px-3 py-1.5 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-savoria-gold/50 ${statusBadge.bg} ${statusBadge.text}`}
+                          className={`w-full rounded-lg border-0 px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-savoria-gold/50 ${statusBadge.bg} ${statusBadge.text}`}
                         >
                           <option value='pending'>Chờ xử lý</option>
                           <option value='confirmed'>Đã xác nhận</option>
@@ -697,39 +769,43 @@ export default function OrderManagement() {
                           <option value='cancelled'>Đã hủy</option>
                         </select>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* Thanh toán */}
+                      <td className='px-3 py-3 align-middle'>
                         {isPaid(order) ? (
-                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 px-3 py-1.5 text-xs font-semibold text-green-700'>
+                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 px-2 py-1 text-xs font-semibold text-green-700'>
                             Đã thanh toán
                           </span>
                         ) : (
-                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 px-3 py-1.5 text-xs font-semibold text-amber-700'>
-                            Chưa thanh toán
+                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 px-2 py-1 text-xs font-semibold text-amber-700'>
+                            Chưa TT
                           </span>
                         )}
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
+                      {/* PTTT */}
+                      <td className='px-3 py-3 align-middle'>
                         <span
-                          className={`inline-flex items-center rounded-full px-3 py-1.5 text-xs font-semibold ${paymentBadge.bg} ${paymentBadge.text}`}
+                          className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${paymentBadge.bg} ${paymentBadge.text}`}
                         >
                           {paymentBadge.label}
                         </span>
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4 text-sm text-gray-500'>
+                      {/* Ngày tạo */}
+                      <td className='px-3 py-3 align-middle text-xs text-gray-500'>
                         {new Date(order.createdAt).toLocaleString('vi-VN')}
                       </td>
-                      <td className='whitespace-nowrap px-4 py-4'>
-                        <div className='flex items-center gap-2'>
+                      {/* Hành động */}
+                      <td className='px-3 py-3 align-middle'>
+                        <div className='flex items-center gap-1'>
                           <button
                             onClick={() => setSelectedOrder(order)}
-                            className='rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200'
+                            className='rounded-lg bg-amber-500 px-2.5 py-1 text-xs font-medium text-neutral-900 transition-colors hover:bg-amber-200'
                           >
                             Chi tiết
                           </button>
                           <button
                             onClick={() => openDeleteModal(order)}
                             disabled={deleteMutation.isPending}
-                            className='rounded-lg border border-amber-500 px-3 py-1.5 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50'
+                            className='rounded-lg border border-amber-500 px-2.5 py-1 text-xs font-medium text-amber-400 transition-colors hover:bg-amber-500/20 disabled:opacity-50'
                           >
                             Xóa
                           </button>

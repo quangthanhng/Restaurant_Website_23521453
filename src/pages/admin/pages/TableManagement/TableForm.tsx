@@ -21,17 +21,17 @@ export default function TableForm({ table, onClose }: TableFormProps) {
   } = useForm<TableFormData>({
     defaultValues: table
       ? {
-          tableNumber: table.tableNumber,
-          maximumCapacity: table.maximumCapacity,
-          status: table.status,
-          position: table.position || ''
-        }
+        tableNumber: table.tableNumber,
+        maximumCapacity: table.maximumCapacity,
+        status: table.status,
+        position: table.position || ''
+      }
       : {
-          tableNumber: 1,
-          maximumCapacity: 4,
-          status: 'available',
-          position: ''
-        }
+        tableNumber: 1,
+        maximumCapacity: 4,
+        status: 'available',
+        position: ''
+      }
   })
 
   const mutation = useMutation({
@@ -75,6 +75,23 @@ export default function TableForm({ table, onClose }: TableFormProps) {
   })
 
   const onSubmit = handleSubmit((data: TableFormData) => {
+    // Khi chỉnh sửa, kiểm tra xem có thay đổi nào không
+    if (isEditing && table) {
+      const currentPosition = table.position || ''
+      const newPosition = data.position?.trim() || ''
+
+      const hasChanges =
+        Number(data.tableNumber) !== table.tableNumber ||
+        Number(data.maximumCapacity) !== table.maximumCapacity ||
+        data.status !== table.status ||
+        newPosition !== currentPosition
+
+      if (!hasChanges) {
+        toast.error('Không có thay đổi nào để cập nhật!')
+        return
+      }
+    }
+
     mutation.mutate(data)
   })
 
@@ -109,11 +126,10 @@ export default function TableForm({ table, onClose }: TableFormProps) {
                   min: { value: 1, message: 'Số bàn phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                  errors.tableNumber
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.tableNumber
                     ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
                     : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                }`}
+                  }`}
                 placeholder='Nhập số bàn'
               />
               {errors.tableNumber && <p className='mt-1 text-sm text-amber-400'>{errors.tableNumber.message}</p>}
@@ -131,11 +147,10 @@ export default function TableForm({ table, onClose }: TableFormProps) {
                   min: { value: 1, message: 'Sức chứa phải lớn hơn 0' },
                   valueAsNumber: true
                 })}
-                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${
-                  errors.maximumCapacity
+                className={`w-full rounded-lg border px-4 py-2.5 text-sm bg-stone-50 text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 ${errors.maximumCapacity
                     ? 'border-amber-500 focus:border-amber-500 focus:ring-amber-500/20'
                     : 'border-stone-200 focus:border-amber-500 focus:ring-savoria-gold/20'
-                }`}
+                  }`}
                 placeholder='Nhập sức chứa tối đa'
               />
               {errors.maximumCapacity && (
