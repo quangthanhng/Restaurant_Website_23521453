@@ -1,7 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import orderApi from '../../../../apis/order.api'
-import tableApi from '../../../../apis/table.api'
 
 interface CartItem {
   dishId:
@@ -61,23 +60,13 @@ export default function Statistics() {
     }
   })
 
-  const { data: tablesData } = useQuery({
-    queryKey: ['admin-tables'],
-    queryFn: async () => {
-      const response = await tableApi.getTables()
-      return response.data
-    }
-  })
+
+  // tablesData query removed - can be added later for table occupancy statistics
 
   const orders: Order[] = useMemo(() => {
     if (!ordersData?.metadata) return []
     return ordersData.metadata as unknown as Order[]
   }, [ordersData])
-
-  const tables = useMemo(() => {
-    if (!tablesData?.metadata) return []
-    return tablesData.metadata
-  }, [tablesData])
 
   const weekOrders = useMemo(() => {
     if (!orders.length) return []

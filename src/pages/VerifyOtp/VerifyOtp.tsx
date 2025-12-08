@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import authApi from '../../apis/auth.api'
-import type { ErrorResponse } from '../../types/user.type'
-import { AxiosError } from 'axios'
 import path from '../../constants/path'
 import { useToast } from '../../components/Toast'
 
@@ -133,7 +131,9 @@ export default function VerifyOtp() {
                   {otp.map((digit, index) => (
                     <input
                       key={index}
-                      ref={(el) => (inputRefs.current[index] = el)}
+                      ref={(el) => {
+                        inputRefs.current[index] = el
+                      }}
                       type='text'
                       inputMode='numeric'
                       maxLength={1}

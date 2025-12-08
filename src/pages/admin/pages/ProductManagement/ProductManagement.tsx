@@ -664,11 +664,10 @@ export default function ProductManagement() {
                   <button
                     key={index}
                     onClick={() => handlePageChange(page)}
-                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
-                      page === pagination.page
+                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === pagination.page
                         ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
                         : 'border border-stone-200 text-gray-500 hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600'
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -727,7 +726,7 @@ export default function ProductManagement() {
                     const value = parseInt((e.target as HTMLInputElement).value)
                     if (value >= 1 && value <= pagination.totalPages) {
                       handlePageChange(value)
-                      ;(e.target as HTMLInputElement).value = ''
+                        ; (e.target as HTMLInputElement).value = ''
                     }
                   }
                 }}
@@ -749,7 +748,7 @@ export default function ProductManagement() {
         title='Xác nhận xóa món ăn'
         message='Món ăn này sẽ bị xóa vĩnh viễn khỏi hệ thống'
         itemName={productToDelete?.name}
-        itemImage={productToDelete?.images?.[0]}
+        itemImage={productToDelete?.image}
         itemDetails={
           productToDelete
             ? `Giá: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(productToDelete.price)}`
