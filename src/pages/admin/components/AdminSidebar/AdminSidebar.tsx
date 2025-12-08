@@ -1,5 +1,6 @@
 import { useContext } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { AppContext } from '../../../../contexts/app.context'
 import { clearLS } from '../../../../utils/auth'
 
@@ -134,13 +135,23 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
   return (
     <>
       {/* Mobile Overlay */}
-      {isOpen && <div className='lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm' onClick={onClose} />}
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className='lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm'
+          onClick={onClose}
+        />
+      )}
 
       {/* Mobile Sidebar */}
-      <aside
-        className={`lg:hidden fixed left-0 top-0 z-50 h-screen w-64 bg-white text-gray-900 border-r border-gray-200 transform transition-transform duration-300 ease-in-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+      <motion.aside
+        initial={{ x: '-100%' }}
+        animate={{ x: isOpen ? 0 : '-100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className='lg:hidden fixed left-0 top-0 z-50 h-screen w-64 bg-white text-gray-900 border-r border-gray-200'
       >
         <div className='flex h-full flex-col'>
           {/* Logo with close button */}
@@ -177,12 +188,32 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                   key={item.path}
                   to={item.path}
                   onClick={onClose}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                    isActive ? 'bg-amber-500/20 text-amber-600' : 'text-gray-500 hover:bg-stone-50 hover:text-amber-600'
-                  }`}
+                  className='block relative'
                 >
-                  {item.icon}
-                  {item.label}
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      backgroundColor: isActive ? 'rgba(245, 158, 11, 0.2)' : 'transparent'
+                    }}
+                    whileHover={{
+                      backgroundColor: isActive ? 'rgba(245, 158, 11, 0.25)' : 'rgba(250, 250, 249, 1)',
+                      x: 2
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                      }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId='mobile-active-pill'
+                        className='absolute right-2 h-2 w-2 rounded-full bg-amber-600'
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </motion.div>
                 </Link>
               )
             })}
@@ -225,7 +256,7 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
             </button>
           </div>
         </div>
-      </aside>
+      </motion.aside>
 
       {/* Desktop Sidebar */}
       <aside className='hidden lg:flex fixed left-0 top-0 z-40 h-screen w-64 bg-white text-gray-900 border-r border-gray-200'>
@@ -253,12 +284,32 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium transition-all ${
-                    isActive ? 'bg-amber-500/20 text-amber-600' : 'text-gray-500 hover:bg-stone-50 hover:text-amber-600'
-                  }`}
+                  className='block relative'
                 >
-                  {item.icon}
-                  {item.label}
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      backgroundColor: isActive ? 'rgba(245, 158, 11, 0.2)' : 'transparent'
+                    }}
+                    whileHover={{
+                      backgroundColor: isActive ? 'rgba(245, 158, 11, 0.25)' : 'rgba(250, 250, 249, 1)',
+                      x: 2
+                    }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                      }`}
+                  >
+                    {item.icon}
+                    {item.label}
+                    {isActive && (
+                      <motion.div
+                        layoutId='desktop-active-pill'
+                        className='absolute right-2 h-2 w-2 rounded-full bg-amber-600'
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                  </motion.div>
                 </Link>
               )
             })}

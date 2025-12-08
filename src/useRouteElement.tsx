@@ -1,4 +1,4 @@
-import { Suspense } from 'react'
+import { Suspense, lazy } from 'react'
 import { Navigate, useRoutes } from 'react-router-dom'
 import path from './constants/path'
 import Login from './pages/Login'
@@ -25,14 +25,17 @@ import NotFound from './pages/NotFound'
 import Profile from './pages/Profile'
 import OrderHistory from './pages/OrderHistory'
 import { AdminRoute, RejectedRoute, ProtectedRoute } from './components/ProtectedRoute'
-import ProductManagement from './pages/admin/pages/ProductManagement'
-import TableManagement from './pages/admin/pages/TableManagement'
-import CategoryManagement from './pages/admin/pages/CategoryManagement'
-import DiscountManagement from './pages/admin/pages/DiscountManagement'
-import BlogManagement from './pages/admin/pages/BlogManagement'
-import ContactManagement from './pages/admin/pages/ContactManagement'
-import OrderManagement from './pages/admin/pages/OrderManagement'
-import Statistics from './pages/admin/pages/Statistics'
+import PageLoader from './pages/admin/components/PageLoader'
+
+// Lazy load admin pages for better performance
+const ProductManagement = lazy(() => import('./pages/admin/pages/ProductManagement'))
+const TableManagement = lazy(() => import('./pages/admin/pages/TableManagement'))
+const CategoryManagement = lazy(() => import('./pages/admin/pages/CategoryManagement'))
+const DiscountManagement = lazy(() => import('./pages/admin/pages/DiscountManagement'))
+const BlogManagement = lazy(() => import('./pages/admin/pages/BlogManagement'))
+const ContactManagement = lazy(() => import('./pages/admin/pages/ContactManagement'))
+const OrderManagement = lazy(() => import('./pages/admin/pages/OrderManagement'))
+const Statistics = lazy(() => import('./pages/admin/pages/Statistics'))
 
 export default function useRouteElement() {
   const routeElements = useRoutes([
@@ -87,35 +90,67 @@ export default function useRouteElement() {
             },
             {
               path: path.adminStatistics,
-              element: <Statistics />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <Statistics />
+                </Suspense>
+              )
             },
             {
               path: path.adminProducts,
-              element: <ProductManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <ProductManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminTables,
-              element: <TableManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <TableManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminCategories,
-              element: <CategoryManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <CategoryManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminOrders,
-              element: <OrderManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <OrderManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminCoupons,
-              element: <DiscountManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <DiscountManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminBlogs,
-              element: <BlogManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <BlogManagement />
+                </Suspense>
+              )
             },
             {
               path: path.adminContacts,
-              element: <ContactManagement />
+              element: (
+                <Suspense fallback={<PageLoader />}>
+                  <ContactManagement />
+                </Suspense>
+              )
             }
           ]
         }

@@ -1,6 +1,7 @@
 import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
 import AdminSidebar from './components/AdminSidebar'
+import PageTransition from './components/PageTransition'
 
 export default function AdminLayout() {
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -27,7 +28,9 @@ export default function AdminLayout() {
 
       {/* Main Content - use lg:ml-64 so mobile doesn't reserve sidebar space */}
       <main className='lg:ml-64 min-h-screen p-6 pt-16 lg:pt-6'>
-        <Outlet />
+        <PageTransition>
+          <Outlet />
+        </PageTransition>
       </main>
     </div>
   )
