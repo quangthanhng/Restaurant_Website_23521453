@@ -332,15 +332,18 @@ export default function Menu() {
 
             {/* Dishes Grid */}
             {!isLoading && filteredDishes.length > 0 && (
-              <StaggerContainer className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
+              <StaggerContainer
+                key={`dishes-${selectedCategory}-${filteredDishes.length}`}
+                className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'
+              >
                 {filteredDishes.map((dish) => (
                   <StaggerItem key={dish._id}>
                     <Link
                       to={`/dish/${dish._id}`}
-                      className='group relative cursor-pointer overflow-hidden rounded-2xl border border-stone-200 bg-white transition-all duration-300 hover:border-amber-500 hover:bg-amber-50/30'
+                      className='group relative cursor-pointer overflow-hidden rounded-2xl border border-transparent bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:bg-amber-50/30'
                     >
                       {/* Image */}
-                      <div className='relative h-64 w-full overflow-hidden bg-stone-100'>
+                      <div className='relative h-64 w-full overflow-hidden rounded-t-2xl bg-stone-100'>
                         <img
                           src={dish.image || 'https://via.placeholder.com/400x300'}
                           alt={dish.name}

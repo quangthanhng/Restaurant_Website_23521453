@@ -5,6 +5,7 @@ import { useCart } from '../../contexts/CartContext'
 import { useToast } from '../../components/Toast'
 import { AppContext } from '../../contexts/app.context'
 import tableApi from '../../apis/table.api'
+import authApi from '../../apis/auth.api'
 import { getDiscounts } from '../../apis/discount.api'
 import type { Table } from '../../types/table.type'
 import type { Discount } from '../../types/discount.type'
@@ -66,6 +67,30 @@ export default function Booking() {
     select: (response) => response.data.metadata || []
   })
   const tables: Table[] = tablesData || []
+
+  // Fetch latest user profile from API to get updated phone number
+  const { data: profileData } = useQuery({
+    queryKey: ['user-profile-booking'],
+    queryFn: async () => {
+      const response = await authApi.getProfile()
+      return response.data
+    },
+    enabled: isAuthenticated,
+    staleTime: 1000 * 60 * 5 // Cache for 5 minutes
+  })
+
+  // Get the full profile with latest data from server
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const serverProfile = profileData?.metadata as any
+  const fullProfile = useMemo(() => {
+    const baseProfile = serverProfile || profile
+    if (!baseProfile) return null
+    return {
+      ...profile,
+      ...baseProfile,
+      phoneNumber: baseProfile.phoneNumber || profile?.phoneNumber || ''
+    }
+  }, [serverProfile, profile])
 
   // Helper function to get table status display
   const getTableStatusDisplay = (status: string) => {
@@ -208,19 +233,19 @@ export default function Booking() {
           discountAmount,
           cartItems,
           customerInfo: {
-            fullName: profile?.username || '',
-            email: profile?.email || '',
-            phoneNumber: profile?.phoneNumber || '',
+            fullName: fullProfile?.username || '',
+            email: fullProfile?.email || '',
+            phoneNumber: fullProfile?.phoneNumber || '',
             notes
           },
           discount: selectedDiscount
             ? {
-              code: selectedDiscount.code,
-              percentage: selectedDiscount.percentage,
-              description: selectedDiscount.description
-            }
+                code: selectedDiscount.code,
+                percentage: selectedDiscount.percentage,
+                description: selectedDiscount.description
+              }
             : null,
-          bookingTime: formattedBookingDateTime
+          bookingTime: `${bookingDate}T${bookingTime}:00` // Local time format
         }
       })
     } catch (err) {
@@ -303,27 +328,29 @@ export default function Booking() {
                           </th>
                         </tr>
                       </thead>
-                      <tbody className='divide-y divide-neutral-800'>
+                      <tbody className='divide-y divide-gray-200'>
                         {tables.map((table) => {
                           const statusDisplay = getTableStatusDisplay(table.status)
                           const bookable = isTableBookable(table)
                           return (
                             <tr
                               key={table._id}
-                              className={`transition-colors ${bookable
+                              className={`transition-colors ${
+                                bookable
                                   ? 'cursor-pointer hover:bg-stone-50'
                                   : 'cursor-not-allowed bg-gray-50 opacity-60'
-                                } ${selectedTableId === table._id && bookable ? 'bg-amber-500/10' : ''}`}
+                              } ${selectedTableId === table._id && bookable ? 'bg-amber-500/10' : ''}`}
                               onClick={() => bookable && setSelectedTableId(table._id)}
                             >
                               <td className='px-6 py-4'>
                                 <div
-                                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${!bookable
+                                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
+                                    !bookable
                                       ? 'border-gray-300 bg-gray-200'
                                       : selectedTableId === table._id
                                         ? 'border-amber-500 bg-amber-500'
                                         : 'border-neutral-600'
-                                    }`}
+                                  }`}
                                 >
                                   {selectedTableId === table._id && bookable && (
                                     <div className='h-2 w-2 rounded-full bg-white' />
@@ -515,7 +542,7 @@ export default function Booking() {
                           d='M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z'
                         />
                       </svg>
-                      <span className='font-medium text-gray-900'>{profile?.username || 'Người dùng'}</span>
+                      <span className='font-medium text-gray-900'>{fullProfile?.username || 'Người dùng'}</span>
                     </div>
                     <div className='flex items-center gap-3'>
                       <svg className='h-5 w-5 text-amber-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
@@ -526,9 +553,9 @@ export default function Booking() {
                           d='M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z'
                         />
                       </svg>
-                      <span className='text-gray-700'>{profile?.email}</span>
+                      <span className='text-gray-700'>{fullProfile?.email}</span>
                     </div>
-                    {profile?.phoneNumber && (
+                    {fullProfile?.phoneNumber && (
                       <div className='flex items-center gap-3'>
                         <svg className='h-5 w-5 text-amber-600' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                           <path
@@ -538,7 +565,7 @@ export default function Booking() {
                             d='M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z'
                           />
                         </svg>
-                        <span className='text-gray-700'>{profile.phoneNumber}</span>
+                        <span className='text-gray-700'>{fullProfile.phoneNumber}</span>
                       </div>
                     )}
                   </div>
@@ -592,10 +619,11 @@ export default function Booking() {
                         <button
                           key={discount._id}
                           onClick={() => setSelectedDiscount(selectedDiscount?._id === discount._id ? null : discount)}
-                          className={`w-full rounded-lg border p-3 text-left transition-all ${selectedDiscount?._id === discount._id
+                          className={`w-full rounded-lg border p-3 text-left transition-all ${
+                            selectedDiscount?._id === discount._id
                               ? 'border-amber-500 bg-amber-500/10'
                               : 'border-stone-200 hover:border-amber-500/50'
-                            }`}
+                          }`}
                         >
                           <div className='flex items-center justify-between'>
                             <div>
@@ -633,10 +661,11 @@ export default function Booking() {
             <button
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className={`w-full rounded-xl py-4 font-semibold shadow-lg transition-all ${isSubmitting
+              className={`w-full rounded-xl py-4 font-semibold shadow-lg transition-all ${
+                isSubmitting
                   ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
                   : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
-                }`}
+              }`}
             >
               {isSubmitting ? (
                 <span className='flex items-center justify-center gap-2'>

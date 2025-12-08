@@ -28,7 +28,7 @@ export function FadeIn({ children, delay = 0, duration = 0.5, direction = 'up', 
         y: 0,
         x: 0
       }}
-      viewport={{ once: true, amount: 0.3 }}
+      viewport={{ once: false, amount: 0.3 }}
       transition={{
         duration,
         delay,
@@ -52,7 +52,7 @@ export function StaggerContainer({ children, staggerDelay = 0.1, className = '' 
     <motion.div
       initial='hidden'
       whileInView='visible'
-      viewport={{ once: true, amount: 0.2 }}
+      viewport={{ once: false, amount: 0.2 }}
       variants={{
         visible: {
           transition: {

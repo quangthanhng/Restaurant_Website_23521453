@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AppProvider } from './contexts/app.context'
 import { CartProvider } from './contexts/CartContext'
 import { ToastProvider } from './components/Toast'
+import ScrollToTop from './components/ScrollToTop'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -20,6 +21,7 @@ const queryClient = new QueryClient({
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
+      <ScrollToTop />
       <AppProvider>
         <CartProvider>
           <QueryClientProvider client={queryClient}>

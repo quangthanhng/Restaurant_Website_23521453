@@ -89,7 +89,7 @@ export default function DiscountManagement() {
       </div>
       {/* Table for desktop */}
       <div className='hidden sm:block rounded-xl border border-gray-100 bg-white shadow-sm overflow-x-auto'>
-        <table className='min-w-full divide-y divide-neutral-800'>
+        <table className='min-w-full divide-y divide-gray-200'>
           <thead className='bg-gray-50'>
             <tr>
               <th className='px-4 py-3 text-left text-xs font-semibold uppercase text-amber-600'>Mã</th>
@@ -100,7 +100,7 @@ export default function DiscountManagement() {
               <th className='px-4 py-3 text-left text-xs font-semibold uppercase text-amber-600'>Hành động</th>
             </tr>
           </thead>
-          <tbody className='divide-y divide-neutral-800'>
+          <tbody className='divide-y divide-gray-100'>
             {isLoading ? (
               <tr>
                 <td colSpan={6} className='text-center py-8'>

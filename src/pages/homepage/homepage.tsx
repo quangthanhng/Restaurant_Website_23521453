@@ -221,7 +221,10 @@ export default function Homepage() {
           </FadeIn>
 
           {/* Dishes Grid */}
-          <StaggerContainer className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'>
+          <StaggerContainer
+            key={`featured-dishes-${dishes.length}`}
+            className='grid gap-8 sm:grid-cols-2 lg:grid-cols-3'
+          >
             {dishes.map((dish) => (
               <StaggerItem key={dish._id}>
                 <div className='group relative overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl'>
@@ -254,11 +257,38 @@ export default function Homepage() {
                     <div className='flex items-center justify-between'>
                       <span className='text-xl font-bold text-amber-600'>{formatPrice(dish.price)}</span>
                       <div className='flex items-center gap-1 text-amber-500'>
-                        {[...Array(5)].map((_, i) => (
-                          <svg key={i} className='h-4 w-4 fill-current' viewBox='0 0 20 20'>
-                            <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
-                          </svg>
-                        ))}
+                        {[...Array(5)].map((_, i) => {
+                          const rating = (dish as { rating?: number }).rating || 5
+                          const fullStars = Math.floor(rating)
+                          const partialFill = rating - fullStars
+
+                          if (i < fullStars) {
+                            return (
+                              <svg key={i} className='h-4 w-4 fill-amber-400' viewBox='0 0 20 20'>
+                                <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                              </svg>
+                            )
+                          } else if (i === fullStars && partialFill > 0) {
+                            return (
+                              <div key={i} className='relative h-4 w-4'>
+                                <svg className='absolute h-4 w-4 fill-gray-200' viewBox='0 0 20 20'>
+                                  <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                                </svg>
+                                <div className='absolute overflow-hidden' style={{ width: `${partialFill * 100}%` }}>
+                                  <svg className='h-4 w-4 fill-amber-400' viewBox='0 0 20 20'>
+                                    <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                                  </svg>
+                                </div>
+                              </div>
+                            )
+                          } else {
+                            return (
+                              <svg key={i} className='h-4 w-4 fill-gray-200' viewBox='0 0 20 20'>
+                                <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                              </svg>
+                            )
+                          }
+                        })}
                       </div>
                     </div>
                   </div>

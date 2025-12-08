@@ -117,14 +117,49 @@ export default function OrderManagement() {
   const totalPages = 1
   const currentPage = 1
 
-  // Update status mutation - định nghĩa trước để dùng trong callback
+  // Update status mutation with optimistic update for instant UI response
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, status }: { id: string; status: string }) => orderApi.updateOrderStatus(id, status),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
-      // Không toast ở đây vì handlers sẽ toast
+    // Optimistic update - update cache immediately before API call
+    onMutate: async ({ id, status }) => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['admin-orders'] })
+
+      // Snapshot the previous value
+      const previousOrders = queryClient.getQueryData(['admin-orders'])
+
+      // Optimistically update the cache
+      queryClient.setQueryData(['admin-orders'], (old: { data?: { metadata?: Order[] | { orders?: Order[] } } }) => {
+        if (!old?.data?.metadata) return old
+
+        const ordersArray = Array.isArray(old.data.metadata) ? old.data.metadata : old.data.metadata.orders || []
+
+        const updatedOrders = ordersArray.map((order: Order) => (order._id === id ? { ...order, status } : order))
+
+        // Return in the same structure as original
+        if (Array.isArray(old.data.metadata)) {
+          return { ...old, data: { ...old.data, metadata: updatedOrders } }
+        }
+        return { ...old, data: { ...old.data, metadata: { ...old.data.metadata, orders: updatedOrders } } }
+      })
+
+      // Return context with the previous value for rollback
+      return { previousOrders }
     },
-    onError: (err: Error) => toast.error('Lỗi cập nhật trạng thái: ' + err.message)
+    // If error, rollback to previous value
+    onError: (err: Error, _variables, context) => {
+      if (context?.previousOrders) {
+        queryClient.setQueryData(['admin-orders'], context.previousOrders)
+      }
+      toast.error('Lỗi cập nhật trạng thái: ' + err.message)
+    },
+    // Always refetch after error or success to ensure data consistency
+    onSettled: () => {
+      // Delay the refetch slightly to avoid visual glitch
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ['admin-orders'] })
+      }, 1000)
+    }
   })
 
   // Delete mutation
@@ -280,6 +315,32 @@ export default function OrderManagement() {
       style: 'currency',
       currency: 'VND'
     }).format(price)
+  }
+
+  // Format datetime as "HH:mm:ss, dd/MM/yyyy"
+  // Parse directly from ISO string to avoid timezone issues
+  const formatDateTime = (dateString: string | Date) => {
+    if (!dateString) return 'N/A'
+
+    const str = typeof dateString === 'string' ? dateString : dateString.toISOString()
+
+    // Handle ISO format: "2025-12-09T00:00:00" or "2025-12-09T00:00:00.000Z"
+    const match = str.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})/)
+    if (match) {
+      const [, year, month, day, hours, minutes, seconds] = match
+      return `${hours}:${minutes}:${seconds}, ${day}/${month}/${year}`
+    }
+
+    // Fallback to Date parsing for other formats
+    const date = new Date(str)
+    if (isNaN(date.getTime())) return 'N/A'
+    const hours = date.getHours().toString().padStart(2, '0')
+    const minutes = date.getMinutes().toString().padStart(2, '0')
+    const seconds = date.getSeconds().toString().padStart(2, '0')
+    const day = date.getDate().toString().padStart(2, '0')
+    const month = (date.getMonth() + 1).toString().padStart(2, '0')
+    const year = date.getFullYear()
+    return `${hours}:${minutes}:${seconds}, ${day}/${month}/${year}`
   }
 
   // Get status badge styles
@@ -670,10 +731,10 @@ export default function OrderManagement() {
                 <th className='w-[180px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Khách hàng
                 </th>
-                <th className='w-[90px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[90px] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Loại đơn
                 </th>
-                <th className='w-[140px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[140px] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Bàn/Địa chỉ
                 </th>
                 <th className='w-[100px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
@@ -682,10 +743,10 @@ export default function OrderManagement() {
                 <th className='w-[120px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Trạng thái
                 </th>
-                <th className='w-[115px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[115px] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   Thanh toán
                 </th>
-                <th className='w-[70px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
+                <th className='w-[70px] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-amber-600'>
                   PTTT
                 </th>
                 <th className='w-[150px] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-amber-600'>
@@ -758,7 +819,7 @@ export default function OrderManagement() {
                         </div>
                       </td>
                       {/* Loại đơn */}
-                      <td className='px-3 py-3 align-middle'>
+                      <td className='px-3 py-3 align-middle text-center'>
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${deliveryBadge.bg} ${deliveryBadge.text}`}
                         >
@@ -766,13 +827,13 @@ export default function OrderManagement() {
                         </span>
                       </td>
                       {/* Bàn/Địa chỉ */}
-                      <td className='px-3 py-3 align-middle'>
+                      <td className='px-3 py-3 align-middle text-center'>
                         {order.deliveryOptions === 'dine-in' && order.tableId ? (
                           <span className='inline-flex items-center rounded-full bg-amber-500/20 px-2 py-1 text-xs font-medium text-amber-600'>
                             Bàn {(order.tableId as Table).tableNumber}
                           </span>
                         ) : order.deliveryOptions === 'delivery' && order.deleveryAddress ? (
-                          <div className='flex items-center gap-1'>
+                          <div className='flex items-center justify-center gap-1'>
                             <span className='text-amber-500'>📍</span>
                             <span className='truncate text-xs text-gray-600 max-w-[80px]' title={order.deleveryAddress}>
                               {order.deleveryAddress}
@@ -801,19 +862,19 @@ export default function OrderManagement() {
                         </select>
                       </td>
                       {/* Thanh toán */}
-                      <td className='px-3 py-3 align-middle'>
+                      <td className='px-3 py-3 align-middle text-center'>
                         {isPaid(order) ? (
-                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-green-100 to-emerald-100 border border-green-200 px-2 py-1 text-xs font-semibold text-green-700'>
+                          <span className='inline-flex items-center rounded-full bg-linear-to-r from-green-100 to-emerald-100 border border-green-200 px-2 py-1 text-xs font-semibold text-green-700'>
                             Đã thanh toán
                           </span>
                         ) : (
-                          <span className='inline-flex items-center rounded-full bg-gradient-to-r from-amber-100 to-orange-100 border border-amber-200 px-2 py-1 text-xs font-semibold text-amber-700'>
+                          <span className='inline-flex items-center rounded-full bg-linear-to-r from-amber-100 to-orange-100 border border-amber-200 px-2 py-1 text-xs font-semibold text-amber-700'>
                             Chưa TT
                           </span>
                         )}
                       </td>
                       {/* PTTT */}
-                      <td className='px-3 py-3 align-middle'>
+                      <td className='px-3 py-3 align-middle text-center'>
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-1 text-xs font-semibold ${paymentBadge.bg} ${paymentBadge.text}`}
                         >
@@ -822,7 +883,7 @@ export default function OrderManagement() {
                       </td>
                       {/* Ngày tạo */}
                       <td className='px-3 py-3 align-middle text-xs text-gray-500'>
-                        {new Date(order.createdAt).toLocaleString('vi-VN')}
+                        {formatDateTime(order.createdAt)}
                       </td>
                       {/* Hành động */}
                       <td className='px-3 py-3 align-middle'>
@@ -911,7 +972,7 @@ export default function OrderManagement() {
                     {order.deliveryOptions === 'dine-in' && order.bookingTime && (
                       <div className='flex items-center justify-between text-sm'>
                         <span className='text-gray-500'>Giờ đặt:</span>
-                        <span className='text-gray-600'>{new Date(order.bookingTime).toLocaleString('vi-VN')}</span>
+                        <span className='text-gray-600'>{formatDateTime(order.bookingTime)}</span>
                       </div>
                     )}
                     {order.deliveryOptions === 'delivery' && order.deleveryAddress && (
@@ -946,7 +1007,7 @@ export default function OrderManagement() {
                     </div>
                     <div className='flex items-center justify-between text-sm'>
                       <span className='text-gray-500'>Ngày tạo:</span>
-                      <span className='text-gray-600'>{new Date(order.createdAt).toLocaleString('vi-VN')}</span>
+                      <span className='text-gray-600'>{formatDateTime(order.createdAt)}</span>
                     </div>
                   </div>
 
@@ -1134,7 +1195,7 @@ export default function OrderManagement() {
                       <div>
                         <p className='text-xs text-gray-400'>Sức chứa</p>
                         <p className='font-medium text-gray-900'>
-                          {(selectedOrder.tableId as Table).maximumCapacity} người
+                          {(selectedOrder.tableId as Table).maximumCapacity || 'N/A'} người
                         </p>
                       </div>
                     </>
@@ -1144,9 +1205,7 @@ export default function OrderManagement() {
                   {selectedOrder.deliveryOptions === 'dine-in' && selectedOrder.bookingTime && (
                     <div className='col-span-2'>
                       <p className='text-xs text-gray-400'>🕐 Thời gian đặt bàn</p>
-                      <p className='font-medium text-gray-900'>
-                        {new Date(selectedOrder.bookingTime).toLocaleString('vi-VN')}
-                      </p>
+                      <p className='font-medium text-gray-900'>{formatDateTime(selectedOrder.bookingTime)}</p>
                     </div>
                   )}
 
@@ -1154,17 +1213,13 @@ export default function OrderManagement() {
                   {selectedOrder.checkInTime && (
                     <div>
                       <p className='text-xs text-gray-400'>⏰ Giờ vào</p>
-                      <p className='font-medium text-green-400'>
-                        {new Date(selectedOrder.checkInTime).toLocaleString('vi-VN')}
-                      </p>
+                      <p className='font-medium text-green-400'>{formatDateTime(selectedOrder.checkInTime)}</p>
                     </div>
                   )}
                   {selectedOrder.checkOutTime && (
                     <div>
                       <p className='text-xs text-gray-400'>⏰ Giờ ra</p>
-                      <p className='font-medium text-amber-400'>
-                        {new Date(selectedOrder.checkOutTime).toLocaleString('vi-VN')}
-                      </p>
+                      <p className='font-medium text-amber-400'>{formatDateTime(selectedOrder.checkOutTime)}</p>
                     </div>
                   )}
 
@@ -1210,11 +1265,11 @@ export default function OrderManagement() {
                   </div>
                   <div className='col-span-2'>
                     <p className='text-xs text-gray-400'>Ngày tạo đơn</p>
-                    <p className='text-sm text-gray-600'>{new Date(selectedOrder.createdAt).toLocaleString('vi-VN')}</p>
+                    <p className='text-sm text-gray-600'>{formatDateTime(selectedOrder.createdAt)}</p>
                   </div>
                   <div className='col-span-2'>
                     <p className='text-xs text-gray-400'>Cập nhật lần cuối</p>
-                    <p className='text-sm text-gray-600'>{new Date(selectedOrder.updatedAt).toLocaleString('vi-VN')}</p>
+                    <p className='text-sm text-gray-600'>{formatDateTime(selectedOrder.updatedAt)}</p>
                   </div>
                 </div>
               </div>
@@ -1319,13 +1374,7 @@ export default function OrderManagement() {
                   Thời gian đặt bàn
                 </p>
                 <p className='mt-1 text-sm font-medium text-gray-900'>
-                  {new Date(newOrderPopup.order.createdAt).toLocaleString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  })}
+                  {formatDateTime(newOrderPopup.order.bookingTime || newOrderPopup.order.createdAt)}
                 </p>
               </div>
               <div className='rounded-lg border border-gray-100 bg-gray-50 p-3'>
@@ -1425,7 +1474,7 @@ export default function OrderManagement() {
 
             {/* Timestamp */}
             <p className='mt-4 text-center text-xs text-gray-400'>
-              Đặt lúc: {new Date(newOrderPopup.order.createdAt).toLocaleString('vi-VN')}
+              Đặt lúc: {formatDateTime(newOrderPopup.order.createdAt)}
             </p>
           </div>
         </div>

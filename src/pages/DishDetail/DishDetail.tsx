@@ -110,7 +110,7 @@ export default function DishDetail() {
                 </span>
               )}
               {dish.discount > 0 && (
-                <span className='inline-flex items-center rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white shadow-lg'>
+                <span className='inline-flex w-fit items-center rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-semibold text-white shadow-lg'>
                   -{dish.discount}%
                 </span>
               )}
@@ -128,15 +128,41 @@ export default function DishDetail() {
             {/* Rating */}
             <div className='mb-6 flex items-center gap-2'>
               <div className='flex items-center gap-1'>
-                {[...Array(5)].map((_, i) => (
-                  <svg
-                    key={i}
-                    className={`h-5 w-5 ${i < Math.round(dish.rating || 5) ? 'fill-amber-400' : 'fill-gray-200'}`}
-                    viewBox='0 0 20 20'
-                  >
-                    <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
-                  </svg>
-                ))}
+                {[...Array(5)].map((_, i) => {
+                  const rating = dish.rating || 5
+                  const fullStars = Math.floor(rating)
+                  const partialFill = rating - fullStars
+
+                  if (i < fullStars) {
+                    // Full star
+                    return (
+                      <svg key={i} className='h-5 w-5 fill-amber-400' viewBox='0 0 20 20'>
+                        <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                      </svg>
+                    )
+                  } else if (i === fullStars && partialFill > 0) {
+                    // Partial star
+                    return (
+                      <div key={i} className='relative h-5 w-5'>
+                        <svg className='absolute h-5 w-5 fill-gray-200' viewBox='0 0 20 20'>
+                          <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                        </svg>
+                        <div className='absolute overflow-hidden' style={{ width: `${partialFill * 100}%` }}>
+                          <svg className='h-5 w-5 fill-amber-400' viewBox='0 0 20 20'>
+                            <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                          </svg>
+                        </div>
+                      </div>
+                    )
+                  } else {
+                    // Empty star
+                    return (
+                      <svg key={i} className='h-5 w-5 fill-gray-200' viewBox='0 0 20 20'>
+                        <path d='M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z' />
+                      </svg>
+                    )
+                  }
+                })}
               </div>
               <span className='text-sm text-stone-500'>({dish.rating || 5}/5)</span>
             </div>
