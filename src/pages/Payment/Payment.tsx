@@ -335,10 +335,11 @@ export default function Payment() {
               <button
                 onClick={handleMoMoPayment}
                 disabled={isMoMoProcessing || isCashProcessing}
-                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${isMoMoProcessing || isCashProcessing
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
+                  isMoMoProcessing || isCashProcessing
                     ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
                     : 'bg-[#A50064] text-gray-900 hover:scale-105 hover:shadow-xl hover:shadow-[#A50064]/30'
-                  }`}
+                }`}
               >
                 {isMoMoProcessing ? (
                   <span className='flex items-center justify-center gap-2'>
@@ -366,10 +367,11 @@ export default function Payment() {
               <button
                 onClick={handleCashPayment}
                 disabled={isMoMoProcessing || isCashProcessing}
-                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${isMoMoProcessing || isCashProcessing
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
+                  isMoMoProcessing || isCashProcessing
                     ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
                     : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
-                  }`}
+                }`}
               >
                 {isCashProcessing ? (
                   <span className='flex items-center justify-center gap-2'>

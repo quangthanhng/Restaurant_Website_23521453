@@ -1034,10 +1034,11 @@ export default function OrderManagement() {
                   <button
                     key={index}
                     onClick={() => handlePageChange(page)}
-                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === currentPage
+                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
+                      page === currentPage
                         ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
                         : 'border border-stone-200 text-gray-500 hover:border-amber-500 hover:bg-stone-50 hover:text-amber-600'
-                      }`}
+                    }`}
                   >
                     {page}
                   </button>
@@ -1384,10 +1385,7 @@ export default function OrderManagement() {
                         </span>
                       </div>
                       <span className='text-sm font-medium text-gray-900'>
-                        {new Intl.NumberFormat('vi-VN').format(
-                          (item.dishId?.price || 0) * (item.quantity || 1)
-                        )}{' '}
-                        đ
+                        {new Intl.NumberFormat('vi-VN').format((item.dishId?.price || 0) * (item.quantity || 1))} đ
                       </span>
                     </div>
                   ))}

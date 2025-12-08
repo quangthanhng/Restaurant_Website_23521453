@@ -53,12 +53,15 @@ export default function ProductManagement() {
   })
   const categories: Category[] = categoriesData || []
 
-  // Fetch TẤT CẢ dishes khi có search term (để search toàn bộ database)
+  // Fetch TẤT CẢ dishes khi có search term hoặc category filter
   const { data: allDishesData, isLoading: isLoadingAllDishes } = useQuery({
     queryKey: ['admin-all-dishes'],
     queryFn: async () => {
-      // Fetch trang đầu để lấy totalPages
-      const firstPage = await dishApi.getDishes({ page: 1, limit: 100 })
+      // Fetch trang đầu để lấy totalPages - KHÔNG filter để lấy tất cả
+      const firstPage = await dishApi.getDishes({
+        page: 1,
+        limit: 100
+      })
       const totalPages = firstPage.data.metadata?.totalPages || 1
 
       if (totalPages === 1) {
@@ -68,7 +71,10 @@ export default function ProductManagement() {
       // Fetch tất cả các trang còn lại
       const allPromises = []
       for (let page = 2; page <= totalPages; page++) {
-        allPromises.push(dishApi.getDishes({ page, limit: 100 }))
+        allPromises.push(dishApi.getDishes({
+          page,
+          limit: 100
+        }))
       }
 
       const results = await Promise.all(allPromises)
@@ -79,10 +85,10 @@ export default function ProductManagement() {
 
       return allDishes
     },
-    enabled: !!searchTerm.trim() // Chỉ fetch khi có search term
+    enabled: !!searchTerm.trim() || !!queryParams.category // Fetch khi có search term HOẶC category filter
   })
 
-  // Fetch dishes từ API (có phân trang và filter) - dùng khi KHÔNG có search term
+  // Fetch dishes từ API (có phân trang và filter) - dùng khi KHÔNG có search term VÀ KHÔNG có category filter
   const {
     data: dishesData,
     isLoading: isLoadingPaginated,
@@ -96,27 +102,33 @@ export default function ProductManagement() {
         keyword: undefined // Bỏ keyword vì backend không hỗ trợ
       }),
     select: (response) => response.data,
-    enabled: !searchTerm.trim() // Chỉ fetch khi KHÔNG có search term
+    enabled: !searchTerm.trim() && !queryParams.category // Chỉ fetch khi KHÔNG có search term VÀ KHÔNG có category filter
   })
 
   // Determine loading state
-  const isLoading = searchTerm.trim() ? isLoadingAllDishes : isLoadingPaginated
+  const isLoading = (searchTerm.trim() || queryParams.category) ? isLoadingAllDishes : isLoadingPaginated
 
-  // Lấy dishes - nếu có search thì dùng allDishes, không thì dùng paginated
+  // Lấy dishes - nếu có search hoặc category filter thì dùng allDishes, không thì dùng paginated
   const dishes = useMemo(() => {
-    if (searchTerm.trim() && allDishesData) {
-      // Filter theo search term trong toàn bộ dishes
-      const searchLower = searchTerm.toLowerCase().trim()
-      return allDishesData.filter(
-        (dish: Dish) =>
-          dish.name.toLowerCase().includes(searchLower) || dish.description?.toLowerCase().includes(searchLower)
-      )
+    if ((searchTerm.trim() || queryParams.category) && allDishesData) {
+      let result = allDishesData
+
+      // Nếu có search term, filter theo search
+      if (searchTerm.trim()) {
+        const searchLower = searchTerm.toLowerCase().trim()
+        result = result.filter(
+          (dish: Dish) =>
+            dish.name.toLowerCase().includes(searchLower) || dish.description?.toLowerCase().includes(searchLower)
+        )
+      }
+
+      return result
     }
     return Array.isArray(dishesData?.metadata?.dishes) ? dishesData.metadata.dishes : []
-  }, [searchTerm, allDishesData, dishesData])
+  }, [searchTerm, queryParams.category, allDishesData, dishesData])
 
-  const totalPages = searchTerm.trim() ? 1 : dishesData?.metadata?.totalPages || 1
-  const currentPage = searchTerm.trim() ? 1 : dishesData?.metadata?.currentPage || queryParams.page || 1
+  const totalPages = (searchTerm.trim() || queryParams.category) ? 1 : dishesData?.metadata?.totalPages || 1
+  const currentPage = (searchTerm.trim() || queryParams.category) ? 1 : dishesData?.metadata?.currentPage || queryParams.page || 1
   const currentLimit = queryParams.limit || 10
 
   // Kiểm tra xem có còn trang tiếp theo không
@@ -223,34 +235,56 @@ export default function ProductManagement() {
     setEditingProduct(null)
   }
 
-  // Filter: chỉ hiển thị món chưa bị xóa và filter theo status nếu có
+  // Filter: chỉ hiển thị món chưa bị xóa và filter theo status/category
   const filteredDishes = useMemo(() => {
     if (!Array.isArray(dishes)) return []
 
     return dishes.filter((dish) => {
+      // Bỏ qua món đã xóa
       if (dish.deleted) return false
 
-      // Filter theo status nếu có chọn
-      if (queryParams.status && dish.status !== queryParams.status) return false
+      // Filter theo category nếu có chọn - LUÔN LUÔN filter trên client để đảm bảo đúng
+      if (queryParams.category && dish.categoryId?._id !== queryParams.category) {
+        return false
+      }
 
-      // Filter theo category nếu có chọn và không đang search
-      if (!searchTerm.trim() && queryParams.category) {
-        if (dish.categoryId?._id !== queryParams.category) return false
+      // Filter theo status nếu có chọn
+      if (queryParams.status && dish.status !== queryParams.status) {
+        return false
       }
 
       return true
     })
-  }, [dishes, queryParams.status, queryParams.category, searchTerm])
+  }, [dishes, queryParams.status, queryParams.category])
 
   // Handle filter change
   const handleCategoryChange = (category: string) => {
-    // Khi chọn category, xóa keyword search
-    setSearchTerm('')
-    setQueryParams((prev) => ({ ...prev, category, keyword: '', page: 1 }))
+    setQueryParams((prev) => ({ ...prev, category, page: 1 }))
   }
 
   const handleStatusChange = (status: string) => {
     setQueryParams((prev) => ({ ...prev, status: status as 'active' | 'inactive' | '', page: 1 }))
+  }
+
+  // Handle search - khi search sẽ tìm trong tất cả danh mục
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value)
+    // Reset về trang 1 khi search
+    if (value.trim()) {
+      setQueryParams((prev) => ({ ...prev, page: 1 }))
+    }
+  }
+
+  // Clear all filters
+  const clearAllFilters = () => {
+    setSearchTerm('')
+    setQueryParams({
+      page: 1,
+      limit: 10,
+      category: '',
+      status: '',
+      keyword: ''
+    })
   }
 
   // Handle pagination
@@ -343,14 +377,14 @@ export default function ProductManagement() {
             type='text'
             placeholder='Tìm kiếm món ăn...'
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
             className='w-full rounded-lg border border-stone-200 bg-stone-50 py-2.5 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-savoria-gold'
           />
         </div>
         <select
           value={queryParams.category}
           onChange={(e) => handleCategoryChange(e.target.value)}
-          className='rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-savoria-gold'
+          className='rounded-lg border border-stone-200 bg-stone-50 px-4 py-2.5 text-sm text-gray-900 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-savoria-gold disabled:opacity-50 disabled:cursor-not-allowed'
           disabled={isCategoriesLoading}
         >
           <option value=''>Tất cả danh mục</option>
@@ -370,6 +404,110 @@ export default function ProductManagement() {
           <option value='inactive'>Không hoạt động</option>
         </select>
       </div>
+
+      {/* Active Filters Badge */}
+      {(searchTerm.trim() || queryParams.category || queryParams.status) && (
+        <div className='mb-4 flex items-center gap-2 flex-wrap'>
+          <span className='text-sm text-gray-600'>Đang lọc:</span>
+          {searchTerm.trim() && (
+            <span className='inline-flex items-center gap-1.5 rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-700'>
+              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z'
+                />
+              </svg>
+              Tìm kiếm: "{searchTerm}"
+              <button
+                onClick={() => setSearchTerm('')}
+                className='ml-1 rounded-full hover:bg-blue-200 p-0.5'
+              >
+                <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
+                </svg>
+              </button>
+            </span>
+          )}
+          {queryParams.category && (
+            <span className='inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-sm font-medium text-amber-700'>
+              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z'
+                />
+              </svg>
+              {categories.find((c) => c._id === queryParams.category)?.name || 'Danh mục'}
+              <button
+                onClick={() => handleCategoryChange('')}
+                className='ml-1 rounded-full hover:bg-amber-200 p-0.5'
+              >
+                <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
+                </svg>
+              </button>
+            </span>
+          )}
+          {queryParams.status && (
+            <span className='inline-flex items-center gap-1.5 rounded-full bg-green-100 px-3 py-1 text-sm font-medium text-green-700'>
+              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                <path
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  strokeWidth='2'
+                  d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
+                />
+              </svg>
+              {queryParams.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
+              <button
+                onClick={() => handleStatusChange('')}
+                className='ml-1 rounded-full hover:bg-green-200 p-0.5'
+              >
+                <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
+                </svg>
+              </button>
+            </span>
+          )}
+          <button
+            onClick={clearAllFilters}
+            className='inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors'
+          >
+            <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth='2'
+                d='M6 18L18 6M6 6l12 12'
+              />
+            </svg>
+            Xóa tất cả bộ lọc
+          </button>
+        </div>
+      )}
+
+      {/* Results Counter */}
+      {!isLoading && (
+        <div className='mb-4 flex items-center justify-between'>
+          <p className='text-sm text-gray-600'>
+            Hiển thị{' '}
+            <span className='font-semibold text-gray-900'>{filteredDishes.length}</span>{' '}
+            {searchTerm.trim()
+              ? 'kết quả tìm kiếm'
+              : queryParams.category
+                ? `món ăn thuộc danh mục ${categories.find(c => c._id === queryParams.category)?.name || ''}`
+                : 'món ăn'}
+          </p>
+          {!searchTerm.trim() && !queryParams.category && totalPages > 1 && (
+            <p className='text-sm text-gray-500'>
+              Trang {currentPage} / {totalPages}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* Error State */}
       {isError && (
@@ -607,136 +745,137 @@ export default function ProductManagement() {
           ))}
       </div>
 
-      {/* Pagination */}
-      <div className='border border-gray-100 bg-white px-6 py-4'>
-        {/* Top row - Info and limit selector */}
-        <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
-          <p className='text-sm text-gray-500'>
-            {dishes.length === 0 && pagination.page === 1 ? (
-              'Chưa có món ăn nào'
-            ) : dishes.length === 0 ? (
-              'Không có món ăn ở trang này'
-            ) : (
-              <>
-                Đang hiển thị <span className='font-semibold text-gray-900'>{dishes.length}</span>
-                {' Món ăn - Trang '}
-                <span className='font-semibold text-gray-900'>{pagination.page}</span>
-                {' / '}
-                <span className='font-semibold text-gray-900'>{pagination.totalPages}</span>
-              </>
-            )}
-          </p>
+      {/* Pagination - Hide when searching or filtering by category */}
+      {!searchTerm.trim() && !queryParams.category && (
+        <div className='border border-gray-100 bg-white px-6 py-4'>
+          {/* Top row - Info and limit selector */}
+          <div className='mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'>
+            <p className='text-sm text-gray-500'>
+              {dishes.length === 0 && pagination.page === 1 ? (
+                'Chưa có món ăn nào'
+              ) : dishes.length === 0 ? (
+                'Không có món ăn ở trang này'
+              ) : (
+                <>
+                  Đang hiển thị <span className='font-semibold text-gray-900'>{dishes.length}</span>
+                  {' Món ăn - Trang '}
+                  <span className='font-semibold text-gray-900'>{pagination.page}</span>
+                  {' / '}
+                  <span className='font-semibold text-gray-900'>{pagination.totalPages}</span>
+                </>
+              )}
+            </p>
 
-          {/* Items per page selector removed as requested */}
-        </div>
+            {/* Items per page selector removed as requested */}
+          </div>
 
-        {/* Bottom row - Pagination controls */}
-        <div className='flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
-          <div className='flex items-center gap-1'>
-            {/* First page button */}
-            <button
-              onClick={() => handlePageChange(1)}
-              disabled={pagination.page <= 1}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
-              title='Trang đầu tiên'
-            >
-              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M11 19l-7-7 7-7m8 14l-7-7 7-7' />
-              </svg>
-            </button>
+          {/* Bottom row - Pagination controls */}
+          <div className='flex flex-col items-center gap-4 sm:flex-row sm:justify-center'>
+            <div className='flex items-center gap-1'>
+              {/* First page button */}
+              <button
+                onClick={() => handlePageChange(1)}
+                disabled={pagination.page <= 1}
+                className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
+                title='Trang đầu tiên'
+              >
+                <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M11 19l-7-7 7-7m8 14l-7-7 7-7' />
+                </svg>
+              </button>
 
-            {/* Previous button */}
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
-              title='Trang trước'
-            >
-              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M15 19l-7-7 7-7' />
-              </svg>
-            </button>
+              {/* Previous button */}
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
+                title='Trang trước'
+              >
+                <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M15 19l-7-7 7-7' />
+                </svg>
+              </button>
 
-            {/* Page numbers */}
-            <div className='flex items-center gap-1 px-1'>
-              {getPageNumbers().map((page, index) =>
-                typeof page === 'number' ? (
-                  <button
-                    key={index}
-                    onClick={() => handlePageChange(page)}
-                    className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
-                      page === pagination.page
+              {/* Page numbers */}
+              <div className='flex items-center gap-1 px-1'>
+                {getPageNumbers().map((page, index) =>
+                  typeof page === 'number' ? (
+                    <button
+                      key={index}
+                      onClick={() => handlePageChange(page)}
+                      className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === pagination.page
                         ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
                         : 'border border-stone-200 text-gray-500 hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600'
-                    }`}
-                  >
-                    {page}
-                  </button>
-                ) : (
-                  <span key={index} className='flex h-9 w-9 items-center justify-center text-gray-400'>
-                    •••
-                  </span>
-                )
-              )}
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ) : (
+                    <span key={index} className='flex h-9 w-9 items-center justify-center text-gray-400'>
+                      •••
+                    </span>
+                  )
+                )}
+              </div>
+
+              {/* Next button */}
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={!hasMorePages}
+                className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
+                title='Trang sau'
+              >
+                <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
+                </svg>
+              </button>
+
+              {/* Last page button */}
+              <button
+                onClick={() => handlePageChange(pagination.totalPages)}
+                disabled={pagination.page >= pagination.totalPages}
+                className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
+                title='Trang cuối'
+              >
+                <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 5l7 7-7 7M5 5l7 7-7 7' />
+                </svg>
+              </button>
             </div>
 
-            {/* Next button */}
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={!hasMorePages}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
-              title='Trang sau'
-            >
-              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M9 5l7 7-7 7' />
-              </svg>
-            </button>
+            {/* Page info and jump to page */}
+            <div className='flex items-center gap-3 border-l border-stone-200 pl-4'>
+              <span className='text-sm text-gray-500'>
+                Trang <span className='font-semibold text-gray-900'>{pagination.page}</span>
+                {' / '}
+                <span className='font-semibold text-gray-900'>{pagination.totalPages}</span>
+              </span>
 
-            {/* Last page button */}
-            <button
-              onClick={() => handlePageChange(pagination.totalPages)}
-              disabled={pagination.page >= pagination.totalPages}
-              className='flex h-9 w-9 items-center justify-center rounded-lg border border-stone-200 text-gray-500 transition-all hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:border-stone-200 disabled:hover:text-gray-500'
-              title='Trang cuối'
-            >
-              <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M13 5l7 7-7 7M5 5l7 7-7 7' />
-              </svg>
-            </button>
-          </div>
-
-          {/* Page info and jump to page */}
-          <div className='flex items-center gap-3 border-l border-stone-200 pl-4'>
-            <span className='text-sm text-gray-500'>
-              Trang <span className='font-semibold text-gray-900'>{pagination.page}</span>
-              {' / '}
-              <span className='font-semibold text-gray-900'>{pagination.totalPages}</span>
-            </span>
-
-            {/* Jump to page input */}
-            <div className='flex items-center gap-2'>
-              <span className='text-sm text-gray-400'>|</span>
-              <span className='text-sm text-gray-500'>Đi đến:</span>
-              <input
-                type='number'
-                min={1}
-                max={pagination.totalPages}
-                placeholder='...'
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    const value = parseInt((e.target as HTMLInputElement).value)
-                    if (value >= 1 && value <= pagination.totalPages) {
-                      handlePageChange(value)
-                      ;(e.target as HTMLInputElement).value = ''
+              {/* Jump to page input */}
+              <div className='flex items-center gap-2'>
+                <span className='text-sm text-gray-400'>|</span>
+                <span className='text-sm text-gray-500'>Đi đến:</span>
+                <input
+                  type='number'
+                  min={1}
+                  max={pagination.totalPages}
+                  placeholder='...'
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      const value = parseInt((e.target as HTMLInputElement).value)
+                      if (value >= 1 && value <= pagination.totalPages) {
+                        handlePageChange(value)
+                          ; (e.target as HTMLInputElement).value = ''
+                      }
                     }
-                  }
-                }}
-                className='w-16 rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 text-center text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
-              />
+                  }}
+                  className='w-16 rounded-lg border border-stone-200 bg-stone-50 px-2 py-1.5 text-center text-sm text-gray-900 placeholder:text-gray-400 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-savoria-gold/20'
+                />
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Product Form Modal */}
       {isFormOpen && <ProductForm product={editingProduct} onClose={handleCloseForm} />}

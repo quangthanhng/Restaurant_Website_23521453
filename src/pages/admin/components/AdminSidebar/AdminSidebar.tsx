@@ -196,19 +196,11 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                     }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${
-                      isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
-                    }`}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                      }`}
                   >
                     {item.icon}
                     {item.label}
-                    {isActive && (
-                      <motion.div
-                        layoutId='mobile-active-pill'
-                        className='absolute right-2 h-2 w-2 rounded-full bg-amber-600'
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      />
-                    )}
                   </motion.div>
                 </Link>
               )
@@ -289,19 +281,11 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                     }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${
-                      isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
-                    }`}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                      }`}
                   >
                     {item.icon}
                     {item.label}
-                    {isActive && (
-                      <motion.div
-                        layoutId='desktop-active-pill'
-                        className='absolute right-2 h-2 w-2 rounded-full bg-amber-600'
-                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                      />
-                    )}
                   </motion.div>
                 </Link>
               )
