@@ -30,7 +30,7 @@ interface PaymentDiscount {
 interface PaymentCustomerInfo {
   fullName: string
   email: string
-  phone: string
+  phoneNumber: string
   notes?: string
 }
 
@@ -241,7 +241,7 @@ export default function Payment() {
               <div>
                 <p className='text-sm text-gray-400'>Khách hàng</p>
                 <p className='font-semibold text-gray-900'>{bookingData.customerInfo?.fullName || 'N/A'}</p>
-                <p>{bookingData.customerInfo?.phone || 'N/A'}</p>
+                <p>{bookingData.customerInfo?.phoneNumber || 'N/A'}</p>
                 <p>{bookingData.customerInfo?.email || 'N/A'}</p>
               </div>
               <div className='text-left md:text-right'>
@@ -335,11 +335,10 @@ export default function Payment() {
               <button
                 onClick={handleMoMoPayment}
                 disabled={isMoMoProcessing || isCashProcessing}
-                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
-                  isMoMoProcessing || isCashProcessing
-                    ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
-                    : 'bg-[#A50064] text-gray-900 hover:scale-105 hover:shadow-xl hover:shadow-[#A50064]/30'
-                }`}
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${isMoMoProcessing || isCashProcessing
+                  ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
+                  : 'bg-[#A50064] text-gray-900 hover:scale-105 hover:shadow-xl hover:shadow-[#A50064]/30'
+                  }`}
               >
                 {isMoMoProcessing ? (
                   <span className='flex items-center justify-center gap-2'>
@@ -367,11 +366,10 @@ export default function Payment() {
               <button
                 onClick={handleCashPayment}
                 disabled={isMoMoProcessing || isCashProcessing}
-                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${
-                  isMoMoProcessing || isCashProcessing
-                    ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
-                    : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
-                }`}
+                className={`w-full rounded-xl py-4 font-bold shadow-lg transition-all ${isMoMoProcessing || isCashProcessing
+                  ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
+                  : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
+                  }`}
               >
                 {isCashProcessing ? (
                   <span className='flex items-center justify-center gap-2'>

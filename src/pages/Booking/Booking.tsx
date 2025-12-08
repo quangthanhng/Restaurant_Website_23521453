@@ -210,15 +210,15 @@ export default function Booking() {
           customerInfo: {
             fullName: profile?.username || '',
             email: profile?.email || '',
-            phone: profile?.phoneNumber || '',
+            phoneNumber: profile?.phoneNumber || '',
             notes
           },
           discount: selectedDiscount
             ? {
-                code: selectedDiscount.code,
-                percentage: selectedDiscount.percentage,
-                description: selectedDiscount.description
-              }
+              code: selectedDiscount.code,
+              percentage: selectedDiscount.percentage,
+              description: selectedDiscount.description
+            }
             : null,
           bookingTime: formattedBookingDateTime
         }
@@ -310,22 +310,20 @@ export default function Booking() {
                           return (
                             <tr
                               key={table._id}
-                              className={`transition-colors ${
-                                bookable
+                              className={`transition-colors ${bookable
                                   ? 'cursor-pointer hover:bg-stone-50'
                                   : 'cursor-not-allowed bg-gray-50 opacity-60'
-                              } ${selectedTableId === table._id && bookable ? 'bg-amber-500/10' : ''}`}
+                                } ${selectedTableId === table._id && bookable ? 'bg-amber-500/10' : ''}`}
                               onClick={() => bookable && setSelectedTableId(table._id)}
                             >
                               <td className='px-6 py-4'>
                                 <div
-                                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${
-                                    !bookable
+                                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${!bookable
                                       ? 'border-gray-300 bg-gray-200'
                                       : selectedTableId === table._id
                                         ? 'border-amber-500 bg-amber-500'
                                         : 'border-neutral-600'
-                                  }`}
+                                    }`}
                                 >
                                   {selectedTableId === table._id && bookable && (
                                     <div className='h-2 w-2 rounded-full bg-white' />
@@ -594,11 +592,10 @@ export default function Booking() {
                         <button
                           key={discount._id}
                           onClick={() => setSelectedDiscount(selectedDiscount?._id === discount._id ? null : discount)}
-                          className={`w-full rounded-lg border p-3 text-left transition-all ${
-                            selectedDiscount?._id === discount._id
+                          className={`w-full rounded-lg border p-3 text-left transition-all ${selectedDiscount?._id === discount._id
                               ? 'border-amber-500 bg-amber-500/10'
                               : 'border-stone-200 hover:border-amber-500/50'
-                          }`}
+                            }`}
                         >
                           <div className='flex items-center justify-between'>
                             <div>
@@ -636,11 +633,10 @@ export default function Booking() {
             <button
               onClick={handleConfirm}
               disabled={isSubmitting}
-              className={`w-full rounded-xl py-4 font-semibold shadow-lg transition-all ${
-                isSubmitting
+              className={`w-full rounded-xl py-4 font-semibold shadow-lg transition-all ${isSubmitting
                   ? 'cursor-not-allowed bg-neutral-600 text-gray-500'
                   : 'bg-amber-500 text-neutral-900 hover:scale-105 hover:shadow-xl hover:shadow-savoria-gold/30'
-              }`}
+                }`}
             >
               {isSubmitting ? (
                 <span className='flex items-center justify-center gap-2'>
