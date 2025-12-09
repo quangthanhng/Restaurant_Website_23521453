@@ -196,8 +196,9 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                     }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
-                      }`}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${
+                      isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                    }`}
                   >
                     {item.icon}
                     {item.label}
@@ -281,8 +282,9 @@ export default function AdminSidebar({ isOpen = false, onClose }: { isOpen?: boo
                     }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ duration: 0.2 }}
-                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
-                      }`}
+                    className={`flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium ${
+                      isActive ? 'text-amber-600' : 'text-gray-500 hover:text-amber-600'
+                    }`}
                   >
                     {item.icon}
                     {item.label}

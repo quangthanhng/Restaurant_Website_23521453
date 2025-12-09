@@ -71,10 +71,12 @@ export default function ProductManagement() {
       // Fetch tất cả các trang còn lại
       const allPromises = []
       for (let page = 2; page <= totalPages; page++) {
-        allPromises.push(dishApi.getDishes({
-          page,
-          limit: 100
-        }))
+        allPromises.push(
+          dishApi.getDishes({
+            page,
+            limit: 100
+          })
+        )
       }
 
       const results = await Promise.all(allPromises)
@@ -106,7 +108,7 @@ export default function ProductManagement() {
   })
 
   // Determine loading state
-  const isLoading = (searchTerm.trim() || queryParams.category) ? isLoadingAllDishes : isLoadingPaginated
+  const isLoading = searchTerm.trim() || queryParams.category ? isLoadingAllDishes : isLoadingPaginated
 
   // Lấy dishes - nếu có search hoặc category filter thì dùng allDishes, không thì dùng paginated
   const dishes = useMemo(() => {
@@ -127,8 +129,9 @@ export default function ProductManagement() {
     return Array.isArray(dishesData?.metadata?.dishes) ? dishesData.metadata.dishes : []
   }, [searchTerm, queryParams.category, allDishesData, dishesData])
 
-  const totalPages = (searchTerm.trim() || queryParams.category) ? 1 : dishesData?.metadata?.totalPages || 1
-  const currentPage = (searchTerm.trim() || queryParams.category) ? 1 : dishesData?.metadata?.currentPage || queryParams.page || 1
+  const totalPages = searchTerm.trim() || queryParams.category ? 1 : dishesData?.metadata?.totalPages || 1
+  const currentPage =
+    searchTerm.trim() || queryParams.category ? 1 : dishesData?.metadata?.currentPage || queryParams.page || 1
   const currentLimit = queryParams.limit || 10
 
   // Kiểm tra xem có còn trang tiếp theo không
@@ -420,10 +423,7 @@ export default function ProductManagement() {
                 />
               </svg>
               Tìm kiếm: "{searchTerm}"
-              <button
-                onClick={() => setSearchTerm('')}
-                className='ml-1 rounded-full hover:bg-blue-200 p-0.5'
-              >
+              <button onClick={() => setSearchTerm('')} className='ml-1 rounded-full hover:bg-blue-200 p-0.5'>
                 <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
                 </svg>
@@ -441,10 +441,7 @@ export default function ProductManagement() {
                 />
               </svg>
               {categories.find((c) => c._id === queryParams.category)?.name || 'Danh mục'}
-              <button
-                onClick={() => handleCategoryChange('')}
-                className='ml-1 rounded-full hover:bg-amber-200 p-0.5'
-              >
+              <button onClick={() => handleCategoryChange('')} className='ml-1 rounded-full hover:bg-amber-200 p-0.5'>
                 <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
                 </svg>
@@ -462,10 +459,7 @@ export default function ProductManagement() {
                 />
               </svg>
               {queryParams.status === 'active' ? 'Hoạt động' : 'Không hoạt động'}
-              <button
-                onClick={() => handleStatusChange('')}
-                className='ml-1 rounded-full hover:bg-green-200 p-0.5'
-              >
+              <button onClick={() => handleStatusChange('')} className='ml-1 rounded-full hover:bg-green-200 p-0.5'>
                 <svg className='h-3.5 w-3.5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
                   <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
                 </svg>
@@ -477,12 +471,7 @@ export default function ProductManagement() {
             className='inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700 hover:bg-gray-200 transition-colors'
           >
             <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth='2'
-                d='M6 18L18 6M6 6l12 12'
-              />
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M6 18L18 6M6 6l12 12' />
             </svg>
             Xóa tất cả bộ lọc
           </button>
@@ -493,12 +482,11 @@ export default function ProductManagement() {
       {!isLoading && (
         <div className='mb-4 flex items-center justify-between'>
           <p className='text-sm text-gray-600'>
-            Hiển thị{' '}
-            <span className='font-semibold text-gray-900'>{filteredDishes.length}</span>{' '}
+            Hiển thị <span className='font-semibold text-gray-900'>{filteredDishes.length}</span>{' '}
             {searchTerm.trim()
               ? 'kết quả tìm kiếm'
               : queryParams.category
-                ? `món ăn thuộc danh mục ${categories.find(c => c._id === queryParams.category)?.name || ''}`
+                ? `món ăn thuộc danh mục ${categories.find((c) => c._id === queryParams.category)?.name || ''}`
                 : 'món ăn'}
           </p>
           {!searchTerm.trim() && !queryParams.category && totalPages > 1 && (
@@ -780,7 +768,12 @@ export default function ProductManagement() {
                 title='Trang đầu tiên'
               >
                 <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth='2' d='M11 19l-7-7 7-7m8 14l-7-7 7-7' />
+                  <path
+                    strokeLinecap='round'
+                    strokeLinejoin='round'
+                    strokeWidth='2'
+                    d='M11 19l-7-7 7-7m8 14l-7-7 7-7'
+                  />
                 </svg>
               </button>
 
@@ -803,10 +796,11 @@ export default function ProductManagement() {
                     <button
                       key={index}
                       onClick={() => handlePageChange(page)}
-                      className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${page === pagination.page
-                        ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
-                        : 'border border-stone-200 text-gray-500 hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600'
-                        }`}
+                      className={`flex h-9 min-w-9 items-center justify-center rounded-lg px-3 text-sm font-medium transition-all ${
+                        page === pagination.page
+                          ? 'bg-amber-500 text-neutral-900 shadow-md shadow-savoria-gold/30'
+                          : 'border border-stone-200 text-gray-500 hover:bg-stone-50 hover:border-amber-500 hover:text-amber-600'
+                      }`}
                     >
                       {page}
                     </button>
@@ -865,7 +859,7 @@ export default function ProductManagement() {
                       const value = parseInt((e.target as HTMLInputElement).value)
                       if (value >= 1 && value <= pagination.totalPages) {
                         handlePageChange(value)
-                          ; (e.target as HTMLInputElement).value = ''
+                        ;(e.target as HTMLInputElement).value = ''
                       }
                     }
                   }}
